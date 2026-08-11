@@ -7,11 +7,16 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatBadgeModule } from '@angular/material/badge';
+import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
+import { NotificationsService } from '../../core/services/notifications.service';
+import { NotificationDto, NotificationType } from '../../core/models/notification.model';
 
 @Component({
   selector: 'app-main-layout',
   imports: [
+    CommonModule,
     RouterOutlet,
     RouterLink,
     RouterLinkActive,
@@ -21,7 +26,8 @@ import { AuthService } from '../../core/services/auth.service';
     MatIconModule,
     MatButtonModule,
     MatMenuModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatBadgeModule
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
@@ -29,6 +35,10 @@ import { AuthService } from '../../core/services/auth.service';
 export class MainLayout {
   protected readonly authService = inject(AuthService);
   protected readonly router = inject(Router);
+  private readonly notificationsService = inject(NotificationsService);
+
+  protected readonly unreadCount = signal(0);
+  protected readonly notifications = signal<NotificationDto[]>([]);
 
   protected readonly navItems = [
     { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord' },
@@ -53,6 +63,39 @@ export class MainLayout {
 
   constructor() {
     this.restoreSession();
+    if (this.authService.isAuthenticated()) {
+      this.loadNotifications();
+    }
+  }
+
+  protected notificationIcon(type: NotificationType): string {
+    switch (type) {
+      case 'LEAVE_REQUEST':
+        return 'beach_access';
+      case 'LEAVE_REVIEW':
+        return 'fact_check';
+      default:
+        return 'assignment_turned_in';
+    }
+  }
+
+  protected openNotification(notification: NotificationDto): void {
+    if (!notification.read) {
+      this.notificationsService.markRead(notification.id).subscribe(() => this.loadNotifications());
+    }
+  }
+
+  protected markAllNotificationsRead(): void {
+    this.notificationsService.markAllRead().subscribe(() => this.loadNotifications());
+  }
+
+  private loadNotifications(): void {
+    this.notificationsService.unreadCount().subscribe({
+      next: count => this.unreadCount.set(count)
+    });
+    this.notificationsService.list(0, 8).subscribe({
+      next: page => this.notifications.set(page.content)
+    });
   }
 
   logout(): void {

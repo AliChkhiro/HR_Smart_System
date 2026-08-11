@@ -20,6 +20,27 @@
       @if (user()) {
         <span class="user-name">{{ user()!.firstName }} {{ user()!.lastName }}</span>
       }
+      <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" aria-label="Notifications"
+              class="bell-button">
+        <mat-icon [matBadge]="unreadCount()" matBadgeColor="warn" [matBadgeHidden]="unreadCount() === 0">
+          notifications
+        </mat-icon>
+      </button>
+      <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+        <div class="menu-header">
+          <span>Notifications</span>
+          <button mat-button (click)="markAllNotificationsRead()">Tout marquer lu</button>
+        </div>
+        @for (notification of notifications(); track notification.id) {
+          <button mat-menu-item (click)="openNotification(notification)">
+            <mat-icon>{{ notificationIcon(notification.type) }}</mat-icon>
+            <span>{{ notification.message }}</span>
+          </button>
+        }
+        @if (notifications().length === 0) {
+          <div class="menu-empty">Aucune notification</div>
+        }
+      </mat-menu>
       <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Menu utilisateur">
         <mat-icon>account_circle</mat-icon>
       </button>

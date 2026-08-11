@@ -1,0 +1,30 @@
+mat-card {
+  margin: 16px;
+}
+
+.mark-all {
+  margin-left: auto;
+}
+
+.spinner {
+  margin: 32px auto;
+}
+
+.unread {
+  background: var(--mat-sidenav-container-background-color, rgba(0, 0, 0, 0.04));
+}
+
+mat-list-item {
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+mat-list-item + mat-list-item {
+  margin-top: 4px;
+}
+
+.empty {
+  text-align: center;
+  color: var(--mat-card-subtitle-text-color, rgba(0, 0, 0, 0.54));
+  padding: 24px;
+}

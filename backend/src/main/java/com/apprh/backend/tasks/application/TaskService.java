@@ -3,6 +3,8 @@ package com.apprh.backend.tasks.application;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
+import com.apprh.backend.notifications.application.NotificationService;
+import com.apprh.backend.notifications.domain.NotificationType;
 import com.apprh.backend.projects.domain.Project;
 import com.apprh.backend.projects.infrastructure.ProjectRepository;
 import com.apprh.backend.tasks.api.TaskRequest;
@@ -33,6 +35,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public Page<TaskResponse> list(String search, Long projectId, Long assigneeId, TaskStatus status,
@@ -56,7 +59,9 @@ public class TaskService {
                 .dueDate(request.dueDate())
                 .build();
         validateDates(task.getStartDate(), task.getDueDate());
-        return taskMapper.toResponse(taskRepository.save(task));
+        Task saved = taskRepository.save(task);
+        notifyAssignee(saved, "Nouvelle tâche assignée : %s".formatted(saved.getName()));
+        return taskMapper.toResponse(saved);
     }
 
     @Transactional
@@ -90,7 +95,9 @@ public class TaskService {
             task.setDueDate(request.dueDate());
         }
         validateDates(task.getStartDate(), task.getDueDate());
-        return taskMapper.toResponse(taskRepository.save(task));
+        Task saved = taskRepository.save(task);
+        notifyAssignee(saved, "Tâche modifiée : %s".formatted(saved.getName()));
+        return taskMapper.toResponse(saved);
     }
 
     @Transactional
@@ -153,5 +160,11 @@ public class TaskService {
             return null;
         }
         return value.trim();
+    }
+
+    private void notifyAssignee(Task task, String message) {
+        if (task.getAssignee() != null) {
+            notificationService.create(task.getAssignee().getUser().getId(), NotificationType.TASK_ASSIGNED, message);
+        }
     }
 }

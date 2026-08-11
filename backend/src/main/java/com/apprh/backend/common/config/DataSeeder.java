@@ -4,6 +4,11 @@ import com.apprh.backend.departments.domain.Department;
 import com.apprh.backend.departments.infrastructure.DepartmentRepository;
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
+import com.apprh.backend.leaves.domain.LeaveRequest;
+import com.apprh.backend.leaves.domain.LeaveType;
+import com.apprh.backend.leaves.infrastructure.LeaveRequestRepository;
+import com.apprh.backend.notifications.application.NotificationService;
+import com.apprh.backend.notifications.domain.NotificationType;
 import com.apprh.backend.skills.domain.EmployeeSkill;
 import com.apprh.backend.skills.domain.Skill;
 import com.apprh.backend.skills.infrastructure.EmployeeSkillRepository;
@@ -14,6 +19,7 @@ import com.apprh.backend.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +63,8 @@ public class DataSeeder implements CommandLineRunner {
     private final EmployeeRepository employeeRepository;
     private final SkillRepository skillRepository;
     private final EmployeeSkillRepository employeeSkillRepository;
+    private final LeaveRequestRepository leaveRequestRepository;
+    private final NotificationService notificationService;
 
     @Value("${app.seed.password}")
     private String seedPassword;
@@ -112,6 +120,38 @@ public class DataSeeder implements CommandLineRunner {
         seedEmployeeSkill("chefprojet@apprh.local", skills.get("Java"), 2);
         seedEmployeeSkill("rh@apprh.local", skills.get("Gestion des RH"), 5);
         seedEmployeeSkill("admin@apprh.local", skills.get("Docker"), 3);
+
+        seedDemoLeaveAndNotifications();
+    }
+
+    private void seedDemoLeaveAndNotifications() {
+        Employee yassine = employeeRepository.findByUserIdAndDeletedAtIsNull(
+                userRepository.findByEmailAndDeletedAtIsNull("employe@apprh.local").orElseThrow().getId()).orElseThrow();
+        LocalDate start = LocalDate.now().plusDays(7);
+        LocalDate end = start.plusDays(5);
+        boolean hasLeave = leaveRequestRepository.findByEmployeeIdAndStatusInAndDeletedAtIsNull(
+                yassine.getId(), List.of(com.apprh.backend.leaves.domain.LeaveStatus.PENDING,
+                        com.apprh.backend.leaves.domain.LeaveStatus.APPROVED)).stream()
+                .anyMatch(l -> l.getStartDate().equals(start));
+        if (!hasLeave) {
+            leaveRequestRepository.save(LeaveRequest.builder()
+                    .employee(yassine)
+                    .type(LeaveType.ANNUAL)
+                    .startDate(start)
+                    .endDate(end)
+                    .reason("Congés annuels de démonstration")
+                    .build());
+        }
+
+        if (notificationService.list(
+                userRepository.findByEmailAndDeletedAtIsNull("admin@apprh.local").orElseThrow().getId(),
+                PageRequest.of(0, 1)).getTotalElements() == 0) {
+            String message = "Yassine Idrissi a demandé des congés (ANNUAL) du %td/%tm/%tY au %td/%tm/%tY"
+                    .formatted(start, start, start, end, end, end);
+            for (User manager : userRepository.findByRoleInAndDeletedAtIsNull(List.of(UserRole.ADMIN, UserRole.RH, UserRole.CHEF_PROJET))) {
+                notificationService.create(manager.getId(), NotificationType.LEAVE_REQUEST, message);
+            }
+        }
     }
 
     private Department findOrCreateDepartment(SeedDepartment seed) {

@@ -1,0 +1,39 @@
+<h2 mat-dialog-title>Nouvelle demande de congés</h2>
+<mat-dialog-content>
+  <form [formGroup]="form" class="leave-form">
+    <mat-form-field appearance="outline">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type">
+        @for (type of types; track type) {
+          <mat-option [value]="type">{{ type }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Date de début</mat-label>
+      <input matInput formControlName="startDate" [matDatepicker]="startPicker" />
+      <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Date de fin</mat-label>
+      <input matInput formControlName="endDate" [matDatepicker]="endPicker" />
+      <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+    </mat-form-field>
+    <mat-form-field appearance="outline">
+      <mat-label>Motif (optionnel)</mat-label>
+      <textarea matInput formControlName="reason" rows="3"></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-flat-button color="primary" [disabled]="form.invalid || submitting" (click)="submit()">
+    @if (submitting) {
+      <mat-spinner diameter="18"></mat-spinner>
+    } @else {
+      <span>Envoyer la demande</span>
+    }
+  </button>
+</mat-dialog-actions>

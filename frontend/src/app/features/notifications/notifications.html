@@ -2,9 +2,29 @@
   <mat-card-header>
     <mat-icon matCardAvatar>notifications</mat-icon>
     <mat-card-title>Notifications</mat-card-title>
-    <mat-card-subtitle>Centre de notifications in-app — Sprint 4</mat-card-subtitle>
+    <mat-card-subtitle>Alertes récentes</mat-card-subtitle>
+    <button mat-flat-button class="mark-all" (click)="markAllRead()">
+      <mat-icon>done_all</mat-icon>
+      Tout marquer lu
+    </button>
   </mat-card-header>
   <mat-card-content>
-    <p>Module en cours de développement (squelette Sprint 0).</p>
+    @if (loading()) {
+      <mat-spinner class="spinner"></mat-spinner>
+    }
+    @if (!loading()) {
+      <mat-list>
+        @for (notification of notifications(); track notification.id) {
+          <mat-list-item [class.unread]="!notification.read" (click)="markRead(notification)">
+            <mat-icon matListItemIcon>{{ typeIcons[notification.type] }}</mat-icon>
+            <div matListItemTitle>{{ notification.message }}</div>
+            <div matListItemMeta>{{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}</div>
+          </mat-list-item>
+        }
+      </mat-list>
+      @if (notifications().length === 0) {
+        <p class="empty">Aucune notification.</p>
+      }
+    }
   </mat-card-content>
 </mat-card>

@@ -15,6 +15,11 @@ export class AuthService {
   readonly user = this.userSignal.asReadonly();
   readonly isAdmin = computed(() => this.user()?.role === 'ADMIN');
 
+  readonly isManager = computed(() => {
+    const role = this.user()?.role;
+    return role === 'ADMIN' || role === 'RH' || role === 'CHEF_PROJET';
+  });
+
   login(request: LoginRequest) {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, request);
   }
