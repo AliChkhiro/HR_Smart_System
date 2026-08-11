@@ -1,10 +1,94 @@
-<mat-card>
-  <mat-card-header>
-    <mat-icon matCardAvatar>checklist</mat-icon>
-    <mat-card-title>Tâches & Kanban</mat-card-title>
-    <mat-card-subtitle>CRUD tâches, Kanban drag & drop, recommandations IA — Sprint 3 & 5</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <p>Module en cours de développement (squelette Sprint 0).</p>
-  </mat-card-content>
-</mat-card>
+<div class="toolbar">
+  <mat-form-field appearance="outline" class="search">
+    <mat-label>Rechercher</mat-label>
+    <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom de la tâche" />
+  </mat-form-field>
+  <mat-form-field appearance="outline" class="filter">
+    <mat-label>Projet</mat-label>
+    <mat-select [(ngModel)]="projectFilter" (selectionChange)="load()">
+      <mat-option value="">Tous</mat-option>
+      @for (project of projects(); track project.id) {
+        <mat-option [value]="project.id">{{ project.name }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
+  <button mat-flat-button color="primary" (click)="load()">
+    <mat-icon>search</mat-icon>
+    Rechercher
+  </button>
+  @if (isAdmin()) {
+    <button mat-flat-button color="accent" (click)="openCreate()" matTooltip="Ajouter une tâche">
+      <mat-icon>add</mat-icon>
+      Nouvelle tâche
+    </button>
+  }
+</div>
+
+@if (loading()) {
+  <div class="spinner"><mat-spinner diameter="40" /></div>
+} @else {
+  <div class="board">
+    @for (column of columns; track column.status) {
+      <div class="column">
+        <mat-card class="column-card">
+          <mat-card-header>
+            <mat-icon matCardAvatar>{{ column.icon }}</mat-icon>
+            <mat-card-title>{{ column.label }}</mat-card-title>
+            <mat-card-subtitle>{{ tasksByStatus()[column.status]?.length ?? 0 }} tâche(s)</mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div
+              cdkDropList
+              [id]="column.status"
+              [cdkDropListData]="tasksByStatus()[column.status] ?? []"
+              [cdkDropListConnectedTo]="connectedColumnIds()"
+              class="drop-list"
+              (cdkDropListDropped)="drop($event)"
+            >
+              @for (task of tasksByStatus()[column.status] ?? []; track task.id) {
+                <div class="task-card" cdkDrag>
+                  <div class="task-header">
+                    <b>{{ task.name }}</b>
+                    <mat-chip class="priority-chip" [color]="priorityColors[task.priority]" selected>
+                      {{ priorityLabels[task.priority] }}
+                    </mat-chip>
+                  </div>
+                  <div class="task-meta">
+                    <span matTooltip="Projet">{{ task.projectName || '—' }}</span>
+                    <span matTooltip="Assigné">
+                      @if (task.assigneeName) {
+                        Assignée à : {{ task.assigneeName }}
+                      } @else {
+                        Non assignée
+                      }
+                    </span>
+                  </div>
+                  @if (task.dueDate) {
+                    <div class="task-meta">
+                      <span matTooltip="Échéance">Échéance : {{ task.dueDate }}</span>
+                      @if (task.estimatedHours) {
+                        <span matTooltip="Heures estimées">{{ task.estimatedHours }} h estimées</span>
+                      }
+                    </div>
+                  }
+                  @if (isAdmin()) {
+                    <div class="task-actions">
+                      <button mat-icon-button matTooltip="Modifier" (click)="openEdit(task)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button matTooltip="Supprimer" (click)="delete(task)">
+                        <mat-icon color="warn">delete</mat-icon>
+                      </button>
+                    </div>
+                  }
+                </div>
+              } @empty {
+                <p class="empty">Aucune tâche</p>
+              }
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    }
+  </div>
+}
