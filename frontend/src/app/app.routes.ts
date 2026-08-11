@@ -15,6 +15,7 @@ export const routes: Routes = [
       { path: 'tasks', loadComponent: () => import('./features/tasks/tasks').then(m => m.Tasks) },
       { path: 'leaves', loadComponent: () => import('./features/leaves/leaves').then(m => m.Leaves) },
       { path: 'employees', loadComponent: () => import('./features/employees/employees').then(m => m.Employees) },
+      { path: 'departments', loadComponent: () => import('./features/departments/departments').then(m => m.Departments) },
       { path: 'users', loadComponent: () => import('./features/users/users').then(m => m.Users) },
       { path: 'skills', loadComponent: () => import('./features/skills/skills').then(m => m.Skills) },
       { path: 'calendar', loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar) },

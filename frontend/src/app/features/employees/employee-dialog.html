@@ -1,0 +1,64 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier l\'employé' : 'Nouvel employé' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    @if (!isEdit) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Compte utilisateur</mat-label>
+        <mat-select formControlName="userId">
+          @for (user of users(); track user.id) {
+            <mat-option [value]="user.id">
+              {{ user.firstName }} {{ user.lastName }} — {{ user.email }}
+            </mat-option>
+          }
+        </mat-select>
+        @if (form.controls.userId.hasError('required')) {
+          <mat-error>Le compte est obligatoire</mat-error>
+        }
+      </mat-form-field>
+    }
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Poste</mat-label>
+      <input matInput formControlName="jobTitle" placeholder="Ex : Développeur full-stack" />
+      @if (form.controls.jobTitle.hasError('required')) {
+        <mat-error>Le poste est obligatoire</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Département</mat-label>
+      <mat-select formControlName="departmentId">
+        <mat-option [value]="null">Aucun</mat-option>
+        @for (department of departments; track department.id) {
+          <mat-option [value]="department.id">{{ department.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Date d'embauche</mat-label>
+        <input matInput formControlName="hireDate" type="date" />
+        @if (form.controls.hireDate.hasError('required')) {
+          <mat-error>La date est obligatoire</mat-error>
+        }
+      </mat-form-field>
+      @if (isEdit) {
+        <mat-form-field appearance="outline" class="half-width">
+          <mat-label>Statut</mat-label>
+          <mat-select formControlName="status">
+            <mat-option value="ACTIVE">Actif</mat-option>
+            <mat-option value="INACTIVE">Inactif</mat-option>
+          </mat-select>
+        </mat-form-field>
+      }
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid || submitting">
+    @if (submitting) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Enregistrer
+    }
+  </button>
+</mat-dialog-actions>

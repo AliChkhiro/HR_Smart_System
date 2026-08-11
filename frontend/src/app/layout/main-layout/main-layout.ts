@@ -37,6 +37,7 @@ export class MainLayout {
     { path: '/calendar', icon: 'calendar_month', label: 'Calendrier' },
     { path: '/leaves', icon: 'beach_access', label: 'Congés' },
     { path: '/employees', icon: 'group', label: 'Employés' },
+    { path: '/departments', icon: 'account_balance', label: 'Départements' },
     { path: '/users', icon: 'manage_accounts', label: 'Utilisateurs', adminOnly: true },
     { path: '/skills', icon: 'workspace_premium', label: 'Compétences' },
     { path: '/notifications', icon: 'notifications', label: 'Notifications' },

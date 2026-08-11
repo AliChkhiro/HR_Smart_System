@@ -1,0 +1,39 @@
+.current {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.skill-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.level-field {
+  width: 90px;
+}
+
+.add-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.skill-select {
+  flex: 1;
+}
+
+.level-select {
+  width: 110px;
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}

@@ -16,7 +16,7 @@ Projet de stage de fin d'études (3 mois, solo). Stack : Java 21 / Spring Boot 4
                                              └────────────┘
 ```
 
-- **backend/** — monolithe modulaire Spring Boot, modules métier par domaine (auth, users, employees, skills, projects, tasks, leaves, notifications, dashboard, ai, audit, settings), chaque module organisé en couches api / application / domain / infrastructure.
+- **backend/** — monolithe modulaire Spring Boot, modules métier par domaine (auth, users, employees, departments, skills, projects, tasks, leaves, notifications, dashboard, ai, audit, settings), chaque module organisé en couches api / application / domain / infrastructure.
 - **frontend/** — SPA Angular 22 (standalone, signaux), Angular Material, garde d'authentification, layout sidenav.
 - **ia-service/** — microservice FastAPI, moteur de scoring pondéré pour la recommandation d'attribution de tâches (Sprint 5).
 - **docs/** — documentation du projet (cahier des charges, UML, MCD/MLD).

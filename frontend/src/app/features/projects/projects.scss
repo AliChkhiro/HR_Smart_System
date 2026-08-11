@@ -1,0 +1,29 @@
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search {
+  flex: 1;
+}
+
+.filter {
+  width: 200px;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.mat-column-dates {
+  width: 180px;
+}
+
+.mat-column-actions {
+  width: 140px;
+  text-align: right;
+}

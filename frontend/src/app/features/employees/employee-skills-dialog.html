@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Compétences de {{ employee.firstName }} {{ employee.lastName }}</h2>
+<mat-dialog-content>
+  <div class="current">
+    @for (skill of currentSkills(); track skill.skillId) {
+      <div class="skill-row">
+        <mat-chip selected color="primary">{{ skill.skillName }}</mat-chip>
+        <mat-form-field appearance="outline" class="level-field">
+          <mat-select
+            [value]="skill.level"
+            (selectionChange)="updateLevel(skill.skillId, $event.value)"
+          >
+            @for (level of [1, 2, 3, 4, 5]; track level) {
+              <mat-option [value]="level">{{ level }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button matTooltip="Retirer" (click)="removeSkill(skill.skillId)">
+          <mat-icon color="warn">remove_circle</mat-icon>
+        </button>
+      </div>
+    } @empty {
+      <p class="empty">Aucune compétence associée.</p>
+    }
+  </div>
+
+  @if (availableSkills().length > 0) {
+    <form [formGroup]="form" class="add-row">
+      <mat-form-field appearance="outline" class="skill-select">
+        <mat-label>Compétence</mat-label>
+        <mat-select formControlName="skillId">
+          @for (skill of availableSkills(); track skill.id) {
+            <mat-option [value]="skill.id">{{ skill.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="level-select">
+        <mat-label>Niveau</mat-label>
+        <mat-select formControlName="level">
+          @for (level of [1, 2, 3, 4, 5]; track level) {
+            <mat-option [value]="level">{{ level }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addSkill()" [disabled]="form.invalid || submitting">
+        <mat-icon>add</mat-icon>
+        Associer
+      </button>
+    </form>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="close()">Fermer</button>
+</mat-dialog-actions>

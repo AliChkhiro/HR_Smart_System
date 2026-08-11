@@ -1,0 +1,53 @@
+<h2 mat-dialog-title>Équipe du projet « {{ project.name }} »</h2>
+<mat-dialog-content>
+  <mat-list>
+    @for (member of members(); track member.employeeId) {
+      <mat-list-item class="member-row">
+        <span class="member-name">{{ member.employeeName }}</span>
+        <span class="member-job">{{ member.jobTitle }}</span>
+        <mat-form-field appearance="outline" class="role-field">
+          <mat-select [value]="member.role" (selectionChange)="updateRole(member.employeeId, $event.value)">
+            @for (role of ['MANAGER', 'MEMBER']; track role) {
+              <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-icon-button matTooltip="Retirer" (click)="removeMember(member.employeeId)">
+          <mat-icon color="warn">remove_circle</mat-icon>
+        </button>
+      </mat-list-item>
+    } @empty {
+      <p class="empty">Aucun membre affecté.</p>
+    }
+  </mat-list>
+
+  @if (availableEmployees().length > 0) {
+    <form [formGroup]="form" class="add-row">
+      <mat-form-field appearance="outline" class="employee-select">
+        <mat-label>Employé</mat-label>
+        <mat-select formControlName="employeeId">
+          @for (employee of availableEmployees(); track employee.id) {
+            <mat-option [value]="employee.id">
+              {{ employee.firstName }} {{ employee.lastName }} — {{ employee.jobTitle }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="role-select">
+        <mat-label>Rôle</mat-label>
+        <mat-select formControlName="role">
+          @for (role of ['MANAGER', 'MEMBER']; track role) {
+            <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="addMember()" [disabled]="form.invalid || submitting">
+        <mat-icon>add</mat-icon>
+        Affecter
+      </button>
+    </form>
+  }
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-flat-button color="primary" (click)="close()">Fermer</button>
+</mat-dialog-actions>

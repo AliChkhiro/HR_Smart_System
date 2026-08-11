@@ -1,0 +1,54 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier le projet' : 'Nouveau projet' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="name" placeholder="Ex : Refonte du portail RH" />
+      @if (form.controls.name.hasError('required')) {
+        <mat-error>Le nom est obligatoire</mat-error>
+      }
+    </mat-form-field>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <textarea matInput formControlName="description" rows="3"></textarea>
+    </mat-form-field>
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Date de début</mat-label>
+        <input matInput formControlName="startDate" type="date" />
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Date de fin</mat-label>
+        <input matInput formControlName="endDate" type="date" />
+      </mat-form-field>
+    </div>
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Statut</mat-label>
+        <mat-select formControlName="status">
+          @for (status of statuses; track status) {
+            <mat-option [value]="status">{{ status }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Priorité</mat-label>
+        <mat-select formControlName="priority">
+          @for (priority of priorities; track priority) {
+            <mat-option [value]="priority">{{ priority }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Annuler</button>
+  <button mat-flat-button color="primary" (click)="submit()" [disabled]="form.invalid || submitting">
+    @if (submitting) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Enregistrer
+    }
+  </button>
+</mat-dialog-actions>

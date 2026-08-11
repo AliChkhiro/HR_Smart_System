@@ -1,0 +1,40 @@
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-name {
+  font-weight: 500;
+  min-width: 160px;
+}
+
+.member-job {
+  flex: 1;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.role-field {
+  width: 150px;
+}
+
+.add-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.employee-select {
+  flex: 1;
+}
+
+.role-select {
+  width: 150px;
+}
+
+.empty {
+  color: rgba(0, 0, 0, 0.6);
+  font-style: italic;
+}
