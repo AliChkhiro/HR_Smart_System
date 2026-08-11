@@ -1,0 +1,17 @@
+# Environnements et secrets
+.env
+*.env
+.env.local
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Logs
+*.log

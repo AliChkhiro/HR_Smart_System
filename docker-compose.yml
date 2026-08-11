@@ -1,0 +1,49 @@
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: apprh-db
+    environment:
+      POSTGRES_DB: apprh
+      POSTGRES_USER: apprh
+      POSTGRES_PASSWORD: apprh
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U apprh -d apprh"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build: ./backend
+    container_name: apprh-backend
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/apprh
+      DB_USERNAME: apprh
+      DB_PASSWORD: apprh
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-a-changer-avant-production}
+      IA_SERVICE_URL: http://ia-service:8000
+    ports:
+      - "8081:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  ia-service:
+    build: ./ia-service
+    container_name: apprh-ia-service
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build: ./frontend
+    container_name: apprh-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
