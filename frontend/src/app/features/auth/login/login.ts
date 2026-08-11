@@ -45,7 +45,7 @@ export class Login {
     const { email, password } = this.form.getRawValue();
     this.authService.login({ email: email!, password: password! }).subscribe({
       next: (res) => {
-        this.authService.setSession(res.accessToken, res.refreshToken, res.user);
+        this.authService.setSession(res);
         this.router.navigate(['/dashboard']);
       },
       error: () => {

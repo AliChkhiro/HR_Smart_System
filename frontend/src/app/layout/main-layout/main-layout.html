@@ -5,7 +5,7 @@
       <span>{{ appTitle }}</span>
     </div>
     <mat-nav-list>
-      @for (item of navItems; track item.path) {
+      @for (item of visibleNavItems(); track item.path) {
         <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           <span matListItemTitle>{{ item.label }}</span>
@@ -17,6 +17,9 @@
   <mat-sidenav-content>
     <mat-toolbar color="primary">
       <span class="spacer"></span>
+      @if (user()) {
+        <span class="user-name">{{ user()!.firstName }} {{ user()!.lastName }}</span>
+      }
       <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Menu utilisateur">
         <mat-icon>account_circle</mat-icon>
       </button>

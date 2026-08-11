@@ -1,0 +1,34 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search-field {
+  width: 320px;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+
+.active-chip {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.disabled-chip {
+  background-color: #fdecea;
+  color: #c62828;
+}

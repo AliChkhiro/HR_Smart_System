@@ -24,6 +24,8 @@ app:
     secret: ${JWT_SECRET:dev-secret-a-changer-avant-production}
     access-token-ttl: ${JWT_ACCESS_TTL:15m}
     refresh-token-ttl: ${JWT_REFRESH_TTL:7d}
+  seed:
+    password: ${SEED_PASSWORD:Apprh@2026!}
   ia-service:
     url: ${IA_SERVICE_URL:http://localhost:8000}
 

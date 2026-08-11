@@ -1,0 +1,63 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier l\'utilisateur' : 'Nouvel utilisateur' }}</h2>
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-form-field class="full-width">
+      <mat-label>Email</mat-label>
+      <input matInput type="email" formControlName="email" [readonly]="isEdit" autocomplete="off" />
+      @if (form.controls.email.hasError('required')) {
+        <mat-error>L'email est requis</mat-error>
+      }
+      @if (form.controls.email.hasError('email')) {
+        <mat-error>Format d'email invalide</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Prénom</mat-label>
+      <input matInput formControlName="firstName" autocomplete="off" />
+      @if (form.controls.firstName.hasError('required')) {
+        <mat-error>Le prénom est requis</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="full-width">
+      <mat-label>Nom</mat-label>
+      <input matInput formControlName="lastName" autocomplete="off" />
+      @if (form.controls.lastName.hasError('required')) {
+        <mat-error>Le nom est requis</mat-error>
+      }
+    </mat-form-field>
+
+    @if (!isEdit) {
+      <mat-form-field class="full-width">
+        <mat-label>Mot de passe initial</mat-label>
+        <input matInput type="password" formControlName="password" autocomplete="new-password" />
+        @if (form.controls.password.hasError('required')) {
+          <mat-error>Le mot de passe est requis</mat-error>
+        }
+        @if (form.controls.password.hasError('minlength')) {
+          <mat-error>6 caractères minimum</mat-error>
+        }
+      </mat-form-field>
+    }
+
+    <mat-form-field class="full-width">
+      <mat-label>Rôle</mat-label>
+      <mat-select formControlName="role">
+        @for (role of roles; track role) {
+          <mat-option [value]="role">{{ roleLabels[role] }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="submitting">Annuler</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid || submitting">
+    @if (submitting) {
+      <mat-spinner diameter="18" />
+    } @else {
+      Enregistrer
+    }
+  </button>
+</mat-dialog-actions>
