@@ -9,12 +9,14 @@ import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 public record TaskRequest(
         @NotBlank @Size(max = 200) String name,
         @Size(max = 4000) String description,
         @NotNull Long projectId,
         Long assigneeId,
+        List<Long> skillIds,
         TaskStatus status,
         TaskPriority priority,
         @DecimalMin("0.25") BigDecimal estimatedHours,

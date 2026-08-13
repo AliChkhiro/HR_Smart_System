@@ -6,6 +6,7 @@ import com.apprh.backend.tasks.domain.TaskStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 public record TaskResponse(
         Long id,
@@ -15,6 +16,7 @@ public record TaskResponse(
         String projectName,
         Long assigneeId,
         String assigneeName,
+        List<Long> skillIds,
         TaskStatus status,
         TaskPriority priority,
         BigDecimal estimatedHours,

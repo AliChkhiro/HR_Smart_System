@@ -11,4 +11,6 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
     Optional<Project> findByIdAndDeletedAtIsNull(Long id);
 
     Optional<Project> findByNameIgnoreCaseAndDeletedAtIsNull(String name);
+
+    long countByDeletedAtIsNull();
 }

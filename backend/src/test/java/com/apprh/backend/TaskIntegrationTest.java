@@ -35,17 +35,20 @@ class TaskIntegrationTest extends AbstractIntegrationTest {
         String chefToken = login("chefprojet@apprh.local");
         long projectId = createProject(chefToken);
         long employeeId = firstEmployeeId(chefToken);
+        long skillId = firstSkillId(chefToken);
 
         MvcResult taskResult = mockMvc.perform(post("/tasks")
                         .header("Authorization", "Bearer " + chefToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\":\"Développer le module RH " + System.nanoTime() + "\","
                                 + "\"description\":\"Implémentation CRUD\",\"projectId\":" + projectId + ","
-                                + "\"assigneeId\":" + employeeId + ",\"priority\":\"HIGH\","
+                                + "\"assigneeId\":" + employeeId + ",\"skillIds\":[" + skillId + "],"
+                                + "\"priority\":\"HIGH\","
                                 + "\"estimatedHours\":8,\"startDate\":\"2026-09-01\",\"dueDate\":\"2026-09-15\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value("TODO"))
                 .andExpect(jsonPath("$.priority").value("HIGH"))
+                .andExpect(jsonPath("$.skillIds[0]").value(Math.toIntExact(skillId)))
                 .andExpect(jsonPath("$.projectName").value(org.hamcrest.Matchers.containsString("Projet Kanban")))
                 .andReturn();
         long taskId = id(taskResult);
@@ -179,6 +182,14 @@ class TaskIntegrationTest extends AbstractIntegrationTest {
 
     private long firstEmployeeId(String token) throws Exception {
         MvcResult result = mockMvc.perform(get("/employees")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andReturn();
+        return objectMapper.readTree(result.getResponse().getContentAsString()).get("content").get(0).get("id").asLong();
+    }
+
+    private long firstSkillId(String token) throws Exception {
+        MvcResult result = mockMvc.perform(get("/skills")
                         .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andReturn();

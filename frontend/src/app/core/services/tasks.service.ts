@@ -3,8 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Page } from '../models/user.model';
 import {
+  RecommendationDto,
   TaskCreateRequest,
   TaskDto,
+  TaskPriority,
   TaskStatus,
   TaskStatusRequest,
   TaskUpdateRequest
@@ -55,5 +57,14 @@ export class TasksService {
 
   delete(id: number) {
     return this.http.delete<void>(`${environment.apiUrl}/tasks/${id}`);
+  }
+
+  recommend(skillIds: number[], startDate?: string, dueDate?: string, priority?: TaskPriority) {
+    return this.http.post<RecommendationDto[]>(`${environment.apiUrl}/tasks/recommend`, {
+      skillIds: skillIds.length > 0 ? skillIds : [],
+      startDate: startDate || undefined,
+      dueDate: dueDate || undefined,
+      priority: priority || undefined
+    });
   }
 }

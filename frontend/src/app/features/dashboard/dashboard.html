@@ -1,10 +1,126 @@
-<mat-card>
-  <mat-card-header>
-    <mat-icon matCardAvatar>dashboard</mat-icon>
-    <mat-card-title>Tableau de bord</mat-card-title>
-    <mat-card-subtitle>KPIs par rôle — Sprint 4</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <p>Module en cours de développement (squelette Sprint 0).</p>
-  </mat-card-content>
-</mat-card>
+@if (loading()) {
+  <mat-spinner class="spinner"></mat-spinner>
+}
+@if (stats(); as stats) {
+  <div class="kpi-grid">
+    <mat-card class="kpi">
+      <mat-card-content>
+        <mat-icon class="kpi-icon" color="primary">group</mat-icon>
+        <div>
+          <div class="kpi-value">{{ stats.employeeCount }}</div>
+          <div class="kpi-label">Employés</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi">
+      <mat-card-content>
+        <mat-icon class="kpi-icon" color="accent">folder</mat-icon>
+        <div>
+          <div class="kpi-value">{{ stats.projectCount }}</div>
+          <div class="kpi-label">Projets</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi" [class.warn-card]="stats.overdueTaskCount > 0">
+      <mat-card-content>
+        <mat-icon class="kpi-icon" color="warn">schedule</mat-icon>
+        <div>
+          <div class="kpi-value">{{ stats.overdueTaskCount }}</div>
+          <div class="kpi-label">Tâches en retard</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="kpi">
+      <mat-card-content>
+        <mat-icon class="kpi-icon" color="primary">event</mat-icon>
+        <div>
+          <div class="kpi-value">{{ stats.upcomingTaskCount }}</div>
+          <div class="kpi-label">Échéances sous 30 j</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+    @if (isManager()) {
+      <mat-card class="kpi">
+        <mat-card-content>
+          <mat-icon class="kpi-icon" color="accent">beach_access</mat-icon>
+          <div>
+            <div class="kpi-value">{{ stats.pendingLeaveCount }}</div>
+            <div class="kpi-label">Congés en attente</div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    }
+    <mat-card class="kpi">
+      <mat-card-content>
+        <mat-icon class="kpi-icon" color="warn">notifications</mat-icon>
+        <div>
+          <div class="kpi-value">{{ stats.unreadNotificationCount }}</div>
+          <div class="kpi-label">Notifications non lues</div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="panels">
+    <mat-card class="panel">
+      <mat-card-header>
+        <mat-card-title>Répartition des tâches</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @for (status of statuses; track status.key) {
+          <div class="status-row">
+            <span class="status-label">{{ status.label }}</span>
+            <div class="status-bar">
+              <div class="status-fill" [class.fill-accent]="status.color === 'accent'"
+                   [class.fill-primary]="status.color === 'primary'"
+                   [class.fill-warn]="status.color === 'warn'"
+                   [class.fill-default]="status.color === 'default'"
+                   [style.width.%]="statusPercent(status.key)"></div>
+            </div>
+            <span class="status-count">{{ stats.tasksByStatus[status.key] ?? 0 }}</span>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel">
+      <mat-card-header>
+        <mat-card-title>Prochaines échéances</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (stats.nextUpcomingTask; as task) {
+          <mat-list>
+            <mat-list-item>
+              <mat-icon matListItemIcon color="primary">assignment</mat-icon>
+              <div matListItemTitle>{{ task.name }}</div>
+              <div matListItemLine>{{ task.projectName ?? '—' }} · {{ task.assigneeName ?? 'Non assignée' }}</div>
+              <div matListItemMeta>le {{ task.dueDate | date: 'dd/MM/yyyy' }}</div>
+            </mat-list-item>
+          </mat-list>
+        } @else {
+          <p class="empty">Aucune échéance sous 30 jours.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="panel" [class.warn-card]="stats.latestOverdueTask !== null">
+      <mat-card-header>
+        <mat-card-title>Retards</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (stats.latestOverdueTask; as task) {
+          <mat-list>
+            <mat-list-item>
+              <mat-icon matListItemIcon color="warn">warning</mat-icon>
+              <div matListItemTitle>{{ task.name }}</div>
+              <div matListItemLine>{{ task.projectName ?? '—' }} · {{ task.assigneeName ?? 'Non assignée' }}</div>
+              <div matListItemMeta>échue le {{ task.dueDate | date: 'dd/MM/yyyy' }}</div>
+            </mat-list-item>
+          </mat-list>
+        } @else {
+          <p class="empty">Aucune tâche en retard. Bravo !</p>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

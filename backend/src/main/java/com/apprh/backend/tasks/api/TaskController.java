@@ -1,6 +1,9 @@
 package com.apprh.backend.tasks.api;
 
 import com.apprh.backend.common.security.UserPrincipal;
+import com.apprh.backend.ia.api.RecommendationDto;
+import com.apprh.backend.ia.api.TaskRecommendRequest;
+import com.apprh.backend.ia.application.RecommendationService;
 import com.apprh.backend.tasks.application.TaskService;
 import com.apprh.backend.tasks.domain.TaskPriority;
 import com.apprh.backend.tasks.domain.TaskStatus;
@@ -24,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/tasks")
@@ -31,6 +35,7 @@ import java.time.LocalDate;
 public class TaskController {
 
     private final TaskService taskService;
+    private final RecommendationService recommendationService;
 
     @GetMapping
     @PreAuthorize("isAuthenticated()")
@@ -52,6 +57,12 @@ public class TaskController {
     @ResponseStatus(HttpStatus.CREATED)
     public TaskResponse create(@Valid @RequestBody TaskRequest request) {
         return taskService.create(request);
+    }
+
+    @PostMapping("/recommend")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH', 'CHEF_PROJET')")
+    public List<RecommendationDto> recommend(@Valid @RequestBody TaskRecommendRequest request) {
+        return recommendationService.recommend(request);
     }
 
     @PatchMapping("/{id}")

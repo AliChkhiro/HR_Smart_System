@@ -7,6 +7,8 @@ import com.apprh.backend.notifications.application.NotificationService;
 import com.apprh.backend.notifications.domain.NotificationType;
 import com.apprh.backend.projects.domain.Project;
 import com.apprh.backend.projects.infrastructure.ProjectRepository;
+import com.apprh.backend.skills.domain.Skill;
+import com.apprh.backend.skills.infrastructure.SkillRepository;
 import com.apprh.backend.tasks.api.TaskRequest;
 import com.apprh.backend.tasks.api.TaskResponse;
 import com.apprh.backend.tasks.api.TaskUpdateRequest;
@@ -26,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,7 @@ public class TaskService {
     private final TaskMapper taskMapper;
     private final ProjectRepository projectRepository;
     private final EmployeeRepository employeeRepository;
+    private final SkillRepository skillRepository;
     private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
@@ -52,6 +56,7 @@ public class TaskService {
                 .description(trimToNull(request.description()))
                 .project(findProject(request.projectId()))
                 .assignee(findAssignee(request.assigneeId()))
+                .skills(findSkills(request.skillIds()))
                 .status(request.status() != null ? request.status() : TaskStatus.TODO)
                 .priority(request.priority() != null ? request.priority() : TaskPriority.MEDIUM)
                 .estimatedHours(normalizeHours(request.estimatedHours()))
@@ -78,6 +83,9 @@ public class TaskService {
         }
         if (request.assigneeId() != null) {
             task.setAssignee(findAssignee(request.assigneeId()));
+        }
+        if (request.skillIds() != null) {
+            task.setSkills(findSkills(request.skillIds()));
         }
         if (request.status() != null) {
             task.setStatus(request.status());
@@ -142,6 +150,20 @@ public class TaskService {
         }
         return employeeRepository.findByIdAndDeletedAtIsNull(assigneeId)
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "ASSIGNEE_NOT_FOUND", "Assigné introuvable"));
+    }
+
+    private List<Skill> findSkills(List<Long> skillIds) {
+        if (skillIds == null || skillIds.isEmpty()) {
+            return List.of();
+        }
+        List<Skill> skills = skillRepository.findAllById(skillIds).stream()
+                .filter(skill -> skill.getDeletedAt() == null)
+                .toList();
+        if (skills.size() != skillIds.size()) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "SKILL_NOT_FOUND",
+                    "Une ou plusieurs compétences sont introuvables");
+        }
+        return skills;
     }
 
     private void validateDates(LocalDate startDate, LocalDate dueDate) {

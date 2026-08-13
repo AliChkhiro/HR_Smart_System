@@ -71,6 +71,51 @@
         <input matInput formControlName="dueDate" type="date" />
       </mat-form-field>
     </div>
+    <div class="row">
+      <mat-form-field appearance="outline" class="half-width">
+        <mat-label>Compétences requises</mat-label>
+        <mat-select formControlName="skillIds" multiple>
+          @for (skill of skills(); track skill.id) {
+            <mat-option [value]="skill.id">{{ skill.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <div class="half-width">
+        <button type="button" mat-stroked-button color="accent" class="recommend-button"
+                [disabled]="recommending()" (click)="recommend()">
+          @if (recommending()) {
+            <mat-spinner diameter="18" />
+          } @else {
+            <mat-icon>smart_toy</mat-icon>
+            Recommander par IA
+          }
+        </button>
+      </div>
+    </div>
+    @if (recommendations().length > 0) {
+      <div class="recommendations">
+        <div class="recommendations-title">Meilleurs profils suggérés</div>
+        @for (rec of recommendations(); track rec.employeeId) {
+          <div class="recommendation-row" [class.selected]="form.controls.assigneeId.value === rec.employeeId">
+            <mat-icon>person</mat-icon>
+            <div class="rec-main">
+              <strong>{{ rec.employeeName }}</strong>
+              <div class="rec-score">
+                <span class="score-badge" [class.score-good]="rec.totalScore >= 0.66"
+                      [class.score-mid]="rec.totalScore >= 0.33 && rec.totalScore < 0.66"
+                      [class.score-low]="rec.totalScore < 0.33">
+                  {{ rec.totalScore * 100 | number: '1.0-0' }} %
+                </span>
+                <span class="rec-explanation">{{ rec.explanation }}</span>
+              </div>
+            </div>
+            <button mat-stroked-button color="primary" (click)="choose(rec.employeeId)">
+              Choisir
+            </button>
+          </div>
+        }
+      </div>
+    }
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

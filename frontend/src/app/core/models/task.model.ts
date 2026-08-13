@@ -9,6 +9,7 @@ export interface TaskDto {
   projectName?: string;
   assigneeId?: number;
   assigneeName?: string;
+  skillIds?: number[];
   status: TaskStatus;
   priority: TaskPriority;
   estimatedHours?: number;
@@ -22,6 +23,7 @@ export interface TaskCreateRequest {
   description?: string;
   projectId: number;
   assigneeId?: number;
+  skillIds?: number[];
   status?: TaskStatus;
   priority?: TaskPriority;
   estimatedHours?: number;
@@ -34,6 +36,7 @@ export interface TaskUpdateRequest {
   description?: string;
   projectId?: number;
   assigneeId?: number;
+  skillIds?: number[];
   status?: TaskStatus;
   priority?: TaskPriority;
   estimatedHours?: number;
@@ -43,4 +46,18 @@ export interface TaskUpdateRequest {
 
 export interface TaskStatusRequest {
   status: TaskStatus;
+}
+
+export interface CriterionScoreDto {
+  name: string;
+  score: number;
+  explanation: string;
+}
+
+export interface RecommendationDto {
+  employeeId: number;
+  employeeName: string;
+  totalScore: number;
+  criteria: CriterionScoreDto[];
+  explanation: string;
 }

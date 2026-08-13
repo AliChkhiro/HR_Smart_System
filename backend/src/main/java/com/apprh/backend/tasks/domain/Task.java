@@ -2,6 +2,7 @@ package com.apprh.backend.tasks.domain;
 
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.projects.domain.Project;
+import com.apprh.backend.skills.domain.Skill;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -11,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -24,6 +27,8 @@ import lombok.Setter;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "task")
@@ -45,6 +50,13 @@ public class Task {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "assignee_id")
     private Employee assignee;
+
+    @ManyToMany
+    @JoinTable(name = "task_skill",
+            joinColumns = @JoinColumn(name = "task_id"),
+            inverseJoinColumns = @JoinColumn(name = "skill_id"))
+    @Builder.Default
+    private List<Skill> skills = new ArrayList<>();
 
     @Column(nullable = false, length = 200)
     private String name;

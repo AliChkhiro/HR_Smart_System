@@ -15,3 +15,82 @@
 mat-dialog-content {
   padding-top: 16px;
 }
+
+.recommend-button {
+  width: 100%;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.recommendations {
+  margin-top: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.recommendations-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+}
+
+.recommendation-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+.recommendation-row.selected {
+  background: rgba(63, 81, 181, 0.08);
+}
+
+.recommendation-row + .recommendation-row {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.rec-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.rec-score {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.score-badge {
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+.score-good {
+  background: #c8e6c9;
+  color: #1b5e20;
+}
+
+.score-mid {
+  background: #ffe0b2;
+  color: #e65100;
+}
+
+.score-low {
+  background: #ffcdd2;
+  color: #b71c1c;
+}
+
+.rec-explanation {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

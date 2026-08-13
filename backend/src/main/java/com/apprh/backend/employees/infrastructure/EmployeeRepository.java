@@ -17,7 +17,11 @@ public interface EmployeeRepository extends JpaRepository<Employee, Long>, JpaSp
 
     boolean existsByUserIdAndDeletedAtIsNull(Long userId);
 
+    long countByDeletedAtIsNull();
+
     long countByDepartmentIdAndDeletedAtIsNull(Long departmentId);
+
+    List<Employee> findAllByDeletedAtIsNull();
 
     @Query("""
             select e.department.id, count(e) from Employee e

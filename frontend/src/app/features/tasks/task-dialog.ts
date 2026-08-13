@@ -1,4 +1,5 @@
 import { Component, Inject, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -6,12 +7,16 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TasksService } from '../../core/services/tasks.service';
 import { EmployeesService } from '../../core/services/employees.service';
-import { TaskDto, TaskPriority, TaskStatus } from '../../core/models/task.model';
+import { SkillsService } from '../../core/services/skills.service';
+import { RecommendationDto, TaskDto, TaskPriority, TaskStatus } from '../../core/models/task.model';
 import { ProjectDto } from '../../core/models/project.model';
 import { EmployeeDto } from '../../core/models/employee.model';
+import { SkillDto } from '../../core/models/skill.model';
 
 export interface TaskDialogData {
   task: TaskDto | null;
@@ -22,12 +27,15 @@ export interface TaskDialogData {
   selector: 'app-task-dialog',
   imports: [
     ReactiveFormsModule,
+    DecimalPipe,
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatChipsModule,
+    MatIconModule
   ],
   templateUrl: './task-dialog.html',
   styleUrl: './task-dialog.scss',
@@ -36,6 +44,7 @@ export class TaskDialogComponent {
   private readonly fb = inject(FormBuilder);
   private readonly tasksService = inject(TasksService);
   private readonly employeesService = inject(EmployeesService);
+  private readonly skillsService = inject(SkillsService);
   private readonly dialogRef = inject(MatDialogRef<TaskDialogComponent>);
   private readonly snackBar = inject(MatSnackBar);
   private readonly data = inject<TaskDialogData>(MAT_DIALOG_DATA);
@@ -45,6 +54,9 @@ export class TaskDialogComponent {
   protected readonly statuses: TaskStatus[] = ['TODO', 'IN_PROGRESS', 'BLOCKED', 'DONE'];
   protected readonly priorities: TaskPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
   protected readonly employees = signal<EmployeeDto[]>([]);
+  protected readonly skills = signal<SkillDto[]>([]);
+  protected readonly recommendations = signal<RecommendationDto[]>([]);
+  protected readonly recommending = signal(false);
   protected submitting = false;
 
   protected readonly form = this.fb.group({
@@ -52,6 +64,7 @@ export class TaskDialogComponent {
     description: [this.data.task?.description ?? ''],
     projectId: [this.data.task?.projectId ?? null, [Validators.required]],
     assigneeId: [this.data.task?.assigneeId ?? null],
+    skillIds: [this.data.task?.skillIds ?? []],
     status: [this.data.task?.status ?? 'TODO'],
     priority: [this.data.task?.priority ?? 'MEDIUM'],
     estimatedHours: [this.data.task?.estimatedHours ?? null],
@@ -64,6 +77,36 @@ export class TaskDialogComponent {
       next: page => this.employees.set(page.content),
       error: () => this.employees.set([])
     });
+    this.skillsService.list().subscribe({
+      next: page => this.skills.set(page.content),
+      error: () => this.skills.set([])
+    });
+  }
+
+  protected recommend(): void {
+    const { skillIds, startDate, dueDate, priority } = this.form.getRawValue();
+    this.recommending.set(true);
+    this.recommendations.set([]);
+    this.tasksService.recommend(
+      (skillIds ?? []) as number[],
+      startDate || undefined,
+      dueDate || undefined,
+      priority as TaskPriority | undefined
+    ).subscribe({
+      next: results => {
+        this.recommendations.set(results.slice(0, 5));
+        this.recommending.set(false);
+      },
+      error: () => {
+        this.recommending.set(false);
+        this.snackBar.open('Recommandation impossible pour le moment', 'Fermer', { duration: 4000 });
+      }
+    });
+  }
+
+  protected choose(employeeId: number): void {
+    this.form.controls.assigneeId.setValue(employeeId);
+    this.recommendations.set([]);
   }
 
   submit(): void {
@@ -71,7 +114,7 @@ export class TaskDialogComponent {
       return;
     }
     this.submitting = true;
-    const { name, description, projectId, assigneeId, status, priority, estimatedHours, startDate, dueDate } =
+    const { name, description, projectId, assigneeId, skillIds, status, priority, estimatedHours, startDate, dueDate } =
       this.form.getRawValue();
     if (this.isEdit && this.data.task) {
       this.tasksService.update(this.data.task.id, {
@@ -79,6 +122,7 @@ export class TaskDialogComponent {
         description: description || undefined,
         projectId: projectId ?? undefined,
         assigneeId: assigneeId ?? undefined,
+        skillIds: skillIds as number[],
         status: status as TaskStatus,
         priority: priority as TaskPriority,
         estimatedHours: estimatedHours ?? undefined,
@@ -97,6 +141,7 @@ export class TaskDialogComponent {
         description: description || undefined,
         projectId: projectId!,
         assigneeId: assigneeId ?? undefined,
+        skillIds: skillIds as number[],
         status: status as TaskStatus,
         priority: priority as TaskPriority,
         estimatedHours: estimatedHours ?? undefined,
