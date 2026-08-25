@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
-  selector: 'app-login',
+  selector: 'app-register',
   imports: [
     ReactiveFormsModule,
     RouterLink,
@@ -21,21 +21,24 @@ import { AuthService } from '../../../core/services/auth.service';
     MatProgressSpinnerModule,
     MatIconModule
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.scss',
+  templateUrl: './register.html',
+  styleUrl: './register.scss',
 })
-export class Login {
+export class Register {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
   protected readonly form = this.fb.group({
+    firstName: ['', [Validators.required]],
+    lastName: ['', [Validators.required]],
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
   protected submitting = false;
   protected errorMessage: string | null = null;
+  protected successMessage: string | null = null;
 
   submit(): void {
     if (this.form.invalid) {
@@ -43,15 +46,26 @@ export class Login {
     }
     this.submitting = true;
     this.errorMessage = null;
-    const { email, password } = this.form.getRawValue();
-    this.authService.login({ email: email!, password: password! }).subscribe({
-      next: (res) => {
-        this.authService.setSession(res);
-        this.router.navigate(['/dashboard']);
-      },
-      error: () => {
+    this.successMessage = null;
+    const { firstName, lastName, email, password } = this.form.getRawValue();
+    this.authService.register({
+      firstName: firstName!,
+      lastName: lastName!,
+      email: email!,
+      password: password!
+    }).subscribe({
+      next: () => {
         this.submitting = false;
-        this.errorMessage = 'Identifiants invalides. Veuillez réessayer.';
+        this.successMessage = 'Compte créé avec succès. Vous pouvez maintenant vous connecter.';
+        this.form.reset();
+      },
+      error: (err) => {
+        this.submitting = false;
+        if (err?.status === 409) {
+          this.errorMessage = 'Un compte avec cet email existe déjà.';
+        } else {
+          this.errorMessage = 'Une erreur est survenue lors de la création du compte.';
+        }
       }
     });
   }

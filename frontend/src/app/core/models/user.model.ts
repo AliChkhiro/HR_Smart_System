@@ -37,6 +37,13 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface RegisterRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  password: string;
+}
+
 export interface Page<T> {
   content: T[];
   totalElements: number;

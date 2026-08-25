@@ -164,35 +164,25 @@
   font-size: 13px;
 }
 
+.success-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13px;
+}
+
 .submit-btn {
   margin-top: 18px;
   height: 46px;
   border-radius: 10px;
   font-size: 14.5px;
   font-weight: 600;
-}
-
-.demo-hint {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  margin-top: 26px;
-  padding: 12px 14px;
-  border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #e7ebf3;
-  color: #475569;
-  font-size: 12px;
-  line-height: 1.5;
-
-  mat-icon {
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
-    color: #64748b;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
 }
 
 .register-switch {

@@ -2,6 +2,7 @@ package com.apprh.backend.auth.application;
 
 import com.apprh.backend.auth.api.AuthResponse;
 import com.apprh.backend.auth.api.LoginRequest;
+import com.apprh.backend.auth.api.RegisterRequest;
 import com.apprh.backend.auth.domain.RefreshToken;
 import com.apprh.backend.auth.infrastructure.JwtProperties;
 import com.apprh.backend.auth.infrastructure.JwtService;
@@ -9,6 +10,7 @@ import com.apprh.backend.auth.infrastructure.RefreshTokenRepository;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.users.api.UserResponse;
 import com.apprh.backend.users.domain.User;
+import com.apprh.backend.users.domain.UserRole;
 import com.apprh.backend.users.domain.UserStatus;
 import com.apprh.backend.users.infrastructure.UserMapper;
 import com.apprh.backend.users.infrastructure.UserRepository;
@@ -42,6 +44,24 @@ public class AuthService {
             throw new ApiException(HttpStatus.FORBIDDEN, "AUTH_ACCOUNT_DISABLED", "Ce compte est désactivé");
         }
         return issueTokens(user);
+    }
+
+    @Transactional
+    public UserResponse register(RegisterRequest request) {
+        String email = request.email().trim().toLowerCase();
+        if (userRepository.existsByEmailAndDeletedAtIsNull(email)) {
+            throw new ApiException(HttpStatus.CONFLICT, "USER_EMAIL_EXISTS",
+                    "Un compte avec cet email existe déjà");
+        }
+        User user = User.builder()
+                .email(email)
+                .firstName(request.firstName().trim())
+                .lastName(request.lastName().trim())
+                .passwordHash(passwordEncoder.encode(request.password()))
+                .role(UserRole.EMPLOYEE)
+                .status(UserStatus.ACTIVE)
+                .build();
+        return userMapper.toResponse(userRepository.save(user));
     }
 
     @Transactional

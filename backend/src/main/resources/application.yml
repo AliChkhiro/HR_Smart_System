@@ -5,6 +5,14 @@ spring:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/apprh}
     username: ${DB_USERNAME:apprh}
     password: ${DB_PASSWORD:apprh}
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
   jpa:
     hibernate:
       ddl-auto: validate
@@ -26,6 +34,9 @@ app:
     refresh-token-ttl: ${JWT_REFRESH_TTL:7d}
   seed:
     password: ${SEED_PASSWORD:Apprh@2026!}
+  mail:
+    enabled: ${MAIL_ENABLED:false}
+    from: ${MAIL_FROM:no-reply@apprh.local}
   ia-service:
     url: ${IA_SERVICE_URL:http://localhost:8000}
 

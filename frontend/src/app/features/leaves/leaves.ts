@@ -127,11 +127,16 @@ export class Leaves {
   }
 
   protected reject(leave: LeaveDto): void {
-    const comment = prompt('Motif du rejet (optionnel) :');
+    const comment = prompt("Motif du rejet (obligatoire — sera envoyé à l'employé par email) :");
     if (comment === null) {
       return;
     }
-    this.review(leave, 'REJECTED', comment.trim() || undefined);
+    const motif = comment.trim();
+    if (!motif) {
+      this.snackBar.open('Le motif du rejet est obligatoire.', 'Fermer', { duration: 4000 });
+      return;
+    }
+    this.review(leave, 'REJECTED', motif);
   }
 
   protected cancel(leave: LeaveDto): void {

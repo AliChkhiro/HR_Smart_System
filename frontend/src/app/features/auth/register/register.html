@@ -6,7 +6,7 @@
       </div>
       <h1 class="brand-title">AppRH</h1>
       <p class="brand-subtitle">
-        Plateforme de gestion RH, projets et planification
+        Créez votre compte pour accéder à la plateforme
       </p>
 
       <div class="brand-features">
@@ -37,10 +37,28 @@
 
   <div class="form-panel">
     <div class="form-inner">
-      <h2 class="form-title">Connexion</h2>
-      <p class="form-subtitle">Accédez à votre espace de travail</p>
+      <h2 class="form-title">Créer un compte</h2>
+      <p class="form-subtitle">Entrez votre propre adresse email : c'est là que vous recevrez les notifications</p>
 
       <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Prénom</mat-label>
+          <mat-icon matIconPrefix>badge</mat-icon>
+          <input matInput formControlName="firstName" autocomplete="given-name" placeholder="Jean" />
+          @if (form.controls.firstName.hasError('required')) {
+            <mat-error>Le prénom est requis</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom</mat-label>
+          <mat-icon matIconPrefix>badge</mat-icon>
+          <input matInput formControlName="lastName" autocomplete="family-name" placeholder="Dupont" />
+          @if (form.controls.lastName.hasError('required')) {
+            <mat-error>Le nom est requis</mat-error>
+          }
+        </mat-form-field>
+
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Adresse email</mat-label>
           <mat-icon matIconPrefix>mail</mat-icon>
@@ -57,7 +75,7 @@
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Mot de passe</mat-label>
           <mat-icon matIconPrefix>lock</mat-icon>
-          <input matInput type="password" formControlName="password" autocomplete="current-password"
+          <input matInput type="password" formControlName="password" autocomplete="new-password"
                  placeholder="••••••••" />
           @if (form.controls.password.hasError('required')) {
             <mat-error>Le mot de passe est requis</mat-error>
@@ -74,23 +92,25 @@
           </div>
         }
 
+        @if (successMessage) {
+          <div class="success-box">
+            <mat-icon>check_circle</mat-icon>
+            <span>{{ successMessage }}</span>
+          </div>
+        }
+
         <button mat-flat-button color="primary" type="submit" class="full-width submit-btn"
                 [disabled]="form.invalid || submitting">
           @if (submitting) {
             <mat-spinner diameter="20" />
           } @else {
-            Se connecter
+            Créer mon compte
           }
         </button>
       </form>
 
-      <div class="demo-hint">
-        <mat-icon>info_outline</mat-icon>
-        <span>Comptes de démonstration : <b>admin / rh / chefprojet / employe</b> @@apprh.local — mot de passe <b>Apprh@2026!</b></span>
-      </div>
-
       <div class="register-switch">
-        Pas encore de compte ? <a routerLink="/register">Créer un compte</a>
+        Déjà un compte ? <a routerLink="/login">Se connecter</a>
       </div>
     </div>
   </div>

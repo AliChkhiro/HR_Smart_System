@@ -1,7 +1,7 @@
 import { Service, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { AuthResponse, LoginRequest, UserDto } from '../models/user.model';
+import { AuthResponse, LoginRequest, RegisterRequest, UserDto } from '../models/user.model';
 
 const TOKEN_KEY = 'apprh.access_token';
 const REFRESH_KEY = 'apprh.refresh_token';
@@ -22,6 +22,10 @@ export class AuthService {
 
   login(request: LoginRequest) {
     return this.http.post<AuthResponse>(`${environment.apiUrl}/auth/login`, request);
+  }
+
+  register(request: RegisterRequest) {
+    return this.http.post<UserDto>(`${environment.apiUrl}/auth/register`, request);
   }
 
   refresh(refreshToken: string) {
