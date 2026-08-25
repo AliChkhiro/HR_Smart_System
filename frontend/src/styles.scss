@@ -1,8 +1,5 @@
-// Include theming for Angular Material with `mat.theme()`.
-// This Sass mixin will define CSS variables that are used for styling Angular Material
-// components according to the Material 3 design spec.
-// Learn more about theming and how to use it for your application's
-// custom components at https://material.angular.dev/guide/theming
+// AppRH — Professional design system
+// Angular Material 3 theming + global component refinements.
 @use '@angular/material' as mat;
 
 html {
@@ -10,8 +7,8 @@ html {
   @include mat.theme(
     (
       color: (
-        primary: mat.$azure-palette,
-        tertiary: mat.$blue-palette,
+        primary: mat.$violet-palette,
+        tertiary: mat.$cyan-palette,
       ),
       typography: Roboto,
       density: 0,
@@ -19,21 +16,366 @@ html {
   );
 }
 
-body {
-  // Default the application to a light color theme. This can be changed to
-  // `dark` to enable the dark color theme, or to `light dark` to defer to the
-  // user's system settings.
-  color-scheme: light;
+:root {
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --muted: #64748b;
+  --line: #e7ebf3;
+  --line-soft: #eef1f6;
+  --panel: #f8fafc;
+  --brand-start: #4f46e5;
+  --brand-mid: #4338ca;
+  --brand-end: #1e1b4b;
+}
 
-  // Set a default background, font and text colors for the application using
-  // Angular Material's system-level CSS variables. Learn more about these
-  // variables at https://material.angular.dev/guide/system-variables
+body {
+  color-scheme: light;
   background-color: var(--mat-sys-surface);
   color: var(--mat-sys-on-surface);
   font: var(--mat-sys-body-medium);
-
-  // Reset the user agent margin.
   margin: 0;
   height: 100%;
+  background: #f3f5fa;
 }
-/* You can add global styles to this file, and also import other style files */
+
+* {
+  box-sizing: border-box;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 8px;
+  border: 2px solid #f3f5fa;
+
+  &:hover {
+    background: #94a3b8;
+  }
+}
+
+// ============ Page structure ============
+.page {
+  max-width: 1600px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 22px;
+
+  .page-ico {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    color: var(--brand-start);
+    flex-shrink: 0;
+
+    mat-icon {
+      font-size: 26px;
+      width: 26px;
+      height: 26px;
+    }
+  }
+
+  .page-titles {
+    min-width: 0;
+
+    .page-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+      line-height: 1.25;
+    }
+
+    .page-subtitle {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+  }
+
+  .page-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+// ============ Cards ============
+.mat-mdc-card {
+  --mdc-elevated-card-container-shape: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 8px 24px -18px rgba(15, 23, 42, 0.18);
+  background: #fff;
+}
+
+.mat-mdc-card-header {
+  padding: 20px 22px 0;
+}
+
+.mat-mdc-card-content {
+  padding: 16px 22px 22px;
+}
+
+.content-card {
+  overflow: hidden;
+
+  .mat-mdc-card-header {
+    padding: 20px 22px 0;
+  }
+
+  .mat-mdc-card-content {
+    padding: 18px 22px 22px;
+  }
+}
+
+// ============ Toolbars & filters ============
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.toolbar .search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 420px;
+}
+
+.toolbar .filter {
+  width: 220px;
+}
+
+// ============ Tables ============
+.table-wrap {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  background: #fff;
+}
+
+.mat-mdc-table {
+  width: 100%;
+  background: transparent;
+}
+
+.mat-mdc-header-row {
+  background: var(--panel);
+}
+
+.mat-mdc-header-cell {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+.mat-mdc-row {
+  border-bottom: 1px solid var(--line-soft);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: #f8faff;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.mat-mdc-cell {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+  border-bottom-color: transparent;
+  padding-top: 14px;
+  padding-bottom: 14px;
+}
+
+.mat-column-actions {
+  width: 140px;
+  text-align: right;
+}
+
+// ============ Chips / badges ============
+.mat-mdc-chip {
+  border-radius: 999px;
+  font-weight: 500;
+}
+
+.chip-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+
+  &::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+}
+
+.chip-green {
+  color: #15803d;
+  background: #dcfce7;
+}
+
+.chip-red {
+  color: #b91c1c;
+  background: #fee2e2;
+}
+
+.chip-amber {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.chip-blue {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.chip-cyan {
+  color: #0e7490;
+  background: #cffafe;
+}
+
+.chip-violet {
+  color: #6d28d9;
+  background: #ede9fe;
+}
+
+.chip-gray {
+  color: #475569;
+  background: #e2e8f0;
+}
+
+// ============ Avatar ============
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 12px;
+}
+
+// ============ People cells ============
+.person-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .person-name {
+    font-weight: 600;
+    color: var(--ink);
+    font-size: 13.5px;
+  }
+
+  .person-sub {
+    font-size: 12px;
+    color: var(--muted);
+  }
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+// ============ Buttons ============
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-flat-button,
+.mat-mdc-stroked-button,
+.mat-mdc-outlined-button {
+  border-radius: 9px;
+  font-weight: 500;
+}
+
+// ============ Form fields ============
+.mat-mdc-form-field {
+  font-size: 13.5px;
+}
+
+.mdc-text-field--outlined {
+  --mdc-outlined-text-field-outline-color: #d6dce7;
+}
+
+// ============ Dialogs ============
+.mat-mdc-dialog-container .mat-mdc-dialog-surface {
+  border-radius: 16px;
+  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.3);
+}
+
+.mat-mdc-dialog-title {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+// ============ Menu ============
+.mat-mdc-menu-panel {
+  border-radius: 12px;
+}
+
+// ============ Snackbar ============
+.mat-mdc-snack-bar-container .mat-mdc-snackbar-surface {
+  border-radius: 10px;
+}
+
+// ============ Empty state ============
+.empty {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}

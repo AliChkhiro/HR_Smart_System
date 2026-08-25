@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { CdkDragDrop, CdkDropList, CdkDrag, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -28,6 +29,7 @@ interface KanbanColumn {
 @Component({
   selector: 'app-tasks',
   imports: [
+    DatePipe,
     CdkDropList,
     CdkDrag,
     MatCardModule,
@@ -80,6 +82,46 @@ export class Tasks {
   protected readonly loading = signal(false);
   protected projectFilter = '';
   protected search = '';
+
+  protected columnColor(status: TaskStatus): string {
+    switch (status) {
+      case 'IN_PROGRESS':
+        return 'chip-blue';
+      case 'BLOCKED':
+        return 'chip-red';
+      case 'DONE':
+        return 'chip-green';
+      default:
+        return 'chip-amber';
+    }
+  }
+
+  protected priorityChipClass(priority: string): string {
+    switch (priority) {
+      case 'URGENT':
+        return 'chip-red';
+      case 'HIGH':
+        return 'chip-amber';
+      case 'MEDIUM':
+        return 'chip-blue';
+      default:
+        return 'chip-gray';
+    }
+  }
+
+  protected initials(name: string): string {
+    const parts = name.trim().split(/\s+/);
+    const first = parts[0]?.charAt(0) ?? '';
+    const last = parts.length > 1 ? parts[parts.length - 1].charAt(0) : '';
+    return (first + last).toUpperCase();
+  }
+
+  protected isOverdue(task: TaskDto): boolean {
+    if (!task.dueDate || task.status === 'DONE') {
+      return false;
+    }
+    return new Date(task.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
+  }
 
   constructor() {
     this.load();

@@ -73,4 +73,13 @@ export class Dashboard {
     }
     return Math.round((stats.tasksByStatus[key] ?? 0) * 100 / total);
   }
+
+  protected completionPercent(): number {
+    const stats = this.stats();
+    const total = this.totalTasks();
+    if (!stats || total === 0) {
+      return 0;
+    }
+    return Math.round(((stats.tasksByStatus['DONE'] ?? 0) * 100) / total);
+  }
 }

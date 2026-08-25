@@ -1,59 +1,66 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Calendrier des échéances</mat-card-title>
-    <mat-card-subtitle>Échéances de tâches — Sprint 3</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="toolbar">
-      <button mat-flat-button color="primary" (click)="previousMonth()">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <h2 class="month-label">{{ monthLabel() }}</h2>
-      <button mat-flat-button color="primary" (click)="nextMonth()">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-      <button mat-stroked-button (click)="goToToday()">Aujourd'hui</button>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>calendar_month</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Calendrier</h1>
+      <p class="page-subtitle">Échéances de tâches par mois</p>
     </div>
+  </div>
 
-    <div class="calendar-grid">
-      @for (dayName of weekDays; track dayName) {
-        <div class="weekday">{{ dayName }}</div>
-      }
-      @for (day of days(); track day.date.toISOString()) {
-        <div
-          class="day-cell"
-          [class.outside]="!day.inMonth"
-          [class.today]="day.isToday"
-        >
-          <span class="day-number">{{ day.date.getDate() }}</span>
-          <div class="day-tasks">
-            @for (task of day.tasks; track task.id) {
-              <div
-                class="task-dot"
-                [matTooltip]="task.name + (task.priority ? ' — ' + task.priority : '')"
-              >
-                <mat-icon class="task-icon" [class]="'priority-' + task.priority" [color]="priorityColors[task.priority]">
-                  @switch (task.status) {
-                    @case ('DONE') {
-                      check_circle
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <button mat-stroked-button (click)="previousMonth()" matTooltip="Mois précédent">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+        <h2 class="month-label">{{ monthLabel() }}</h2>
+        <button mat-stroked-button (click)="nextMonth()" matTooltip="Mois suivant">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+        <button mat-flat-button color="primary" (click)="goToToday()">Aujourd'hui</button>
+      </div>
+
+      <div class="calendar-grid">
+        @for (dayName of weekDays; track dayName) {
+          <div class="weekday">{{ dayName }}</div>
+        }
+        @for (day of days(); track day.date.toISOString()) {
+          <div
+            class="day-cell"
+            [class.outside]="!day.inMonth"
+            [class.today]="day.isToday"
+            [class.has-tasks]="day.tasks.length > 0"
+          >
+            <span class="day-number">{{ day.date.getDate() }}</span>
+            <div class="day-tasks">
+              @for (task of day.tasks; track task.id) {
+                <div
+                  class="task-dot"
+                  [matTooltip]="task.name + (task.priority ? ' — ' + task.priority : '')"
+                >
+                  <mat-icon class="task-icon" [class]="'priority-' + task.priority" [color]="priorityColors[task.priority]">
+                    @switch (task.status) {
+                      @case ('DONE') {
+                        check_circle
+                      }
+                      @case ('BLOCKED') {
+                        block
+                      }
+                      @case ('IN_PROGRESS') {
+                        hourglass_top
+                      }
+                      @default {
+                        radio_button_unchecked
+                      }
                     }
-                    @case ('BLOCKED') {
-                      block
-                    }
-                    @case ('IN_PROGRESS') {
-                      hourglass_top
-                    }
-                    @default {
-                      radio_button_unchecked
-                    }
-                  }
-                </mat-icon>
-                <span class="task-name">{{ task.name }}</span>
-              </div>
-            }
+                  </mat-icon>
+                  <span class="task-name">{{ task.name }}</span>
+                </div>
+              }
+            </div>
           </div>
-        </div>
-      }
-    </div>
-  </mat-card-content>
-</mat-card>
+        }
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

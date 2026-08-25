@@ -1,56 +1,104 @@
-<mat-sidenav-container class="layout">
-  <mat-sidenav mode="side" opened>
+<mat-sidenav-container class="layout" [class.collapsed]="collapsed()">
+  <mat-sidenav mode="side" opened class="sidebar">
     <div class="brand">
-      <mat-icon>workspaces</mat-icon>
-      <span>{{ appTitle }}</span>
+      <div class="brand-logo">
+        <mat-icon>workspaces</mat-icon>
+      </div>
+      <div class="brand-text">
+        <span class="brand-name">AppRH</span>
+        <span class="brand-tag">Gestion RH &amp; projets</span>
+      </div>
     </div>
-    <mat-nav-list>
-      @for (item of visibleNavItems(); track item.path) {
-        <a mat-list-item [routerLink]="item.path" routerLinkActive="active-link">
-          <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
-          <span matListItemTitle>{{ item.label }}</span>
+
+    <nav class="nav">
+      @for (item of visibleNavItems(); track item.path; let i = $index) {
+        @if (i === 0 || item.section !== visibleNavItems()[i - 1].section) {
+          <div class="section-label">{{ item.section }}</div>
+        }
+        <a
+          class="nav-link"
+          [class.active]="isActive(item.path)"
+          [routerLink]="item.path"
+          [matTooltip]="collapsed() ? item.label : ''"
+          matTooltipPosition="right"
+        >
+          <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
+          <span class="nav-label">{{ item.label }}</span>
         </a>
       }
-    </mat-nav-list>
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (user(); as user) {
+        <div class="user-card">
+          <div class="avatar avatar-sm">{{ initials(user) }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <span class="user-role">{{ roleLabel(user.role) }}</span>
+          </div>
+          <button mat-icon-button (click)="logout()" matTooltip="Déconnexion" class="logout-btn">
+            <mat-icon>logout</mat-icon>
+          </button>
+        </div>
+      }
+    </div>
   </mat-sidenav>
 
   <mat-sidenav-content>
-    <mat-toolbar color="primary">
+    <mat-toolbar class="topbar">
+      <button mat-icon-button (click)="toggleSidebar()" matTooltip="Réduire / agrandir le menu">
+        <mat-icon>{{ collapsed() ? 'menu_open' : 'menu' }}</mat-icon>
+      </button>
+      <span class="topbar-title">{{ currentPageLabel() }}</span>
+
       <span class="spacer"></span>
-      @if (user()) {
-        <span class="user-name">{{ user()!.firstName }} {{ user()!.lastName }}</span>
-      }
+
       <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" aria-label="Notifications"
               class="bell-button">
         <mat-icon [matBadge]="unreadCount()" matBadgeColor="warn" [matBadgeHidden]="unreadCount() === 0">
           notifications
         </mat-icon>
       </button>
-      <mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+      <mat-menu #notificationsMenu="matMenu" class="notifications-menu" xPosition="before">
         <div class="menu-header">
           <span>Notifications</span>
           <button mat-button (click)="markAllNotificationsRead()">Tout marquer lu</button>
         </div>
         @for (notification of notifications(); track notification.id) {
-          <button mat-menu-item (click)="openNotification(notification)">
-            <mat-icon>{{ notificationIcon(notification.type) }}</mat-icon>
-            <span>{{ notification.message }}</span>
+          <button mat-menu-item class="notif-item" (click)="openNotification(notification)">
+            <mat-icon class="notif-icon" [class.unread]="!notification.read">{{ notificationIcon(notification.type) }}</mat-icon>
+            <span class="notif-text">
+              <span class="notif-msg">{{ notification.message }}</span>
+              <span class="notif-date">{{ notification.createdAt | date: 'dd/MM HH:mm' }}</span>
+            </span>
           </button>
         }
         @if (notifications().length === 0) {
           <div class="menu-empty">Aucune notification</div>
         }
+        <a mat-menu-item class="menu-link-all" [routerLink]="'/notifications'">
+          <mat-icon>list</mat-icon>
+          <span>Voir tout</span>
+        </a>
       </mat-menu>
-      <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="Menu utilisateur">
-        <mat-icon>account_circle</mat-icon>
-      </button>
-      <mat-menu #userMenu="matMenu">
+
+      @if (user(); as user) {
+        <div class="topbar-user" [matMenuTriggerFor]="userMenu">
+          <div class="avatar">{{ initials(user) }}</div>
+          <div class="topbar-user-info">
+            <span class="topbar-user-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <span class="topbar-user-role">{{ roleLabel(user.role) }}</span>
+          </div>
+        </div>
+      }
+      <mat-menu #userMenu="matMenu" xPosition="before">
         <button mat-menu-item (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Déconnexion</span>
         </button>
       </mat-menu>
     </mat-toolbar>
+
     <main class="content">
       <router-outlet />
     </main>

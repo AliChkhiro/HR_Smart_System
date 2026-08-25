@@ -61,8 +61,11 @@ export class Employees {
     });
   }
 
-  protected load(): void {
-    this.loading.set(true);
+  protected initials(employee: EmployeeDto): string {
+    return (employee.firstName.charAt(0) + employee.lastName.charAt(0)).toUpperCase();
+  }
+
+  protected load(): void {    this.loading.set(true);
     const departmentId = this.departmentFilter ? Number(this.departmentFilter) : undefined;
     this.employeesService.list(this.search.trim() || undefined, departmentId).subscribe({
       next: page => {

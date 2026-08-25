@@ -65,6 +65,38 @@ export class Projects {
   protected search = '';
   protected statusFilter = '';
 
+  protected initials(project: ProjectDto): string {
+    return project.name.charAt(0).toUpperCase();
+  }
+
+  protected statusChipClass(status: ProjectStatus): string {
+    switch (status) {
+      case 'COMPLETED':
+        return 'chip-green';
+      case 'CANCELLED':
+        return 'chip-gray';
+      case 'IN_PROGRESS':
+        return 'chip-blue';
+      case 'ON_HOLD':
+        return 'chip-amber';
+      default:
+        return 'chip-cyan';
+    }
+  }
+
+  protected priorityChipClass(priority: ProjectPriority): string {
+    switch (priority) {
+      case 'URGENT':
+        return 'chip-red';
+      case 'HIGH':
+        return 'chip-amber';
+      case 'MEDIUM':
+        return 'chip-blue';
+      default:
+        return 'chip-gray';
+    }
+  }
+
   constructor() {
     this.load();
   }

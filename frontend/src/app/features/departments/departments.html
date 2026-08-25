@@ -1,66 +1,80 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Départements</mat-card-title>
-    <mat-card-subtitle>Organisation des équipes — Sprint 2</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="toolbar">
-      <mat-form-field appearance="outline" class="search">
-        <mat-label>Rechercher</mat-label>
-        <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom ou description" />
-      </mat-form-field>
-      <button mat-flat-button color="primary" (click)="load()">
-        <mat-icon>search</mat-icon>
-        Rechercher
-      </button>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>account_balance</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Départements</h1>
+      <p class="page-subtitle">Organisation des équipes</p>
+    </div>
+    <div class="page-actions">
       @if (isAdmin()) {
-        <button mat-flat-button color="accent" (click)="openCreate()" matTooltip="Ajouter un département">
+        <button mat-flat-button color="primary" (click)="openCreate()" matTooltip="Ajouter un département">
           <mat-icon>add</mat-icon>
-          Nouveau
+          Nouveau département
         </button>
       }
     </div>
+  </div>
 
-    @if (loading()) {
-      <div class="spinner"><mat-spinner diameter="40" /></div>
-    } @else {
-      <table mat-table [dataSource]="departments()" class="mat-elevation-z2">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Nom</th>
-          <td mat-cell *matCellDef="let row">
-            <b>{{ row.name }}</b>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="description">
-          <th mat-header-cell *matHeaderCellDef>Description</th>
-          <td mat-cell *matCellDef="let row">{{ row.description || '—' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="manager">
-          <th mat-header-cell *matHeaderCellDef>Responsable</th>
-          <td mat-cell *matCellDef="let row">{{ row.managerName || '—' }}</td>
-        </ng-container>
-        <ng-container matColumnDef="employeeCount">
-          <th mat-header-cell *matHeaderCellDef>Employés</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-chip>{{ row.employeeCount }}</mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            @if (isAdmin()) {
-              <button mat-icon-button matTooltip="Modifier" (click)="openEdit(row)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button matTooltip="Supprimer" (click)="delete(row)">
-                <mat-icon color="warn">delete</mat-icon>
-              </button>
-            }
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    }
-  </mat-card-content>
-</mat-card>
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="search">
+          <mat-label>Rechercher</mat-label>
+          <mat-icon matIconPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom ou description" />
+        </mat-form-field>
+        <button mat-stroked-button (click)="load()">
+          <mat-icon>search</mat-icon>
+          Rechercher
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
+      } @else {
+        <div class="table-wrap">
+          <table mat-table [dataSource]="departments()">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Nom</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="person-cell">
+                  <div class="avatar">{{ initials(row) }}</div>
+                  <div class="person-name">{{ row.name }}</div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Description</th>
+              <td mat-cell *matCellDef="let row">{{ row.description || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="manager">
+              <th mat-header-cell *matHeaderCellDef>Responsable</th>
+              <td mat-cell *matCellDef="let row">{{ row.managerName || '—' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="employeeCount">
+              <th mat-header-cell *matHeaderCellDef>Employés</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip-status chip-blue">{{ row.employeeCount }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                @if (isAdmin()) {
+                  <button mat-icon-button matTooltip="Modifier" (click)="openEdit(row)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Supprimer" (click)="delete(row)">
+                    <mat-icon color="warn">delete</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

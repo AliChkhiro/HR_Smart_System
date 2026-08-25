@@ -1,106 +1,122 @@
-<mat-card>
-  <mat-card-header>
-    <mat-icon matCardAvatar>beach_access</mat-icon>
-    <mat-card-title>Congés</mat-card-title>
-    <mat-card-subtitle>Demandes, approbation et suivi</mat-card-subtitle>
-    <div class="header-actions">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Statut</mat-label>
-        <mat-select [(ngModel)]="statusFilter" (selectionChange)="load()">
-          <mat-option value="">Tous</mat-option>
-          <mat-option value="PENDING">En attente</mat-option>
-          <mat-option value="APPROVED">Approuvés</mat-option>
-          <mat-option value="REJECTED">Rejetés</mat-option>
-          <mat-option value="CANCELLED">Annulés</mat-option>
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Type</mat-label>
-        <mat-select [(ngModel)]="typeFilter" (selectionChange)="load()">
-          <mat-option value="">Tous</mat-option>
-          <mat-option value="ANNUAL">Annuel</mat-option>
-          <mat-option value="SICK">Maladie</mat-option>
-          <mat-option value="MATERNITY">Maternité</mat-option>
-          <mat-option value="PATERNITY">Paternité</mat-option>
-          <mat-option value="UNPAID">Sans solde</mat-option>
-          <mat-option value="OTHER">Autre</mat-option>
-        </mat-select>
-      </mat-form-field>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>beach_access</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Congés</h1>
+      <p class="page-subtitle">Demandes, approbation et suivi des absences</p>
+    </div>
+    <div class="page-actions">
       <button mat-flat-button color="primary" (click)="openCreate()">
         <mat-icon>add</mat-icon>
         Demander un congé
       </button>
     </div>
-  </mat-card-header>
-  <mat-card-content>
-    @if (loading()) {
-      <mat-spinner class="spinner"></mat-spinner>
-    }
-    <table mat-table [dataSource]="leaves()" class="leaves-table">
-      <ng-container matColumnDef="employee">
-        <th mat-header-cell *matHeaderCellDef>Employé</th>
-        <td mat-cell *matCellDef="let leave">{{ leave.employeeName }}</td>
-      </ng-container>
-      <ng-container matColumnDef="type">
-        <th mat-header-cell *matHeaderCellDef>Type</th>
-        <td mat-cell *matCellDef="let leave">{{ typeLabels[leave.type] }}</td>
-      </ng-container>
-      <ng-container matColumnDef="period">
-        <th mat-header-cell *matHeaderCellDef>Période</th>
-        <td mat-cell *matCellDef="let leave">
-          du {{ leave.startDate | date: 'dd/MM/yyyy' }} au {{ leave.endDate | date: 'dd/MM/yyyy' }}
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="days">
-        <th mat-header-cell *matHeaderCellDef>Jours</th>
-        <td mat-cell *matCellDef="let leave">{{ days(leave) }}</td>
-      </ng-container>
-      <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef>Statut</th>
-        <td mat-cell *matCellDef="let leave">
-          <mat-chip [color]="statusColors[leave.status]">{{ statusLabels[leave.status] }}</mat-chip>
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="review">
-        <th mat-header-cell *matHeaderCellDef>Décision</th>
-        <td mat-cell *matCellDef="let leave">
-          @if (leave.reviewerName) {
-            <span>
-              {{ leave.reviewerName }}<br />
-              @if (leave.reviewComment) {
-                <small>{{ leave.reviewComment }}</small>
-              }
-            </span>
-          } @else {
-            <span>—</span>
-          }
-        </td>
-      </ng-container>
-      <ng-container matColumnDef="actions">
-        <th mat-header-cell *matHeaderCellDef></th>
-        <td mat-cell *matCellDef="let leave">
-          <div class="row-actions">
-            @if (isManager() && leave.status === 'PENDING') {
-              <button mat-icon-button matTooltip="Approuver" color="primary" (click)="approve(leave)">
-                <mat-icon>check_circle</mat-icon>
-              </button>
-              <button mat-icon-button matTooltip="Rejeter" color="warn" (click)="reject(leave)">
-                <mat-icon>cancel</mat-icon>
-              </button>
-            }
-            @if (leave.status === 'PENDING') {
-              <button mat-icon-button matTooltip="Annuler ma demande" (click)="cancel(leave)">
-                <mat-icon>delete</mat-icon>
-              </button>
-            }
-          </div>
-        </td>
-      </ng-container>
-      <tr mat-header-row *matHeaderRowDef="columns"></tr>
-      <tr mat-row *matRowDef="let row; columns: columns"></tr>
-    </table>
-    @if (!loading() && leaves().length === 0) {
-      <p class="empty">Aucune demande de congés.</p>
-    }
-  </mat-card-content>
-</mat-card>
+  </div>
+
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="filter">
+          <mat-label>Statut</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="load()">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="PENDING">En attente</mat-option>
+            <mat-option value="APPROVED">Approuvés</mat-option>
+            <mat-option value="REJECTED">Rejetés</mat-option>
+            <mat-option value="CANCELLED">Annulés</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter">
+          <mat-label>Type</mat-label>
+          <mat-select [(ngModel)]="typeFilter" (selectionChange)="load()">
+            <mat-option value="">Tous</mat-option>
+            <mat-option value="ANNUAL">Annuel</mat-option>
+            <mat-option value="SICK">Maladie</mat-option>
+            <mat-option value="MATERNITY">Maternité</mat-option>
+            <mat-option value="PATERNITY">Paternité</mat-option>
+            <mat-option value="UNPAID">Sans solde</mat-option>
+            <mat-option value="OTHER">Autre</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
+      }
+      @if (!loading() && leaves().length > 0) {
+        <div class="table-wrap">
+          <table mat-table [dataSource]="leaves()">
+            <ng-container matColumnDef="employee">
+              <th mat-header-cell *matHeaderCellDef>Employé</th>
+              <td mat-cell *matCellDef="let leave">{{ leave.employeeName }}</td>
+            </ng-container>
+            <ng-container matColumnDef="type">
+              <th mat-header-cell *matHeaderCellDef>Type</th>
+              <td mat-cell *matCellDef="let leave">
+                <span class="chip-status chip-cyan">{{ typeLabels[leave.type] }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="period">
+              <th mat-header-cell *matHeaderCellDef>Période</th>
+              <td mat-cell *matCellDef="let leave">
+                du <b>{{ leave.startDate | date: 'dd/MM/yyyy' }}</b> au <b>{{ leave.endDate | date: 'dd/MM/yyyy' }}</b>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="days">
+              <th mat-header-cell *matHeaderCellDef>Jours</th>
+              <td mat-cell *matCellDef="let leave">
+                <span class="chip-status chip-blue">{{ days(leave) }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Statut</th>
+              <td mat-cell *matCellDef="let leave">
+                <span class="chip-status" [class]="statusChipClass(leave.status)">{{ statusLabels[leave.status] }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="review">
+              <th mat-header-cell *matHeaderCellDef>Décision</th>
+              <td mat-cell *matCellDef="let leave">
+                @if (leave.reviewerName) {
+                  <span>
+                    {{ leave.reviewerName }}<br />
+                    @if (leave.reviewComment) {
+                      <small class="muted">{{ leave.reviewComment }}</small>
+                    }
+                  </span>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef></th>
+              <td mat-cell *matCellDef="let leave">
+                <div class="row-actions">
+                  @if (isManager() && leave.status === 'PENDING') {
+                    <button mat-icon-button matTooltip="Approuver" color="primary" (click)="approve(leave)">
+                      <mat-icon>check_circle</mat-icon>
+                    </button>
+                    <button mat-icon-button matTooltip="Rejeter" color="warn" (click)="reject(leave)">
+                      <mat-icon>cancel</mat-icon>
+                    </button>
+                  }
+                  @if (leave.status === 'PENDING') {
+                    <button mat-icon-button matTooltip="Annuler ma demande" (click)="cancel(leave)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  }
+                </div>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="columns"></tr>
+            <tr mat-row *matRowDef="let row; columns: columns"></tr>
+          </table>
+        </div>
+      }
+      @if (!loading() && leaves().length === 0) {
+        <p class="empty">Aucune demande de congés.</p>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

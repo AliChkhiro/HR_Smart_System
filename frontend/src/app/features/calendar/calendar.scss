@@ -1,78 +1,115 @@
 .toolbar {
   display: flex;
-  gap: 12px;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 
 .month-label {
   margin: 0 8px;
   text-transform: capitalize;
   flex: 1;
+  font-size: 20px;
+  font-weight: 700;
+  color: #0f172a;
 }
 
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
 .weekday {
   text-align: center;
-  font-weight: 500;
-  font-size: 12px;
-  color: rgba(0, 0, 0, 0.6);
-  padding: 6px 0;
+  font-weight: 700;
+  font-size: 11px;
+  color: #64748b;
+  padding: 8px 0;
   text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .day-cell {
-  min-height: 90px;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-  padding: 4px 6px;
-  background: white;
+  min-height: 96px;
+  border: 1px solid #eef1f6;
+  border-radius: 10px;
+  padding: 6px 8px;
+  background: #fff;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.12);
+  }
 
   &.outside {
-    background: rgba(0, 0, 0, 0.03);
+    background: #f8fafc;
     opacity: 0.55;
   }
 
   &.today {
-    outline: 2px solid #3f51b5;
+    border: 2px solid #4f46e5;
+    background: #f8faff;
+    box-shadow: 0 4px 14px -6px rgba(79, 70, 229, 0.35);
+  }
+
+  &.has-tasks {
+    border-color: #dbeafe;
   }
 }
 
 .day-number {
   font-size: 12px;
-  font-weight: 500;
-  color: rgba(0, 0, 0, 0.7);
+  font-weight: 600;
+  color: #475569;
+}
+
+.day-cell.today .day-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #4f46e5;
+  color: #fff;
 }
 
 .day-tasks {
   margin-top: 4px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   overflow: hidden;
 }
 
 .task-dot {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   font-size: 11px;
   cursor: default;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #f8fafc;
+
+  &:hover {
+    background: #eef2ff;
+  }
 }
 
 .task-icon {
   font-size: 14px;
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 }
 
 .task-name {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: #334155;
+  font-weight: 500;
 }

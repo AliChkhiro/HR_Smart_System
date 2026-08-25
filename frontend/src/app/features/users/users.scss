@@ -1,34 +1,12 @@
-.toolbar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.search-field {
-  width: 320px;
-}
-
-.spacer {
-  flex: 1 1 auto;
-}
-
-.full-width {
-  width: 100%;
-}
-
 .spinner {
   display: flex;
   justify-content: center;
-  padding: 32px;
+  padding: 32px 0;
 }
 
-.active-chip {
-  background-color: #e8f5e9;
-  color: #2e7d32;
-}
-
-.disabled-chip {
-  background-color: #fdecea;
-  color: #c62828;
+.email-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: #94a3b8;
 }

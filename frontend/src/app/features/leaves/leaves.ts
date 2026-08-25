@@ -72,6 +72,19 @@ export class Leaves {
   protected statusFilter = '';
   protected typeFilter = '';
 
+  protected statusChipClass(status: string): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'chip-green';
+      case 'REJECTED':
+        return 'chip-red';
+      case 'CANCELLED':
+        return 'chip-gray';
+      default:
+        return 'chip-amber';
+    }
+  }
+
   constructor() {
     this.load();
   }

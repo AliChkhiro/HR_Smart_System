@@ -1,10 +1,64 @@
-<mat-card>
-  <mat-card-header>
-    <mat-icon matCardAvatar>settings</mat-icon>
-    <mat-card-title>Paramètres</mat-card-title>
-    <mat-card-subtitle>Configuration de base (types de congés, organisation) — réservé Admin</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <p>Module en cours de développement (squelette Sprint 0).</p>
-  </mat-card-content>
-</mat-card>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>settings</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Paramètres</h1>
+      <p class="page-subtitle">Configuration de base — réservé Administrateur</p>
+    </div>
+  </div>
+
+  <div class="settings-grid">
+    <mat-card class="setting-card">
+      <mat-card-content>
+        <div class="setting-ico tile-indigo"><mat-icon>beach_access</mat-icon></div>
+        <div class="setting-body">
+          <span class="setting-title">Types de congés</span>
+          <span class="setting-desc">Annuel, maladie, maternité, paternité, sans solde.</span>
+        </div>
+        <span class="chip-status chip-green">En production</span>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="setting-card">
+      <mat-card-content>
+        <div class="setting-ico tile-cyan"><mat-icon>account_balance</mat-icon></div>
+        <div class="setting-body">
+          <span class="setting-title">Organisation</span>
+          <span class="setting-desc">Départements, responsables et équipes.</span>
+        </div>
+        <span class="chip-status chip-green">En production</span>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="setting-card">
+      <mat-card-content>
+        <div class="setting-ico tile-amber"><mat-icon>auto_awesome</mat-icon></div>
+        <div class="setting-body">
+          <span class="setting-title">Assignation IA</span>
+          <span class="setting-desc">Pondération des recommandations d'assignation.</span>
+        </div>
+        <span class="chip-status chip-amber">Bientôt</span>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="setting-card">
+      <mat-card-content>
+        <div class="setting-ico tile-blue"><mat-icon>notifications_active</mat-icon></div>
+        <div class="setting-body">
+          <span class="setting-title">Notifications</span>
+          <span class="setting-desc">Alertes congés, revues et assignations.</span>
+        </div>
+        <span class="chip-status chip-amber">Bientôt</span>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="content-card soon-card">
+    <mat-card-content>
+      <div class="soon">
+        <mat-icon>construction</mat-icon>
+        <div>
+          <b>Module en cours de développement</b>
+          <p>Le paramétrage avancé (quotas de congés, règles d'entreprise, pondération IA) sera proposé dans une prochaine itération.</p>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

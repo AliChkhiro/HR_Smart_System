@@ -1,26 +1,5 @@
-.toolbar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.search {
-  flex: 1;
-}
-
 .spinner {
   display: flex;
   justify-content: center;
   padding: 32px 0;
-}
-
-.mat-column-employeeCount {
-  width: 100px;
-  text-align: center;
-}
-
-.mat-column-actions {
-  width: 100px;
-  text-align: right;
 }

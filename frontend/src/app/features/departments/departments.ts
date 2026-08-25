@@ -49,6 +49,10 @@ export class Departments {
     this.load();
   }
 
+  protected initials(department: DepartmentDto): string {
+    return department.name.charAt(0).toUpperCase();
+  }
+
   protected load(): void {
     this.loading.set(true);
     this.departmentsService.list(this.search.trim() || undefined).subscribe({

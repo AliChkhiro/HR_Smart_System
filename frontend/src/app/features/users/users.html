@@ -1,74 +1,88 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Utilisateurs</mat-card-title>
-    <mat-card-subtitle>Gestion des comptes et des rôles (réservé Administrateur)</mat-card-subtitle>
-  </mat-card-header>
-
-  <mat-card-content>
-    <div class="toolbar">
-      <mat-form-field class="search-field">
-        <mat-label>Rechercher</mat-label>
-        <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom, prénom ou email" />
-      </mat-form-field>
-      <button mat-raised-button color="primary" (click)="load()">
-        <mat-icon>search</mat-icon>
-        Rechercher
-      </button>
-      <span class="spacer"></span>
-      <button mat-raised-button color="accent" (click)="openCreate()">
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>manage_accounts</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Utilisateurs</h1>
+      <p class="page-subtitle">Gestion des comptes et des rôles — réservé Administrateur</p>
+    </div>
+    <div class="page-actions">
+      <button mat-flat-button color="primary" (click)="openCreate()">
         <mat-icon>person_add</mat-icon>
         Nouvel utilisateur
       </button>
     </div>
+  </div>
 
-    @if (loading()) {
-      <div class="spinner"><mat-spinner diameter="40" /></div>
-    } @else {
-      <table mat-table [dataSource]="users()" class="full-width">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Nom</th>
-          <td mat-cell *matCellDef="let user">{{ user.firstName }} {{ user.lastName }}</td>
-        </ng-container>
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="search">
+          <mat-label>Rechercher</mat-label>
+          <mat-icon matIconPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom, prénom ou email" />
+        </mat-form-field>
+        <button mat-stroked-button (click)="load()">
+          <mat-icon>search</mat-icon>
+          Rechercher
+        </button>
+      </div>
 
-        <ng-container matColumnDef="email">
-          <th mat-header-cell *matHeaderCellDef>Email</th>
-          <td mat-cell *matCellDef="let user">{{ user.email }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="role">
-          <th mat-header-cell *matHeaderCellDef>Rôle</th>
-          <td mat-cell *matCellDef="let user">
-            <mat-chip>{{ roleLabels[user.role] }}</mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Statut</th>
-          <td mat-cell *matCellDef="let user">
-            <mat-chip [class.active-chip]="user.status === 'ACTIVE'" [class.disabled-chip]="user.status === 'DISABLED'">
-              {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
-            </mat-chip>
-          </td>
-        </ng-container>
-
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let user">
-            <button mat-icon-button (click)="openEdit(user)" matTooltip="Modifier">
-              <mat-icon>edit</mat-icon>
-            </button>
-            <button mat-icon-button (click)="toggleStatus(user)" [matTooltip]="user.status === 'ACTIVE' ? 'Désactiver' : 'Réactiver'">
-              <mat-icon>{{ user.status === 'ACTIVE' ? 'block' : 'check_circle' }}</mat-icon>
-            </button>
-            <button mat-icon-button (click)="delete(user)" matTooltip="Supprimer">
-              <mat-icon color="warn">delete</mat-icon>
-            </button>
-          </td>
-        </ng-container>
-
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    }
-  </mat-card-content>
-</mat-card>
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
+      } @else {
+        <div class="table-wrap">
+          <table mat-table [dataSource]="users()">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Nom</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="person-cell">
+                  <div class="avatar">{{ initials(user) }}</div>
+                  <div class="person-name">{{ user.firstName }} {{ user.lastName }}</div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef>Email</th>
+              <td mat-cell *matCellDef="let user">
+                <div class="person-cell">
+                  <mat-icon class="email-icon">mail</mat-icon>
+                  <span>{{ user.email }}</span>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef>Rôle</th>
+              <td mat-cell *matCellDef="let user">
+                <span class="chip-status" [class]="roleChipClass(user.role)">{{ roleLabels[user.role] }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Statut</th>
+              <td mat-cell *matCellDef="let user">
+                <span class="chip-status" [class.chip-green]="user.status === 'ACTIVE'" [class.chip-gray]="user.status === 'DISABLED'">
+                  {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
+                </span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let user">
+                <button mat-icon-button (click)="openEdit(user)" matTooltip="Modifier">
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="toggleStatus(user)" [matTooltip]="user.status === 'ACTIVE' ? 'Désactiver' : 'Réactiver'">
+                  <mat-icon [color]="user.status === 'ACTIVE' ? 'warn' : 'primary'">{{ user.status === 'ACTIVE' ? 'block' : 'check_circle' }}</mat-icon>
+                </button>
+                <button mat-icon-button (click)="delete(user)" matTooltip="Supprimer">
+                  <mat-icon color="warn">delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

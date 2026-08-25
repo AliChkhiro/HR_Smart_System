@@ -1,15 +1,51 @@
 <div class="login-page">
-  <mat-card class="login-card">
-    <mat-card-header>
-      <mat-icon class="login-icon">workspaces</mat-icon>
-      <mat-card-title>AppRH</mat-card-title>
-      <mat-card-subtitle>Plateforme de gestion de projets et RH</mat-card-subtitle>
-    </mat-card-header>
-    <mat-card-content>
+  <div class="brand-panel">
+    <div class="brand-inner">
+      <div class="brand-logo">
+        <mat-icon>workspaces</mat-icon>
+      </div>
+      <h1 class="brand-title">AppRH</h1>
+      <p class="brand-subtitle">
+        Plateforme de gestion RH, projets et planification
+      </p>
+
+      <div class="brand-features">
+        <div class="feature">
+          <mat-icon>group</mat-icon>
+          <div>
+            <span class="feature-title">Ressources humaines</span>
+            <span class="feature-desc">Employés, compétences, départements et congés centralisés.</span>
+          </div>
+        </div>
+        <div class="feature">
+          <mat-icon>checklist</mat-icon>
+          <div>
+            <span class="feature-title">Suivi de projets</span>
+            <span class="feature-desc">Kanban, calendrier des échéances et priorités.</span>
+          </div>
+        </div>
+        <div class="feature">
+          <mat-icon>auto_awesome</mat-icon>
+          <div>
+            <span class="feature-title">Assignation assistée par IA</span>
+            <span class="feature-desc">Recommandations d'assignation selon compétences et charge.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-panel">
+    <div class="form-inner">
+      <h2 class="form-title">Connexion</h2>
+      <p class="form-subtitle">Accédez à votre espace de travail</p>
+
       <form [formGroup]="form" (ngSubmit)="submit()">
-        <mat-form-field class="full-width">
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Adresse email</mat-label>
-          <input matInput type="email" formControlName="email" autocomplete="username" />
+          <mat-icon matIconPrefix>mail</mat-icon>
+          <input matInput type="email" formControlName="email" autocomplete="username"
+                 placeholder="vous@entreprise.com" />
           @if (form.controls.email.hasError('required')) {
             <mat-error>L'email est requis</mat-error>
           }
@@ -18,9 +54,11 @@
           }
         </mat-form-field>
 
-        <mat-form-field class="full-width">
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>Mot de passe</mat-label>
-          <input matInput type="password" formControlName="password" autocomplete="current-password" />
+          <mat-icon matIconPrefix>lock</mat-icon>
+          <input matInput type="password" formControlName="password" autocomplete="current-password"
+                 placeholder="••••••••" />
           @if (form.controls.password.hasError('required')) {
             <mat-error>Le mot de passe est requis</mat-error>
           }
@@ -30,10 +68,14 @@
         </mat-form-field>
 
         @if (errorMessage) {
-          <p class="error">{{ errorMessage }}</p>
+          <div class="error-box">
+            <mat-icon>error_outline</mat-icon>
+            <span>{{ errorMessage }}</span>
+          </div>
         }
 
-        <button mat-raised-button color="primary" type="submit" class="full-width" [disabled]="form.invalid || submitting">
+        <button mat-flat-button color="primary" type="submit" class="full-width submit-btn"
+                [disabled]="form.invalid || submitting">
           @if (submitting) {
             <mat-spinner diameter="20" />
           } @else {
@@ -41,6 +83,11 @@
           }
         </button>
       </form>
-    </mat-card-content>
-  </mat-card>
+
+      <div class="demo-hint">
+        <mat-icon>info_outline</mat-icon>
+        <span>Comptes de démonstration : <b>admin / rh / chefprojet / employe</b> @@apprh.local — mot de passe <b>Apprh@2026!</b></span>
+      </div>
+    </div>
+  </div>
 </div>

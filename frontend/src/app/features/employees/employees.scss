@@ -1,39 +1,14 @@
-.toolbar {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.search {
-  flex: 1;
-}
-
-.filter {
-  width: 220px;
-}
-
 .spinner {
   display: flex;
   justify-content: center;
   padding: 32px 0;
 }
 
-.muted {
-  color: rgba(0, 0, 0, 0.6);
-  font-size: 12px;
-}
-
 .skill-chip {
-  margin: 2px;
+  margin: 2px 4px 2px 0;
 }
 
 .level {
-  font-size: 11px;
-  opacity: 0.7;
-}
-
-.mat-column-actions {
-  width: 140px;
-  text-align: right;
+  opacity: 0.75;
+  font-weight: 500;
 }

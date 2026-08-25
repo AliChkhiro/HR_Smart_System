@@ -1,94 +1,112 @@
-<div class="toolbar">
-  <mat-form-field appearance="outline" class="search">
-    <mat-label>Rechercher</mat-label>
-    <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom de la tâche" />
-  </mat-form-field>
-  <mat-form-field appearance="outline" class="filter">
-    <mat-label>Projet</mat-label>
-    <mat-select [(ngModel)]="projectFilter" (selectionChange)="load()">
-      <mat-option value="">Tous</mat-option>
-      @for (project of projects(); track project.id) {
-        <mat-option [value]="project.id">{{ project.name }}</mat-option>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>checklist</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Tâches &amp; Kanban</h1>
+      <p class="page-subtitle">Suivi visuel et glisser-déposer des tâches</p>
+    </div>
+    <div class="page-actions">
+      @if (isAdmin()) {
+        <button mat-flat-button color="primary" (click)="openCreate()" matTooltip="Ajouter une tâche">
+          <mat-icon>add</mat-icon>
+          Nouvelle tâche
+        </button>
       }
-    </mat-select>
-  </mat-form-field>
-  <button mat-flat-button color="primary" (click)="load()">
-    <mat-icon>search</mat-icon>
-    Rechercher
-  </button>
-  @if (isAdmin()) {
-    <button mat-flat-button color="accent" (click)="openCreate()" matTooltip="Ajouter une tâche">
-      <mat-icon>add</mat-icon>
-      Nouvelle tâche
-    </button>
-  }
-</div>
-
-@if (loading()) {
-  <div class="spinner"><mat-spinner diameter="40" /></div>
-} @else {
-  <div class="board">
-    @for (column of columns; track column.status) {
-      <div class="column">
-        <mat-card class="column-card">
-          <mat-card-header>
-            <mat-icon matCardAvatar>{{ column.icon }}</mat-icon>
-            <mat-card-title>{{ column.label }}</mat-card-title>
-            <mat-card-subtitle>{{ tasksByStatus()[column.status]?.length ?? 0 }} tâche(s)</mat-card-subtitle>
-          </mat-card-header>
-          <mat-card-content>
-            <div
-              cdkDropList
-              [id]="column.status"
-              [cdkDropListData]="tasksByStatus()[column.status] ?? []"
-              [cdkDropListConnectedTo]="connectedColumnIds()"
-              class="drop-list"
-              (cdkDropListDropped)="drop($event)"
-            >
-              @for (task of tasksByStatus()[column.status] ?? []; track task.id) {
-                <div class="task-card" cdkDrag>
-                  <div class="task-header">
-                    <b>{{ task.name }}</b>
-                    <mat-chip class="priority-chip" [color]="priorityColors[task.priority]" selected>
-                      {{ priorityLabels[task.priority] }}
-                    </mat-chip>
-                  </div>
-                  <div class="task-meta">
-                    <span matTooltip="Projet">{{ task.projectName || '—' }}</span>
-                    <span matTooltip="Assigné">
-                      @if (task.assigneeName) {
-                        Assignée à : {{ task.assigneeName }}
-                      } @else {
-                        Non assignée
-                      }
-                    </span>
-                  </div>
-                  @if (task.dueDate) {
-                    <div class="task-meta">
-                      <span matTooltip="Échéance">Échéance : {{ task.dueDate }}</span>
-                      @if (task.estimatedHours) {
-                        <span matTooltip="Heures estimées">{{ task.estimatedHours }} h estimées</span>
-                      }
-                    </div>
-                  }
-                  @if (isAdmin()) {
-                    <div class="task-actions">
-                      <button mat-icon-button matTooltip="Modifier" (click)="openEdit(task)">
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                      <button mat-icon-button matTooltip="Supprimer" (click)="delete(task)">
-                        <mat-icon color="warn">delete</mat-icon>
-                      </button>
-                    </div>
-                  }
-                </div>
-              } @empty {
-                <p class="empty">Aucune tâche</p>
-              }
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
-    }
+    </div>
   </div>
-}
+
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="search">
+          <mat-label>Rechercher</mat-label>
+          <mat-icon matIconPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom de la tâche" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter">
+          <mat-label>Projet</mat-label>
+          <mat-select [(ngModel)]="projectFilter" (selectionChange)="load()">
+            <mat-option value="">Tous</mat-option>
+            @for (project of projects(); track project.id) {
+              <mat-option [value]="project.id">{{ project.name }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <button mat-stroked-button (click)="load()">
+          <mat-icon>search</mat-icon>
+          Rechercher
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
+      } @else {
+        <div class="board">
+          @for (column of columns; track column.status) {
+            <div class="column">
+              <div class="column-header">
+                <span class="column-dot" [class]="'dot-' + column.status.toLowerCase()"></span>
+                <span class="column-title">{{ column.label }}</span>
+                <span class="column-count">{{ tasksByStatus()[column.status]?.length ?? 0 }}</span>
+              </div>
+              <div
+                cdkDropList
+                [id]="column.status"
+                [cdkDropListData]="tasksByStatus()[column.status] ?? []"
+                [cdkDropListConnectedTo]="connectedColumnIds()"
+                class="drop-list"
+                (cdkDropListDropped)="drop($event)"
+              >
+                @for (task of tasksByStatus()[column.status] ?? []; track task.id) {
+                  <div class="task-card" cdkDrag [class.overdue]="isOverdue(task)">
+                    <div class="task-card-top">
+                      <span class="priority-edge" [class]="'edge-' + task.priority.toLowerCase()"></span>
+                      <div class="task-title" [matTooltip]="task.name">{{ task.name }}</div>
+                      <span class="chip-status priority-badge" [class]="priorityChipClass(task.priority)">
+                        {{ priorityLabels[task.priority] }}
+                      </span>
+                    </div>
+                    <div class="task-meta">
+                      <span class="meta-item">
+                        <mat-icon>folder</mat-icon>
+                        {{ task.projectName || '—' }}
+                      </span>
+                    </div>
+                    @if (task.description) {
+                      <div class="task-desc">{{ task.description }}</div>
+                    }
+                    <div class="task-foot">
+                      <span class="meta-item">
+                        <span class="avatar avatar-xs">{{ task.assigneeName ? initials(task.assigneeName) : '?' }}</span>
+                        {{ task.assigneeName ?? 'Non assignée' }}
+                      </span>
+                      <span class="meta-item" [class.late]="isOverdue(task)" [matTooltip]="isOverdue(task) ? 'Échéance dépassée' : 'Échéance'">
+                        <mat-icon>{{ isOverdue(task) ? 'error' : 'event' }}</mat-icon>
+                        {{ task.dueDate | date: 'dd/MM' }}
+                        @if (task.estimatedHours) {
+                          · {{ task.estimatedHours }} h
+                        }
+                      </span>
+                      @if (isAdmin()) {
+                        <span class="task-actions">
+                          <button mat-icon-button matTooltip="Modifier" (click)="openEdit(task)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button matTooltip="Supprimer" (click)="delete(task)">
+                            <mat-icon color="warn">delete</mat-icon>
+                          </button>
+                        </span>
+                      }
+                    </div>
+                  </div>
+                } @empty {
+                  <div class="empty">Aucune tâche</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

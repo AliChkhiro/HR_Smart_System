@@ -1,41 +1,10 @@
-mat-card {
-  margin: 16px;
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-left: auto;
-  flex-wrap: wrap;
-}
-
-.filter-field {
-  width: 160px;
-  margin-bottom: -1.25em;
-}
-
 .spinner {
-  margin: 32px auto;
-}
-
-.leaves-table {
-  width: 100%;
-  margin-top: 12px;
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
 }
 
 .row-actions {
   display: flex;
-  gap: 4px;
   justify-content: flex-end;
-}
-
-.empty {
-  text-align: center;
-  color: var(--mat-card-subtitle-text-color, rgba(0, 0, 0, 0.54));
-  padding: 24px;
-}
-
-small {
-  color: var(--mat-card-subtitle-text-color, rgba(0, 0, 0, 0.54));
 }

@@ -1,30 +1,48 @@
-<mat-card>
-  <mat-card-header>
-    <mat-icon matCardAvatar>notifications</mat-icon>
-    <mat-card-title>Notifications</mat-card-title>
-    <mat-card-subtitle>Alertes récentes</mat-card-subtitle>
-    <button mat-flat-button class="mark-all" (click)="markAllRead()">
-      <mat-icon>done_all</mat-icon>
-      Tout marquer lu
-    </button>
-  </mat-card-header>
-  <mat-card-content>
-    @if (loading()) {
-      <mat-spinner class="spinner"></mat-spinner>
-    }
-    @if (!loading()) {
-      <mat-list>
-        @for (notification of notifications(); track notification.id) {
-          <mat-list-item [class.unread]="!notification.read" (click)="markRead(notification)">
-            <mat-icon matListItemIcon>{{ typeIcons[notification.type] }}</mat-icon>
-            <div matListItemTitle>{{ notification.message }}</div>
-            <div matListItemMeta>{{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}</div>
-          </mat-list-item>
-        }
-      </mat-list>
-      @if (notifications().length === 0) {
-        <p class="empty">Aucune notification.</p>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>notifications</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Notifications</h1>
+      <p class="page-subtitle">Alertes et activités récentes</p>
+    </div>
+    <div class="page-actions">
+      <button mat-stroked-button (click)="markAllRead()">
+        <mat-icon>done_all</mat-icon>
+        Tout marquer lu
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="content-card">
+    <mat-card-content>
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
       }
-    }
-  </mat-card-content>
-</mat-card>
+      @if (!loading()) {
+        @if (notifications().length > 0) {
+          <div class="notif-list">
+            @for (notification of notifications(); track notification.id) {
+              <button
+                type="button"
+                class="notif-row"
+                [class.unread]="!notification.read"
+                (click)="markRead(notification)"
+              >
+                <span class="notif-ico"><mat-icon>{{ typeIcons[notification.type] }}</mat-icon></span>
+                <span class="notif-body">
+                  <span class="notif-msg">{{ notification.message }}</span>
+                  <span class="notif-date">{{ notification.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                </span>
+                @if (!notification.read) {
+                  <span class="unread-dot"></span>
+                }
+              </button>
+            }
+          </div>
+        } @else {
+          <p class="empty">Aucune notification.</p>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

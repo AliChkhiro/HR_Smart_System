@@ -52,6 +52,23 @@ export class Users {
   protected readonly loading = signal(false);
   protected search = '';
 
+  protected initials(user: UserDto): string {
+    return (user.firstName.charAt(0) + user.lastName.charAt(0)).toUpperCase();
+  }
+
+  protected roleChipClass(role: UserRole): string {
+    switch (role) {
+      case 'ADMIN':
+        return 'chip-violet';
+      case 'RH':
+        return 'chip-cyan';
+      case 'CHEF_PROJET':
+        return 'chip-blue';
+      default:
+        return 'chip-gray';
+    }
+  }
+
   constructor() {
     this.load();
   }

@@ -1,87 +1,105 @@
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>Projets</mat-card-title>
-    <mat-card-subtitle>Portefeuille de projets et affectation d'équipe — Sprint 2</mat-card-subtitle>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="toolbar">
-      <mat-form-field appearance="outline" class="search">
-        <mat-label>Rechercher</mat-label>
-        <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom du projet" />
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter">
-        <mat-label>Statut</mat-label>
-        <mat-select [(ngModel)]="statusFilter" (selectionChange)="load()">
-          <mat-option value="">Tous</mat-option>
-          @for (status of statuses; track status) {
-            <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button color="primary" (click)="load()">
-        <mat-icon>search</mat-icon>
-        Rechercher
-      </button>
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>folder</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Projets</h1>
+      <p class="page-subtitle">Portefeuille de projets et affectation d'équipe</p>
+    </div>
+    <div class="page-actions">
       @if (isAdmin()) {
-        <button mat-flat-button color="accent" (click)="openCreate()" matTooltip="Ajouter un projet">
+        <button mat-flat-button color="primary" (click)="openCreate()" matTooltip="Ajouter un projet">
           <mat-icon>add</mat-icon>
-          Nouveau
+          Nouveau projet
         </button>
       }
     </div>
+  </div>
 
-    @if (loading()) {
-      <div class="spinner"><mat-spinner diameter="40" /></div>
-    } @else {
-      <table mat-table [dataSource]="projects()" class="mat-elevation-z2">
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>Projet</th>
-          <td mat-cell *matCellDef="let row"><b>{{ row.name }}</b></td>
-        </ng-container>
-        <ng-container matColumnDef="dates">
-          <th mat-header-cell *matHeaderCellDef>Période</th>
-          <td mat-cell *matCellDef="let row">
-            {{ row.startDate || '…' }} → {{ row.endDate || '…' }}
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="status">
-          <th mat-header-cell *matHeaderCellDef>Statut</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-chip [color]="row.status === 'COMPLETED' ? 'primary' : row.status === 'CANCELLED' ? 'warn' : 'accent'"
-                      selected>
-              {{ statusLabels[row.status] }}
-            </mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="priority">
-          <th mat-header-cell *matHeaderCellDef>Priorité</th>
-          <td mat-cell *matCellDef="let row">
-            <mat-chip>{{ priorityLabels[row.priority] }}</mat-chip>
-          </td>
-        </ng-container>
-        <ng-container matColumnDef="memberCount">
-          <th mat-header-cell *matHeaderCellDef>Équipe</th>
-          <td mat-cell *matCellDef="let row">{{ row.memberCount }} membre(s)</td>
-        </ng-container>
-        <ng-container matColumnDef="actions">
-          <th mat-header-cell *matHeaderCellDef>Actions</th>
-          <td mat-cell *matCellDef="let row">
-            @if (isAdmin()) {
-              <button mat-icon-button matTooltip="Équipe" (click)="openMembers(row)">
-                <mat-icon>group</mat-icon>
-              </button>
-              <button mat-icon-button matTooltip="Modifier" (click)="openEdit(row)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button matTooltip="Supprimer" (click)="delete(row)">
-                <mat-icon color="warn">delete</mat-icon>
-              </button>
+  <mat-card class="content-card">
+    <mat-card-content>
+      <div class="toolbar">
+        <mat-form-field appearance="outline" class="search">
+          <mat-label>Rechercher</mat-label>
+          <mat-icon matIconPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="search" (keyup.enter)="load()" placeholder="Nom du projet" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter">
+          <mat-label>Statut</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="load()">
+            <mat-option value="">Tous</mat-option>
+            @for (status of statuses; track status) {
+              <mat-option [value]="status">{{ statusLabels[status] }}</mat-option>
             }
-          </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
-    }
-  </mat-card-content>
-</mat-card>
+          </mat-select>
+        </mat-form-field>
+        <button mat-stroked-button (click)="load()">
+          <mat-icon>search</mat-icon>
+          Rechercher
+        </button>
+      </div>
+
+      @if (loading()) {
+        <div class="spinner"><mat-spinner diameter="40" /></div>
+      } @else {
+        <div class="table-wrap">
+          <table mat-table [dataSource]="projects()">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef>Projet</th>
+              <td mat-cell *matCellDef="let row">
+                <div class="person-cell">
+                  <div class="avatar project-avatar">{{ initials(row) }}</div>
+                  <div>
+                    <div class="person-name">{{ row.name }}</div>
+                    <div class="person-sub">{{ row.description || '—' }}</div>
+                  </div>
+                </div>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="dates">
+              <th mat-header-cell *matHeaderCellDef>Période</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="muted">{{ row.startDate || '…' }} → {{ row.endDate || '…' }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="status">
+              <th mat-header-cell *matHeaderCellDef>Statut</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip-status" [class]="statusChipClass(row.status)">{{ statusLabels[row.status] }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="priority">
+              <th mat-header-cell *matHeaderCellDef>Priorité</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip-status" [class]="priorityChipClass(row.priority)">{{ priorityLabels[row.priority] }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="memberCount">
+              <th mat-header-cell *matHeaderCellDef>Équipe</th>
+              <td mat-cell *matCellDef="let row">
+                <span class="chip-status chip-blue">{{ row.memberCount }}</span>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>Actions</th>
+              <td mat-cell *matCellDef="let row">
+                @if (isAdmin()) {
+                  <button mat-icon-button matTooltip="Équipe" (click)="openMembers(row)">
+                    <mat-icon>group</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Modifier" (click)="openEdit(row)">
+                    <mat-icon>edit</mat-icon>
+                  </button>
+                  <button mat-icon-button matTooltip="Supprimer" (click)="delete(row)">
+                    <mat-icon color="warn">delete</mat-icon>
+                  </button>
+                }
+              </td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
