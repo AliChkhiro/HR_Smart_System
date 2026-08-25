@@ -43,6 +43,7 @@ export class EmployeeDialogComponent {
   protected readonly isEdit = this.data.employee !== null;
   protected readonly departments = this.data.departments;
   protected readonly users = signal<UserDto[]>([]);
+  protected loadingUsers = true;
   protected submitting = false;
 
   protected readonly form = this.fb.group({
@@ -54,9 +55,15 @@ export class EmployeeDialogComponent {
   });
 
   constructor() {
-    this.usersService.list(undefined, undefined, 0, 100).subscribe({
-      next: page => this.users.set(page.content),
-      error: () => this.users.set([])
+    this.usersService.list(undefined, undefined, 0, 100, !this.isEdit).subscribe({
+      next: page => {
+        this.users.set(page.content);
+        this.loadingUsers = false;
+      },
+      error: () => {
+        this.users.set([]);
+        this.loadingUsers = false;
+      }
     });
   }
 

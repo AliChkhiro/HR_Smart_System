@@ -29,12 +29,13 @@ public class UserController {
     private final UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH')")
     public Page<UserResponse> list(@RequestParam(required = false) String search,
                                    @RequestParam(required = false) UserRole role,
+                                   @RequestParam(defaultValue = "false") boolean unassigned,
                                    @RequestParam(defaultValue = "0") int page,
                                    @RequestParam(defaultValue = "20") int size) {
-        return userService.list(search, role, PageRequest.of(page, Math.min(size, 100)));
+        return userService.list(search, role, unassigned, PageRequest.of(page, Math.min(size, 100)));
     }
 
     @PostMapping

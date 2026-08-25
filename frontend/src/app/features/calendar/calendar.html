@@ -30,8 +30,21 @@
             [class.outside]="!day.inMonth"
             [class.today]="day.isToday"
             [class.has-tasks]="day.tasks.length > 0"
+            [class.holiday]="day.holidays.length > 0"
           >
             <span class="day-number">{{ day.date.getDate() }}</span>
+            <div class="day-holidays">
+              @for (holiday of day.holidays; track holiday.name) {
+                <div
+                  class="holiday-badge"
+                  [class.religious]="holiday.type === 'RELIGIOUS'"
+                  [matTooltip]="holiday.name + (holiday.type === 'RELIGIOUS' ? ' (férié religieux — date approximative)' : ' (jour férié)')"
+                >
+                  <mat-icon>celebration</mat-icon>
+                  <span class="holiday-name">{{ holiday.name }}</span>
+                </div>
+              }
+            </div>
             <div class="day-tasks">
               @for (task of day.tasks; track task.id) {
                 <div
@@ -60,6 +73,12 @@
             </div>
           </div>
         }
+      </div>
+
+      <div class="calendar-legend">
+        <span class="legend-item"><mat-icon class="legend-ico national">celebration</mat-icon> Jour férié national</span>
+        <span class="legend-item"><mat-icon class="legend-ico religious">celebration</mat-icon> Fête religieuse (date approximative)</span>
+        <span class="legend-item legend-dot today"></span> Aujourd'hui
       </div>
     </mat-card-content>
   </mat-card>

@@ -29,8 +29,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     @Transactional(readOnly = true)
-    public Page<UserResponse> list(String search, UserRole role, Pageable pageable) {
-        return userRepository.findAll(UserSpecifications.activeAndFiltered(search, role), pageable)
+    public Page<UserResponse> list(String search, UserRole role, boolean unassigned, Pageable pageable) {
+        return userRepository.findAll(UserSpecifications.activeAndFiltered(search, role, unassigned), pageable)
                 .map(userMapper::toResponse);
     }
 

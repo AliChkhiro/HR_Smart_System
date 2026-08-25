@@ -7,13 +7,16 @@ import { Page, UserCreateRequest, UserDto, UserUpdateRequest } from '../models/u
 export class UsersService {
   private readonly http = inject(HttpClient);
 
-  list(search?: string, role?: string, page = 0, size = 100) {
+  list(search?: string, role?: string, page = 0, size = 100, unassigned?: boolean) {
     const params: Record<string, string> = { page: String(page), size: String(size) };
     if (search) {
       params['search'] = search;
     }
     if (role) {
       params['role'] = role;
+    }
+    if (unassigned) {
+      params['unassigned'] = 'true';
     }
     return this.http.get<Page<UserDto>>(`${environment.apiUrl}/users`, { params });
   }

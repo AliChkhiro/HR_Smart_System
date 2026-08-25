@@ -14,6 +14,9 @@
         @if (form.controls.userId.hasError('required')) {
           <mat-error>Le compte est obligatoire</mat-error>
         }
+        @if (!loadingUsers && users().length === 0) {
+          <mat-hint>Aucun compte disponible : tous les comptes sont déjà rattachés à un employé. Créez d'abord un nouvel utilisateur.</mat-hint>
+        }
       </mat-form-field>
     }
     <mat-form-field appearance="outline" class="full-width">

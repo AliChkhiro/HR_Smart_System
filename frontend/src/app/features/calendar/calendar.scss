@@ -57,6 +57,106 @@
   &.has-tasks {
     border-color: #dbeafe;
   }
+
+  &.holiday {
+    background: #fff7ed;
+
+    .day-number {
+      color: #c2410c;
+      font-weight: 700;
+    }
+  }
+}
+
+.day-holidays {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.holiday-badge {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  cursor: default;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: #ffedd5;
+  color: #9a3412;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+    color: #ea580c;
+  }
+
+  &.religious {
+    background: #fef3c7;
+    color: #92400e;
+
+    mat-icon {
+      color: #d97706;
+    }
+  }
+
+  &:hover {
+    background: #fed7aa;
+  }
+
+  &.religious:hover {
+    background: #fde68a;
+  }
+}
+
+.holiday-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.calendar-legend {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #eef1f6;
+  font-size: 12px;
+  color: #64748b;
+
+  .legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .legend-ico {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+
+    &.national {
+      color: #ea580c;
+    }
+
+    &.religious {
+      color: #d97706;
+    }
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #4f46e5;
+  }
 }
 
 .day-number {

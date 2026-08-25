@@ -6,13 +6,16 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TasksService } from '../../core/services/tasks.service';
+import { HolidaysService } from '../../core/services/holidays.service';
 import { TaskDto } from '../../core/models/task.model';
+import { HolidayDto } from '../../core/models/holiday.model';
 
 interface CalendarDay {
   date: Date;
   inMonth: boolean;
   isToday: boolean;
   tasks: TaskDto[];
+  holidays: HolidayDto[];
 }
 
 @Component({
@@ -29,10 +32,12 @@ interface CalendarDay {
 })
 export class Calendar {
   private readonly tasksService = inject(TasksService);
+  private readonly holidaysService = inject(HolidaysService);
   private readonly snackBar = inject(MatSnackBar);
 
   protected readonly month = signal(new Date());
   protected readonly tasks = signal<TaskDto[]>([]);
+  protected readonly holidays = signal<HolidayDto[]>([]);
 
   protected readonly monthLabel = computed(() =>
     this.month().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
@@ -53,6 +58,11 @@ export class Calendar {
         byDate.set(key, [...(byDate.get(key) ?? []), task]);
       }
     }
+    const holidayByDate = new Map<string, HolidayDto[]>();
+    for (const holiday of this.holidays()) {
+      const key = holiday.date;
+      holidayByDate.set(key, [...(holidayByDate.get(key) ?? []), holiday]);
+    }
     const result: CalendarDay[] = [];
     for (let i = 0; i < 42; i++) {
       const date = new Date(gridStart);
@@ -62,7 +72,8 @@ export class Calendar {
         date,
         inMonth: date.getMonth() === this.month().getMonth(),
         isToday: date.toDateString() === today.toDateString(),
-        tasks: byDate.get(key) ?? []
+        tasks: byDate.get(key) ?? [],
+        holidays: holidayByDate.get(key) ?? []
       });
     }
     return result;
@@ -113,5 +124,17 @@ export class Calendar {
         next: page => this.tasks.set(page.content),
         error: () => this.snackBar.open('Impossible de charger le calendrier', 'Fermer', { duration: 4000 })
       });
+    const years = new Set<number>([gridStart.getFullYear(), gridEnd.getFullYear()]);
+    years.forEach(y =>
+      this.holidaysService.list(y).subscribe({
+        next: holidays => {
+          const merged = new Map(this.holidays().map(h => [h.date, h]));
+          for (const h of holidays) {
+            merged.set(h.date, h);
+          }
+          this.holidays.set([...merged.values()]);
+        }
+      })
+    );
   }
 }
