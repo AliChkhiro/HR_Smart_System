@@ -25,6 +25,12 @@ services:
       DB_PASSWORD: apprh
       JWT_SECRET: ${JWT_SECRET:-dev-secret-a-changer-avant-production}
       IA_SERVICE_URL: http://ia-service:8000
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@apprh.local}
     ports:
       - "8081:8080"
     depends_on:

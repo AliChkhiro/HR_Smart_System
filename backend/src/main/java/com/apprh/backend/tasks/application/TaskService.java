@@ -1,6 +1,7 @@
 package com.apprh.backend.tasks.application;
 
 import com.apprh.backend.common.exception.ApiException;
+import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
 import com.apprh.backend.notifications.application.NotificationService;
@@ -40,6 +41,7 @@ public class TaskService {
     private final EmployeeRepository employeeRepository;
     private final SkillRepository skillRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public Page<TaskResponse> list(String search, Long projectId, Long assigneeId, TaskStatus status,
@@ -187,6 +189,9 @@ public class TaskService {
     private void notifyAssignee(Task task, String message) {
         if (task.getAssignee() != null) {
             notificationService.create(task.getAssignee().getUser().getId(), NotificationType.TASK_ASSIGNED, message);
+            emailService.send(task.getAssignee().getUser().getEmail(),
+                    "Nouvelle tâche assignée",
+                    message + ". Consultez vos tâches sur la plateforme AppRH.");
         }
     }
 }

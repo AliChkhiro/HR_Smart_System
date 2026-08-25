@@ -1,6 +1,7 @@
 package com.apprh.backend.leaves.application;
 
 import com.apprh.backend.common.exception.ApiException;
+import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
 import com.apprh.backend.leaves.api.LeaveRequestRecord;
@@ -41,6 +42,7 @@ public class LeaveService {
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
     public Page<LeaveResponse> list(Long currentUserId, boolean manager, Long employeeId, LeaveStatus status,
@@ -79,9 +81,10 @@ public class LeaveService {
                 .reason(trimToNull(request.reason()))
                 .build();
         LeaveRequest saved = leaveRequestRepository.save(leave);
-        notifyManagers("%s %s a demandé des congés (%s) du %s au %s".formatted(
+        String requestMessage = "%s %s a demandé des congés (%s) du %s au %s".formatted(
                 employee.getUser().getFirstName(), employee.getUser().getLastName(),
-                request.type(), request.startDate().format(DATE_FORMAT), request.endDate().format(DATE_FORMAT)));
+                request.type(), request.startDate().format(DATE_FORMAT), request.endDate().format(DATE_FORMAT));
+        notifyManagers(requestMessage);
         return toResponse(saved);
     }
 
@@ -96,17 +99,34 @@ public class LeaveService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "LEAVE_INVALID_REVIEW",
                     "La décision doit être APPROVED ou REJECTED");
         }
+        if (request.status() == LeaveStatus.REJECTED && trimToNull(request.comment()) == null) {
+            throw new ApiException(HttpStatus.BAD_REQUEST, "LEAVE_REJECTION_REASON_REQUIRED",
+                    "Le motif du rejet est obligatoire : il sera communiqué à l'employé par email");
+        }
         Employee reviewer = employeeOf(currentUserId);
         leave.setStatus(request.status());
         leave.setReviewer(reviewer);
         leave.setReviewDate(Instant.now());
         leave.setReviewComment(trimToNull(request.comment()));
         LeaveRequest saved = leaveRequestRepository.save(leave);
-        String decision = request.status() == LeaveStatus.APPROVED ? "approuvée" : "rejetée";
-        String comment = leave.getReviewComment() == null ? "" : " : " + leave.getReviewComment();
+        boolean approved = request.status() == LeaveStatus.APPROVED;
+        String decision = approved ? "approuvée" : "rejetée";
+        String period = "du %s au %s".formatted(
+                leave.getStartDate().format(DATE_FORMAT), leave.getEndDate().format(DATE_FORMAT));
+        String reviewerName = reviewer.getUser().getFirstName() + " " + reviewer.getUser().getLastName();
+        String reviewMessage = "Votre demande de congés (%s) %s a été %s%s".formatted(
+                leave.getType(), period, decision,
+                approved || leave.getReviewComment() == null ? "" : " : " + leave.getReviewComment());
         notificationService.create(leave.getEmployee().getUser().getId(), NotificationType.LEAVE_REVIEW,
-                "Votre demande de congés (%s) a été %s%s".formatted(
-                        leave.getType(), decision, comment));
+                reviewMessage);
+        String emailBody = approved
+                ? "Bonjour %s,\nVotre demande de congés (%s) %s a été APPROUVÉE par %s.".formatted(
+                        leave.getEmployee().getUser().getFirstName(), leave.getType(), period, reviewerName)
+                : "Bonjour %s,\nVotre demande de congés (%s) %s a été REJETÉE par %s.\nMotif du rejet : %s".formatted(
+                        leave.getEmployee().getUser().getFirstName(), leave.getType(), period, reviewerName,
+                        leave.getReviewComment());
+        emailService.send(leave.getEmployee().getUser().getEmail(),
+                "Demande de congés " + decision, emailBody);
         return toResponse(saved);
     }
 
@@ -163,7 +183,12 @@ public class LeaveService {
 
     private void notifyManagers(String message) {
         userRepository.findByRoleInAndDeletedAtIsNull(MANAGER_ROLES)
-                .forEach(user -> notificationService.create(user.getId(), NotificationType.LEAVE_REQUEST, message));
+                .forEach(user -> {
+                    notificationService.create(user.getId(), NotificationType.LEAVE_REQUEST, message);
+                    emailService.send(user.getEmail(),
+                            "Nouvelle demande de congés",
+                            message + ". Merci de la traiter depuis la plateforme AppRH.");
+                });
     }
 
     private LeaveResponse toResponse(LeaveRequest leave) {

@@ -4,7 +4,6 @@ import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -15,6 +14,15 @@ export interface LeaveDialogData {
   leave: LeaveDto | null;
 }
 
+function isoDate(value: unknown): string {
+  if (!(value instanceof Date)) {
+    return String(value ?? '');
+  }
+  const month = String(value.getMonth() + 1).padStart(2, '0');
+  const day = String(value.getDate()).padStart(2, '0');
+  return `${value.getFullYear()}-${month}-${day}`;
+}
+
 @Component({
   selector: 'app-leave-dialog',
   imports: [
@@ -23,7 +31,6 @@ export interface LeaveDialogData {
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
-    MatDatepickerModule,
     MatButtonModule,
     MatProgressSpinnerModule
   ],
@@ -38,6 +45,14 @@ export class LeaveDialogComponent {
 
   protected readonly isEdit = false;
   protected readonly types: LeaveType[] = ['ANNUAL', 'SICK', 'MATERNITY', 'PATERNITY', 'UNPAID', 'OTHER'];
+  protected readonly typeLabels: Record<string, string> = {
+    ANNUAL: 'Annuel',
+    SICK: 'Maladie',
+    MATERNITY: 'Maternité',
+    PATERNITY: 'Paternité',
+    UNPAID: 'Sans solde',
+    OTHER: 'Autre'
+  };
   protected submitting = false;
 
   protected readonly form = this.fb.group({
@@ -55,8 +70,8 @@ export class LeaveDialogComponent {
     const { type, startDate, endDate, reason } = this.form.getRawValue();
     this.leavesService.create({
       type: type as LeaveType,
-      startDate: startDate!,
-      endDate: endDate!,
+      startDate: isoDate(startDate),
+      endDate: isoDate(endDate),
       reason: reason || undefined
     }).subscribe({
       next: () => {
