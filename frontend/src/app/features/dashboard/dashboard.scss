@@ -2,6 +2,22 @@
   margin: 80px auto;
 }
 
+// ============ Clickable cards ============
+.clickable {
+  cursor: pointer;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+  }
+}
+
 // ============ KPI cards ============
 .kpi-grid {
   display: grid;
@@ -11,12 +27,7 @@
 }
 
 .kpi {
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px -14px rgba(15, 23, 42, 0.3);
-  }
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   .mat-mdc-card-content {
     display: flex;

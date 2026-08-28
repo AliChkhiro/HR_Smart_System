@@ -38,7 +38,6 @@ export class Register {
 
   protected submitting = false;
   protected errorMessage: string | null = null;
-  protected successMessage: string | null = null;
 
   submit(): void {
     if (this.form.invalid) {
@@ -46,7 +45,6 @@ export class Register {
     }
     this.submitting = true;
     this.errorMessage = null;
-    this.successMessage = null;
     const { firstName, lastName, email, password } = this.form.getRawValue();
     this.authService.register({
       firstName: firstName!,
@@ -55,9 +53,9 @@ export class Register {
       password: password!
     }).subscribe({
       next: () => {
-        this.submitting = false;
-        this.successMessage = 'Compte créé avec succès. Vous pouvez maintenant vous connecter.';
-        this.form.reset();
+        this.router.navigate(['/login'], {
+          queryParams: { registered: 'true' }
+        });
       },
       error: (err) => {
         this.submitting = false;

@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -40,6 +41,7 @@ export class Projects {
   private readonly projectsService = inject(ProjectsService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isAdmin = inject(AuthService).isAdmin;
   protected readonly displayedColumns = ['name', 'dates', 'status', 'priority', 'memberCount', 'actions'];
@@ -98,6 +100,10 @@ export class Projects {
   }
 
   constructor() {
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam && this.statuses.includes(statusParam as ProjectStatus)) {
+      this.statusFilter = statusParam;
+    }
     this.load();
   }
 

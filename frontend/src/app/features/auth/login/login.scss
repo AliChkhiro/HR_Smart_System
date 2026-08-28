@@ -164,6 +164,19 @@
   font-size: 13px;
 }
 
+.success-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+  font-size: 13px;
+}
+
 .submit-btn {
   margin-top: 18px;
   height: 46px;

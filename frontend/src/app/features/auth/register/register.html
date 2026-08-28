@@ -92,13 +92,6 @@
           </div>
         }
 
-        @if (successMessage) {
-          <div class="success-box">
-            <mat-icon>check_circle</mat-icon>
-            <span>{{ successMessage }}</span>
-          </div>
-        }
-
         <button mat-flat-button color="primary" type="submit" class="full-width submit-btn"
                 [disabled]="form.invalid || submitting">
           @if (submitting) {

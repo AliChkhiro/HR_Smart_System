@@ -1,5 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
@@ -15,6 +16,7 @@ import { DashboardStats } from '../../core/models/dashboard.model';
   selector: 'app-dashboard',
   imports: [
     DatePipe,
+    RouterLink,
     MatCardModule,
     MatIconModule,
     MatListModule,
@@ -28,6 +30,7 @@ import { DashboardStats } from '../../core/models/dashboard.model';
 export class Dashboard {
   private readonly dashboardService = inject(DashboardService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   protected readonly isManager = inject(AuthService).isManager;
   protected readonly stats = signal<DashboardStats | null>(null);
@@ -81,5 +84,16 @@ export class Dashboard {
       return 0;
     }
     return Math.round(((stats.tasksByStatus['DONE'] ?? 0) * 100) / total);
+  }
+
+  protected go(route: string, params?: Record<string, unknown>): void {
+    this.router.navigate([route], { queryParams: params });
+  }
+
+  protected onCardKeydown(event: KeyboardEvent, route: string, params?: Record<string, unknown>): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.go(route, params);
+    }
   }
 }

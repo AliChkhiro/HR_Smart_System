@@ -29,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -87,7 +88,9 @@ public class TaskService {
             task.setAssignee(findAssignee(request.assigneeId()));
         }
         if (request.skillIds() != null) {
-            task.setSkills(findSkills(request.skillIds()));
+            List<Skill> newSkills = findSkills(request.skillIds());
+            task.getSkills().clear();
+            task.getSkills().addAll(newSkills);
         }
         if (request.status() != null) {
             task.setStatus(request.status());
@@ -156,7 +159,7 @@ public class TaskService {
 
     private List<Skill> findSkills(List<Long> skillIds) {
         if (skillIds == null || skillIds.isEmpty()) {
-            return List.of();
+            return new ArrayList<>();
         }
         List<Skill> skills = skillRepository.findAllById(skillIds).stream()
                 .filter(skill -> skill.getDeletedAt() == null)
@@ -165,7 +168,7 @@ public class TaskService {
             throw new ApiException(HttpStatus.BAD_REQUEST, "SKILL_NOT_FOUND",
                     "Une ou plusieurs compétences sont introuvables");
         }
-        return skills;
+        return new ArrayList<>(skills);
     }
 
     private void validateDates(LocalDate startDate, LocalDate dueDate) {
