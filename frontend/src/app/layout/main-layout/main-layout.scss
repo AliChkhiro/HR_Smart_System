@@ -1,20 +1,29 @@
-.layout {
-  height: 100vh;
+.app-layout {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 // ============ Sidebar ============
 .sidebar {
-  width: 252px;
+  width: 230px;
   background: linear-gradient(180deg, #141b34 0%, #0d1124 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease;
+  flex-shrink: 0;
+}
 
-  ::ng-deep .mat-drawer-inner-container {
-    display: flex;
-    flex-direction: column;
-  }
+// ============ Main wrapper ============
+.main-wrapper {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .brand {
@@ -176,9 +185,9 @@
 }
 
 // ============ Collapsed ============
-.layout.collapsed {
+.app-layout.collapsed {
   .sidebar {
-    width: 76px;
+    width: 70px;
   }
 
   .brand {
@@ -225,11 +234,14 @@
 
 // ============ Topbar ============
 .topbar {
+  display: flex;
+  align-items: center;
   background: #fff;
   border-bottom: 1px solid var(--line);
   padding: 0 24px;
   height: 64px;
   gap: 8px;
+  flex-shrink: 0;
 
   .topbar-title {
     font-size: 17px;
@@ -237,6 +249,9 @@
     color: var(--ink);
     margin-left: 6px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 
@@ -349,4 +364,32 @@
 .content {
   padding: 26px 28px 40px;
   min-height: calc(100vh - 64px);
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+// ============ Responsive ============
+@media (max-width: 900px) {
+  .topbar .topbar-user-info {
+    display: none;
+  }
+
+  .content {
+    padding: 20px 16px 32px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-layout.collapsed .sidebar {
+    width: 56px;
+  }
+
+  .app-layout.collapsed .brand {
+    padding: 20px 10px 18px;
+  }
+
+  .content {
+    padding: 16px 12px 28px;
+  }
 }

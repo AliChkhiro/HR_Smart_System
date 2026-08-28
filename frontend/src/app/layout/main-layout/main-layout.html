@@ -1,5 +1,5 @@
-<mat-sidenav-container class="layout" [class.collapsed]="collapsed()">
-  <mat-sidenav mode="side" opened class="sidebar">
+<div class="app-layout" [class.collapsed]="collapsed()">
+  <aside class="sidebar">
     <div class="brand">
       <div class="brand-logo">
         <mat-icon>workspaces</mat-icon>
@@ -42,10 +42,10 @@
         </div>
       }
     </div>
-  </mat-sidenav>
+  </aside>
 
-  <mat-sidenav-content>
-    <mat-toolbar class="topbar">
+  <div class="main-wrapper">
+    <header class="topbar">
       <button mat-icon-button (click)="toggleSidebar()" matTooltip="Réduire / agrandir le menu">
         <mat-icon>{{ collapsed() ? 'menu_open' : 'menu' }}</mat-icon>
       </button>
@@ -97,10 +97,10 @@
           <span>Déconnexion</span>
         </button>
       </mat-menu>
-    </mat-toolbar>
+    </header>
 
     <main class="content">
       <router-outlet />
     </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+</div>

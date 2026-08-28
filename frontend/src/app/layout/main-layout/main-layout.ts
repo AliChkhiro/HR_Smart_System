@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -30,7 +29,6 @@ interface NavItem {
     DatePipe,
     RouterOutlet,
     RouterLink,
-    MatSidenavModule,
     MatToolbarModule,
     MatListModule,
     MatIconModule,
