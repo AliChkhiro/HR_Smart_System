@@ -122,7 +122,12 @@ export class MainLayout {
 
   protected openNotification(notification: NotificationDto): void {
     if (!notification.read) {
-      this.notificationsService.markRead(notification.id).subscribe(() => this.loadNotifications());
+      this.notificationsService.markRead(notification.id).subscribe(() => {
+        this.loadNotifications();
+        this.router.navigate(['/notifications']);
+      });
+    } else {
+      this.router.navigate(['/notifications']);
     }
   }
 

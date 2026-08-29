@@ -262,6 +262,20 @@
 .bell-button {
   color: var(--ink-soft);
   position: relative;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: var(--brand-start);
+    background: #eef2ff;
+  }
+
+  mat-icon {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover mat-icon {
+    transform: scale(1.1);
+  }
 }
 
 .topbar-user {
@@ -297,68 +311,8 @@
 }
 
 // ============ Notifications menu ============
-.menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink);
-}
-
-.menu-empty {
-  padding: 20px 16px;
-  color: var(--muted);
-  text-align: center;
-  font-size: 13px;
-}
-
-.notif-item {
-  height: auto !important;
-  min-height: 52px;
-  padding: 8px 16px !important;
-
-  .notif-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: var(--panel);
-    color: var(--brand-start);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-
-    &.unread {
-      background: #eef2ff;
-      color: var(--brand-start);
-    }
-  }
-
-  .notif-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.35;
-
-    .notif-msg {
-      font-size: 12.5px;
-      color: var(--ink-soft);
-      white-space: normal;
-    }
-
-    .notif-date {
-      font-size: 11px;
-      color: var(--muted);
-    }
-  }
-}
-
-.menu-link-all {
-  border-top: 1px solid var(--line)-soft;
-  font-size: 13px;
-  color: var(--brand-start);
-}
+// Les styles du panneau de notifications sont définis globalement dans styles.scss
+// (overlay CDK rendu hors du composant).
 
 // ============ Content ============
 .content {
