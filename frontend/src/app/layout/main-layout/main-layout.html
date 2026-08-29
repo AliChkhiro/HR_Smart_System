@@ -91,8 +91,30 @@
           </div>
         </div>
       }
-      <mat-menu #userMenu="matMenu" xPosition="before">
-        <button mat-menu-item (click)="logout()">
+      <mat-menu #userMenu="matMenu" class="user-menu" xPosition="before">
+        @if (user(); as user) {
+          <div class="user-menu-header">
+            <div class="avatar avatar-sm">{{ initials(user) }}</div>
+            <div class="user-menu-identity">
+              <span class="user-menu-name">{{ user.firstName }} {{ user.lastName }}</span>
+              <span class="user-menu-email">{{ user.email }}</span>
+            </div>
+            <span class="user-menu-online">
+              <span class="online-dot"></span>
+              En ligne
+            </span>
+          </div>
+        }
+        <button mat-menu-item class="user-menu-item" [routerLink]="'/profile'">
+          <mat-icon>account_circle</mat-icon>
+          <span>Voir le profil</span>
+        </button>
+        <button mat-menu-item class="user-menu-item" [routerLink]="'/settings'">
+          <mat-icon>settings</mat-icon>
+          <span>Paramètres</span>
+        </button>
+        <div class="user-menu-divider"></div>
+        <button mat-menu-item class="user-menu-item danger" (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Déconnexion</span>
         </button>
