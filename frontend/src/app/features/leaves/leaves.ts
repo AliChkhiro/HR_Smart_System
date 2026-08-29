@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -39,6 +40,7 @@ import { LeaveDialogComponent } from './leave-dialog';
 })
 export class Leaves {
   private readonly leavesService = inject(LeavesService);
+  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
 
@@ -86,6 +88,10 @@ export class Leaves {
   }
 
   constructor() {
+    const param = this.route.snapshot.queryParamMap.get('status') as LeaveStatus | '';
+    if (param && (param === 'PENDING' || param === 'APPROVED' || param === 'REJECTED' || param === 'CANCELLED')) {
+      this.statusFilter = param;
+    }
     this.load();
   }
 
