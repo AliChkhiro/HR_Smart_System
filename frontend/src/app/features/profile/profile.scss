@@ -1,0 +1,121 @@
+.spinner {
+  margin: 80px auto;
+}
+
+.profile-card {
+  max-width: 640px;
+  overflow: hidden;
+}
+
+.profile-tabs {
+  .mat-mdc-tab-body-content {
+    padding: 20px 22px 26px;
+  }
+}
+
+.profile-hero {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 0 20px;
+  border-bottom: 1px solid var(--line-soft);
+  margin-bottom: 20px;
+
+  .profile-avatar {
+    width: 72px;
+    height: 72px;
+    font-size: 26px;
+    border-radius: 50%;
+  }
+
+  .profile-hero-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .profile-name {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.01em;
+    }
+
+    .profile-role {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .chip-status {
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+  }
+}
+
+.profile-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: var(--panel);
+    }
+
+    .field-ico {
+      color: var(--brand-start);
+      background: #eef2ff;
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+
+      .field-label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        font-weight: 600;
+      }
+
+      .field-value {
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--ink);
+      }
+    }
+  }
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+
+  .full-width {
+    width: 100%;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 8px;
+  }
+}
