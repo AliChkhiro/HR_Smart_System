@@ -59,6 +59,14 @@ public class EmployeeService {
         return toResponseWithSkills(employee, employeeSkillRepository.findAllByEmployeeId(id));
     }
 
+    @Transactional(readOnly = true)
+    public EmployeeResponse getByUser(Long userId) {
+        Employee employee = employeeRepository.findByUserIdAndDeletedAtIsNull(userId)
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "EMPLOYEE_NOT_FOUND",
+                        "Aucun profil employé n'est associé à ce compte"));
+        return toResponseWithSkills(employee, employeeSkillRepository.findAllByEmployeeId(employee.getId()));
+    }
+
     @Transactional
     public EmployeeResponse create(EmployeeCreateRequest request) {
         if (employeeRepository.existsByUserIdAndDeletedAtIsNull(request.userId())) {

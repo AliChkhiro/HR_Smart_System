@@ -379,3 +379,107 @@ body {
   padding: 20px 0;
   margin: 0;
 }
+
+// ============ User menu ============
+.user-menu.mat-mdc-menu-panel {
+  min-width: 280px;
+  border-radius: 14px;
+  padding: 6px;
+  box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.28);
+
+  .mat-mdc-menu-item {
+    border-radius: 8px;
+    margin: 2px 0;
+    min-height: 42px;
+
+    .mat-mdc-menu-item-text {
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ink-soft);
+    }
+
+    mat-icon {
+      color: #64748b;
+    }
+
+    &:hover {
+      background: #f1f5f9;
+    }
+  }
+
+  .menu-danger {
+    .mat-mdc-menu-item-text {
+      color: #b91c1c;
+    }
+
+    mat-icon {
+      color: #b91c1c;
+    }
+
+    &:hover {
+      background: #fef2f2;
+    }
+  }
+}
+
+.user-menu-header {
+  padding: 14px 14px 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-menu-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
+  flex-shrink: 0;
+}
+
+.user-menu-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.user-menu-name {
+  font-weight: 700;
+  color: var(--ink);
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu-email {
+  font-size: 12px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu-status {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 14px 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #15803d;
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.18);
+  }
+}

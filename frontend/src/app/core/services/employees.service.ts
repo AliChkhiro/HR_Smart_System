@@ -22,6 +22,10 @@ export class EmployeesService {
     return this.http.get<Page<EmployeeDto>>(`${environment.apiUrl}/employees`, { params });
   }
 
+  me() {
+    return this.http.get<EmployeeDto>(`${environment.apiUrl}/employees/me`);
+  }
+
   create(request: EmployeeCreateRequest) {
     return this.http.post<EmployeeDto>(`${environment.apiUrl}/employees`, request);
   }
