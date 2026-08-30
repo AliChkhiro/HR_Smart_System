@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule, DatePipe } from '@angular/common';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
@@ -37,7 +38,8 @@ interface NavItem {
     MatButtonModule,
     MatMenuModule,
     MatTooltipModule,
-    MatBadgeModule
+    MatBadgeModule,
+    MatDividerModule
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
@@ -53,6 +55,7 @@ export class MainLayout {
 
   protected readonly navItems: NavItem[] = [
     { path: '/dashboard', icon: 'dashboard', label: 'Tableau de bord', section: 'GÉNÉRAL' },
+    { path: '/profile', icon: 'badge', label: 'Mon profil', section: 'GÉNÉRAL' },
     { path: '/projects', icon: 'folder', label: 'Projets', section: 'GÉNÉRAL' },
     { path: '/tasks', icon: 'checklist', label: 'Tâches & Kanban', section: 'GÉNÉRAL' },
     { path: '/calendar', icon: 'calendar_month', label: 'Calendrier', section: 'GÉNÉRAL' },

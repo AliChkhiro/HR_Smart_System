@@ -91,30 +91,57 @@
           </div>
         </div>
       }
-      <mat-menu #userMenu="matMenu" class="user-menu" xPosition="before">
+      <mat-menu #userMenu="matMenu" xPosition="before" class="user-menu">
         @if (user(); as user) {
           <div class="user-menu-header">
-            <div class="avatar avatar-sm">{{ initials(user) }}</div>
-            <div class="user-menu-identity">
+            <div class="user-menu-avatar">{{ initials(user) }}</div>
+            <div class="user-menu-info">
               <span class="user-menu-name">{{ user.firstName }} {{ user.lastName }}</span>
               <span class="user-menu-email">{{ user.email }}</span>
             </div>
-            <span class="user-menu-online">
-              <span class="online-dot"></span>
-              En ligne
-            </span>
           </div>
+          <div class="user-menu-status"><span class="status-dot"></span> En ligne</div>
         }
-        <button mat-menu-item class="user-menu-item" [routerLink]="'/profile'">
-          <mat-icon>account_circle</mat-icon>
+        <a mat-menu-item [routerLink]="'/profile'">
+          <mat-icon>badge</mat-icon>
           <span>Voir le profil</span>
+        </a>
+        <button mat-menu-item [disabled]="true" matTooltip="Bientôt disponible">
+          <mat-icon>edit</mat-icon>
+          <span>Modifier le profil</span>
         </button>
-        <button mat-menu-item class="user-menu-item" [routerLink]="'/settings'">
+        <a mat-menu-item [routerLink]="'/leaves'">
+          <mat-icon>beach_access</mat-icon>
+          <span>Mes demandes</span>
+        </a>
+        <mat-divider></mat-divider>
+        <a mat-menu-item [routerLink]="'/notifications'">
+          <mat-icon>notifications</mat-icon>
+          <span>Notifications</span>
+        </a>
+        <a mat-menu-item [routerLink]="'/settings'">
           <mat-icon>settings</mat-icon>
           <span>Paramètres</span>
+        </a>
+        <mat-divider></mat-divider>
+        <button mat-menu-item [disabled]="true" matTooltip="Bientôt disponible">
+          <mat-icon>palette</mat-icon>
+          <span>Préférences d'affichage</span>
         </button>
-        <div class="user-menu-divider"></div>
-        <button mat-menu-item class="user-menu-item danger" (click)="logout()">
+        <button mat-menu-item [disabled]="true" matTooltip="Bientôt disponible">
+          <mat-icon>language</mat-icon>
+          <span>Changer de langue</span>
+        </button>
+        <button mat-menu-item [disabled]="true" matTooltip="Bientôt disponible">
+          <mat-icon>keyboard</mat-icon>
+          <span>Raccourcis clavier</span>
+        </button>
+        <button mat-menu-item [disabled]="true" matTooltip="Bientôt disponible">
+          <mat-icon>help_center</mat-icon>
+          <span>Centre d'aide</span>
+        </button>
+        <mat-divider></mat-divider>
+        <button mat-menu-item class="menu-danger" (click)="logout()">
           <mat-icon>logout</mat-icon>
           <span>Déconnexion</span>
         </button>

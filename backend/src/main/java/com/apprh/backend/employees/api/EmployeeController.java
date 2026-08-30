@@ -2,12 +2,14 @@ package com.apprh.backend.employees.api;
 
 import com.apprh.backend.employees.application.EmployeeService;
 import com.apprh.backend.employees.domain.EmployeeStatus;
+import com.apprh.backend.common.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -34,6 +36,13 @@ public class EmployeeController {
                                        @RequestParam(defaultValue = "0") int page,
                                        @RequestParam(defaultValue = "20") int size) {
         return employeeService.list(search, departmentId, status, PageRequest.of(page, Math.min(size, 100)));
+    }
+
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public EmployeeResponse me(Authentication authentication) {
+        UserPrincipal principal = (UserPrincipal) authentication.getPrincipal();
+        return employeeService.getByUser(principal.id());
     }
 
     @GetMapping("/{id}")
