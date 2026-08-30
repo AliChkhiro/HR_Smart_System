@@ -203,6 +203,7 @@ export class Profile {
       this.cancelEdit();
     } else {
       this.startEdit();
+
     }
   }
 
