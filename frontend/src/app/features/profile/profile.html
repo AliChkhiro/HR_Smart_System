@@ -1,0 +1,574 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>badge</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Mon profil</h1>
+      <p class="page-subtitle">Votre espace personnel et professionnel</p>
+    </div>
+    <div class="page-actions">
+      <button mat-stroked-button (click)="openLeaves()">
+        <mat-icon>beach_access</mat-icon>
+        Mes demandes
+      </button>
+      @if (!editing()) {
+        <button mat-flat-button color="primary" (click)="toggleEdit()">
+          <mat-icon>edit</mat-icon>
+          Modifier le profil
+        </button>
+      }
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="spinner"><mat-spinner diameter="44" /></div>
+  } @else if (error()) {
+    <mat-card class="content-card error-card">
+      <mat-card-content>
+        <div class="error-state">
+          <mat-icon>cloud_off</mat-icon>
+          <b>Impossible de charger les informations</b>
+          <p>Vérifiez votre connexion puis réessayez.</p>
+          <button mat-flat-button color="primary" (click)="retry()">
+            <mat-icon>refresh</mat-icon>
+            Réessayer
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    @if (user(); as user) {
+      <mat-card class="profile-hero">
+        <mat-card-content>
+          <div class="hero-main">
+            <div class="hero-avatar">{{ initials(user) }}</div>
+            <div class="hero-info">
+              <div class="hero-name-row">
+                <h2 class="hero-name">{{ user.firstName }} {{ user.lastName }}</h2>
+                <span class="chip-status" [class]="roleChipClass(user.role)">{{ roleLabels[user.role] }}</span>
+              </div>
+              <div class="hero-meta">
+                @if (employee(); as employee) {
+                  <span class="hero-meta-item">
+                    <mat-icon>work</mat-icon>
+                    {{ employee.jobTitle }}
+                  </span>
+                  <mat-icon class="meta-sep">chevron_right</mat-icon>
+                  @if (employee.departmentName) {
+                    <span class="hero-meta-item">
+                      <mat-icon>account_balance</mat-icon>
+                      {{ employee.departmentName }}
+                    </span>
+                  }
+                }
+              </div>
+              <div class="hero-status">
+                <span class="status-pill status-online">
+                  <span class="status-dot"></span>
+                  En ligne
+                </span>
+                <span class="hero-email">
+                  <mat-icon>mail</mat-icon>
+                  {{ user.email }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-side">
+            <div class="hero-stat">
+              <span class="hero-stat-value">{{ approvedDays() }}</span>
+              <span class="hero-stat-label">jours de congés utilisés</span>
+            </div>
+            <div class="hero-stat">
+              <span class="hero-stat-value">{{ pendingLeaves().length }}</span>
+              <span class="hero-stat-label">demande(s) en attente</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-tab-group class="profile-tabs" [selectedIndex]="selectedTab()" (selectedIndexChange)="selectedTab.set($event)">
+        <mat-tab label="Vue d'ensemble">
+          <div class="tab-body">
+            <div class="overview-grid">
+              <mat-card class="overview-card">
+                <mat-card-header>
+                  <mat-card-title>Profil</mat-card-title>
+                  <mat-card-subtitle>Informations principales</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <ul class="info-list">
+                    @if (employee(); as employee) {
+                      <li>
+                        <mat-icon>work</mat-icon>
+                        <span class="info-label">Poste</span>
+                        <span class="info-value">{{ employee.jobTitle }}</span>
+                      </li>
+                      @if (employee.departmentName) {
+                        <li>
+                          <mat-icon>account_balance</mat-icon>
+                          <span class="info-label">Département</span>
+                          <span class="info-value">{{ employee.departmentName }}</span>
+                        </li>
+                      }
+                    }
+                    <li>
+                      <mat-icon>manage_accounts</mat-icon>
+                      <span class="info-label">Rôle</span>
+                      <span class="info-value">{{ roleLabels[user.role] }}</span>
+                    </li>
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="overview-card">
+                <mat-card-header>
+                  <mat-card-title>Présence</mat-card-title>
+                  <mat-card-subtitle>Disponibilité en temps réel</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <ul class="info-list">
+                    <li>
+                      <mat-icon>online_prediction</mat-icon>
+                      <span class="info-label">Statut</span>
+                      <span class="info-value">
+                        <span class="status-pill status-online">
+                          <span class="status-dot"></span>
+                          En ligne
+                        </span>
+                      </span>
+                    </li>
+                    <li>
+                      <mat-icon>event_available</mat-icon>
+                      <span class="info-label">Statut du compte</span>
+                      <span class="info-value">
+                        <span class="chip-status" [class.chip-green]="user.status === 'ACTIVE'"
+                              [class.chip-gray]="user.status === 'DISABLED'">
+                          {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="overview-card overview-leaves">
+                <mat-card-header>
+                  <mat-card-title>Congés & absences</mat-card-title>
+                  <mat-card-subtitle>Synthèse de vos demandes</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="leave-summary-row">
+                    <div class="leave-stat">
+                      <span class="leave-stat-value">{{ leaves().length }}</span>
+                      <span class="leave-stat-label">demandes au total</span>
+                    </div>
+                    <div class="leave-stat">
+                      <span class="leave-stat-value">{{ approvedDays() }}</span>
+                      <span class="leave-stat-label">jours utilisés</span>
+                    </div>
+                    <div class="leave-stat">
+                      <span class="leave-stat-value">{{ pendingLeaves().length }}</span>
+                      <span class="leave-stat-label">en attente</span>
+                    </div>
+                  </div>
+                  @if (nextLeave(); as next) {
+                    <div class="next-leave">
+                      <mat-icon>event</mat-icon>
+                      <span>
+                        <b>Prochain congé :</b>
+                        {{ next.startDate | date: 'dd/MM/yyyy' }} — {{ next.endDate | date: 'dd/MM/yyyy' }}
+                        ({{ leaveTypeLabels[next.type] }})
+                      </span>
+                    </div>
+                  } @else {
+                    <p class="empty">Aucun congé approuvé à venir.</p>
+                  }
+                  <div class="card-action">
+                    <button mat-stroked-button (click)="openLeaves()">
+                      <mat-icon>visibility</mat-icon>
+                      Voir mes demandes
+                    </button>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="overview-card">
+                <mat-card-header>
+                  <mat-card-title>Activité récente</mat-card-title>
+                  <mat-card-subtitle>Dernières notifications</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                  @if (recentActivities().length === 0) {
+                    <p class="empty">Aucune activité récente.</p>
+                  } @else {
+                    <ul class="activity-list">
+                      @for (activity of recentActivities(); track activity.id) {
+                        <li>
+                          <mat-icon class="activity-ico">{{ notificationIcons[activity.type] ?? 'notifications' }}</mat-icon>
+                          <div class="activity-body">
+                            <span class="activity-msg">{{ activity.message }}</span>
+                            <span class="activity-date">{{ activity.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                          </div>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Informations personnelles">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>{{ editing() ? 'Modifier mes informations' : 'Identité' }}</mat-card-title>
+                <mat-card-subtitle>{{ editing() ? 'Mettez à jour vos coordonnées personnelles' : 'Données de votre compte' }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (editing()) {
+                  <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
+                    <div class="form-grid">
+                      <mat-form-field appearance="outline">
+                        <mat-label>Prénom</mat-label>
+                        <mat-icon matIconPrefix>person</mat-icon>
+                        <input matInput formControlName="firstName" placeholder="Votre prénom" />
+                        @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+                          <mat-error>Le prénom est requis.</mat-error>
+                        }
+                      </mat-form-field>
+                      <mat-form-field appearance="outline">
+                        <mat-label>Nom</mat-label>
+                        <mat-icon matIconPrefix>badge</mat-icon>
+                        <input matInput formControlName="lastName" placeholder="Votre nom" />
+                        @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+                          <mat-error>Le nom est requis.</mat-error>
+                        }
+                      </mat-form-field>
+                    </div>
+                    <div class="form-actions">
+                      <button mat-stroked-button type="button" (click)="cancelEdit()">Annuler</button>
+                      <button mat-flat-button color="primary" type="submit" [disabled]="saving() || form.invalid">
+                        @if (saving()) {
+                          <mat-spinner diameter="18" />
+                        } @else {
+                          <mat-icon>save</mat-icon>
+                        }
+                        Enregistrer
+                      </button>
+                    </div>
+                  </form>
+                } @else {
+                  <ul class="info-list info-list-single">
+                    <li>
+                      <mat-icon>person</mat-icon>
+                      <span class="info-label">Nom complet</span>
+                      <span class="info-value">{{ user.firstName }} {{ user.lastName }}</span>
+                    </li>
+                    <li>
+                      <mat-icon>badge</mat-icon>
+                      <span class="info-label">Prénom</span>
+                      <span class="info-value">{{ user.firstName }}</span>
+                    </li>
+                    <li>
+                      <mat-icon>person_outline</mat-icon>
+                      <span class="info-label">Nom</span>
+                      <span class="info-value">{{ user.lastName }}</span>
+                    </li>
+                    <li>
+                      <mat-icon>event</mat-icon>
+                      <span class="info-label">Compte créé le</span>
+                      <span class="info-value">{{ user.createdAt | date: 'dd/MM/yyyy' }}</span>
+                    </li>
+                  </ul>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Informations professionnelles">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Carrière</mat-card-title>
+                <mat-card-subtitle>Votre situation au sein de l'entreprise</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (employee(); as employee) {
+                  <ul class="info-list info-list-single">
+                    <li>
+                      <mat-icon>work</mat-icon>
+                      <span class="info-label">Poste</span>
+                      <span class="info-value">{{ employee.jobTitle }}</span>
+                    </li>
+                    @if (employee.departmentName) {
+                      <li>
+                        <mat-icon>account_balance</mat-icon>
+                        <span class="info-label">Département</span>
+                        <span class="info-value">{{ employee.departmentName }}</span>
+                      </li>
+                    }
+                    <li>
+                      <mat-icon>event</mat-icon>
+                      <span class="info-label">Date d'embauche</span>
+                      <span class="info-value">{{ employee.hireDate | date: 'dd/MM/yyyy' }}</span>
+                    </li>
+                    <li>
+                      <mat-icon>schedule</mat-icon>
+                      <span class="info-label">Ancienneté</span>
+                      <span class="info-value">
+                        {{ seniorityYears() }} an{{ seniorityYears() && seniorityYears() > 1 ? 's' : '' }}
+                      </span>
+                    </li>
+                    <li>
+                      <mat-icon>fact_check</mat-icon>
+                      <span class="info-label">Statut</span>
+                      <span class="info-value">
+                        <span class="chip-status" [class.chip-green]="employee.status === 'ACTIVE'"
+                              [class.chip-red]="employee.status !== 'ACTIVE'">
+                          {{ employee.status === 'ACTIVE' ? 'Actif' : 'Inactif' }}
+                        </span>
+                      </span>
+                    </li>
+                  </ul>
+                } @else {
+                  <p class="empty">Aucune information professionnelle disponible.</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Coordonnées">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Coordonnées</mat-card-title>
+                <mat-card-subtitle>Comment vous joindre</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <ul class="info-list info-list-single">
+                  <li>
+                    <mat-icon>mail</mat-icon>
+                    <span class="info-label">Email professionnel</span>
+                    <span class="info-value">{{ user.email }}</span>
+                  </li>
+                </ul>
+                <mat-divider></mat-divider>
+                <div class="coming-soon">
+                  <mat-icon>add_ic_call</mat-icon>
+                  <div>
+                    <b>Téléphone et adresse</b>
+                    <p>Ces informations seront disponibles prochainement.</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Congés & absences">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Mes demandes de congés</mat-card-title>
+                <mat-card-subtitle>{{ leaves().length }} demande(s) enregistrée(s)</mat-card-subtitle>
+                <div class="card-actions">
+                  <button mat-stroked-button (click)="openLeaves()">
+                    <mat-icon>add</mat-icon>
+                    Gérer mes demandes
+                  </button>
+                </div>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="leave-summary-row leave-summary-big">
+                  <div class="leave-stat">
+                    <span class="leave-stat-value">{{ approvedDays() }}</span>
+                    <span class="leave-stat-label">jours approuvés / utilisés</span>
+                  </div>
+                  <div class="leave-stat">
+                    <span class="leave-stat-value">{{ pendingLeaves().length }}</span>
+                    <span class="leave-stat-label">demande(s) en attente</span>
+                  </div>
+                </div>
+                @if (leaves().length === 0) {
+                  <p class="empty">Aucune demande de congés.</p>
+                } @else {
+                  <div class="leave-table">
+                    <div class="leave-table-head">
+                      <span>Type</span>
+                      <span>Période</span>
+                      <span>Durée</span>
+                      <span>Statut</span>
+                    </div>
+                    @for (leave of leaves(); track leave.id) {
+                      <div class="leave-table-row">
+                        <span class="leave-type">{{ leaveTypeLabels[leave.type] }}</span>
+                        <span>{{ leave.startDate | date: 'dd/MM/yyyy' }} — {{ leave.endDate | date: 'dd/MM/yyyy' }}</span>
+                        <span>{{ days(leave) }} j</span>
+                        <span class="chip-status" [class]="leaveStatusClass(leave.status)">
+                          {{ leaveStatusLabels[leave.status] }}
+                        </span>
+                      </div>
+                    }
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Compétences">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Compétences</mat-card-title>
+                <mat-card-subtitle>Votre profil de compétences</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (employee(); as employee) {
+                  @if (employee.skills.length === 0) {
+                    <p class="empty">Aucune compétence enregistrée.</p>
+                  } @else {
+                    <div class="skills-grid">
+                      @for (skill of employee.skills; track skill.skillId) {
+                        <div class="skill-card">
+                          <div class="skill-head">
+                            <span class="skill-name">{{ skill.skillName }}</span>
+                            <span class="chip-status chip-blue">{{ skill.category }}</span>
+                          </div>
+                          <div class="skill-level">
+                            <span class="skill-label">Niveau</span>
+                            <div class="skill-bar">
+                              <div class="skill-fill" [class]="skillLevelClass(skill.level)"
+                                   [style.width.%]="skillLevelPercent(skill.level)"></div>
+                            </div>
+                            <span class="skill-value">{{ skill.level }}/5</span>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                } @else {
+                  <p class="empty">Aucune compétence disponible.</p>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Activité récente">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Votre activité</mat-card-title>
+                <mat-card-subtitle>Dernières notifications et événements</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                @if (recentActivities().length === 0) {
+                  <p class="empty">Aucune activité récente.</p>
+                } @else {
+                  <ul class="activity-list activity-timeline">
+                    @for (activity of recentActivities(); track activity.id) {
+                      <li>
+                        <mat-icon class="activity-ico">{{ notificationIcons[activity.type] ?? 'notifications' }}</mat-icon>
+                        <div class="activity-body">
+                          <span class="activity-msg">{{ activity.message }}</span>
+                          <span class="activity-date">{{ activity.createdAt | date: 'dd/MM/yyyy HH:mm' }}</span>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Sécurité">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Sécurité du compte</mat-card-title>
+                <mat-card-subtitle>Protection de votre accès</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <ul class="info-list info-list-single">
+                  <li>
+                    <mat-icon>password</mat-icon>
+                    <span class="info-label">Mot de passe</span>
+                    <span class="info-value">Géré via votre compte administrateur</span>
+                  </li>
+                  <li>
+                    <mat-icon>security</mat-icon>
+                    <span class="info-label">Rôle</span>
+                    <span class="info-value">{{ roleLabels[user.role] }}</span>
+                  </li>
+                  <li>
+                    <mat-icon>badge</mat-icon>
+                    <span class="info-label">Compte</span>
+                    <span class="info-value">
+                      <span class="chip-status" [class.chip-green]="user.status === 'ACTIVE'"
+                            [class.chip-gray]="user.status === 'DISABLED'">
+                        {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
+                      </span>
+                    </span>
+                  </li>
+                </ul>
+                <mat-divider></mat-divider>
+                <div class="coming-soon">
+                  <mat-icon>phonelink_lock</mat-icon>
+                  <div>
+                    <b>Double authentification et sessions</b>
+                    <p>Ces fonctionnalités de sécurité avancée seront proposées prochainement.</p>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Préférences">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Préférences</mat-card-title>
+                <mat-card-subtitle>Personnalisation de votre interface</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="prefs-grid">
+                  <div class="pref-item">
+                    <mat-icon>palette</mat-icon>
+                    <div>
+                      <b>Apparence</b>
+                      <p>Clair / Sombre / Système</p>
+                    </div>
+                    <span class="chip-status chip-amber">Bientôt</span>
+                  </div>
+                  <div class="pref-item">
+                    <mat-icon>language</mat-icon>
+                    <div>
+                      <b>Langue</b>
+                      <p>Français (actuellement)</p>
+                    </div>
+                    <span class="chip-status chip-amber">Bientôt</span>
+                  </div>
+                  <div class="pref-item">
+                    <mat-icon>notifications</mat-icon>
+                    <div>
+                      <b>Notifications</b>
+                      <p>Préférences de réception des notifications</p>
+                    </div>
+                    <span class="chip-status chip-amber">Bientôt</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
+    }
+  }
+</div>

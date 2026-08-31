@@ -42,6 +42,7 @@ export class Projects {
   private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isAdmin = inject(AuthService).isAdmin;
   protected readonly displayedColumns = ['name', 'dates', 'status', 'priority', 'memberCount', 'actions'];
@@ -100,9 +101,15 @@ export class Projects {
   }
 
   constructor() {
+<<<<<<< Updated upstream
     const param = this.route.snapshot.queryParamMap.get('status') as ProjectStatus | '';
     if (param && this.statuses.includes(param)) {
       this.statusFilter = param;
+=======
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam && (this.statuses as readonly string[]).includes(statusParam)) {
+      this.statusFilter = statusParam;
+>>>>>>> Stashed changes
     }
     this.load();
   }

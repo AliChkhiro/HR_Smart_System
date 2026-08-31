@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 .app-layout {
+=======
+﻿.app-layout {
+>>>>>>> Stashed changes
   display: flex;
   width: 100%;
   min-height: 100vh;
@@ -188,10 +192,14 @@
 .app-layout.collapsed {
   .sidebar {
     width: 70px;
+<<<<<<< Updated upstream
+=======
+    overflow: hidden;
+>>>>>>> Stashed changes
   }
 
   .brand {
-    padding: 20px 17px 18px;
+    padding: 20px 14px 18px;
     justify-content: center;
 
     .brand-text,
@@ -340,7 +348,11 @@
   }
 
   .app-layout.collapsed .brand {
+<<<<<<< Updated upstream
     padding: 20px 10px 18px;
+=======
+    padding: 20px 7px 18px;
+>>>>>>> Stashed changes
   }
 
   .content {
