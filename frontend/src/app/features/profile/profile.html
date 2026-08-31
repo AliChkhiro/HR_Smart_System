@@ -570,5 +570,85 @@
         </mat-tab>
       </mat-tab-group>
     }
+    <div class="page-ico"><mat-icon>account_circle</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Mon profil</h1>
+      <p class="page-subtitle">Gérez vos informations personnelles</p>
+    </div>
+  </div>
+
+  @if (user(); as user) {
+    <mat-card class="profile-card">
+      <mat-tab-group animationDuration="250ms" class="profile-tabs">
+        <mat-tab label="Voir le profil">
+          <div class="profile-view">
+            <div class="profile-hero">
+              <div class="avatar profile-avatar">{{ initials() }}</div>
+              <div class="profile-hero-info">
+                <div class="profile-name">{{ user.firstName }} {{ user.lastName }}</div>
+                <div class="profile-role">{{ roleLabel(user.role) }}</div>
+                <span class="chip-status chip-green">En ligne</span>
+              </div>
+            </div>
+
+            <div class="profile-fields">
+              <div class="field-row">
+                <mat-icon class="field-ico">alternate_email</mat-icon>
+                <div class="field">
+                  <span class="field-label">Adresse email</span>
+                  <span class="field-value">{{ user.email }}</span>
+                </div>
+              </div>
+              <div class="field-row">
+                <mat-icon class="field-ico">badge</mat-icon>
+                <div class="field">
+                  <span class="field-label">Rôle</span>
+                  <span class="field-value">{{ roleLabel(user.role) }}</span>
+                </div>
+              </div>
+              <div class="field-row">
+                <mat-icon class="field-ico">verified_user</mat-icon>
+                <div class="field">
+                  <span class="field-label">Statut</span>
+                  <span class="field-value">Actif</span>
+                </div>
+              </div>
+              <div class="field-row">
+                <mat-icon class="field-ico">calendar_today</mat-icon>
+                <div class="field">
+                  <span class="field-label">Membre depuis</span>
+                  <span class="field-value">{{ user.createdAt | date: 'dd MMMM yyyy' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Modifier le profil">
+          <form class="profile-form" [formGroup]="form" (ngSubmit)="save()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Prénom</mat-label>
+              <input matInput formControlName="firstName" placeholder="Votre prénom" />
+              <mat-error *ngIf="form.get('firstName')?.invalid">Le prénom est requis.</mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Nom</mat-label>
+              <input matInput formControlName="lastName" placeholder="Votre nom" />
+              <mat-error *ngIf="form.get('lastName')?.invalid">Le nom est requis.</mat-error>
+            </mat-form-field>
+
+            <div class="form-actions">
+              <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid || saving()">
+                <mat-icon>save</mat-icon>
+                {{ saving() ? 'Enregistrement…' : 'Enregistrer' }}
+              </button>
+            </div>
+          </form>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card>
+  } @else {
+    <div class="spinner"><mat-spinner diameter="44" /></div>
   }
 </div>

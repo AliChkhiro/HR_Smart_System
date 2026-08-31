@@ -12,9 +12,11 @@ export const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./features/dashboard/dashboard').then(m => m.Dashboard) },
+      { path: 'profile', loadComponent: () => import('./features/profile/profile').then(m => m.Profile) },
       { path: 'projects', loadComponent: () => import('./features/projects/projects').then(m => m.Projects) },
       { path: 'tasks', loadComponent: () => import('./features/tasks/tasks').then(m => m.Tasks) },
       { path: 'leaves', loadComponent: () => import('./features/leaves/leaves').then(m => m.Leaves) },
+      { path: 'profile', loadComponent: () => import('./features/profile/profile').then(m => m.Profile) },
       { path: 'employees', loadComponent: () => import('./features/employees/employees').then(m => m.Employees) },
       { path: 'departments', loadComponent: () => import('./features/departments/departments').then(m => m.Departments) },
       { path: 'users', loadComponent: () => import('./features/users/users').then(m => m.Users) },
