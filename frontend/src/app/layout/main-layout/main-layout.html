@@ -1,5 +1,5 @@
-<mat-sidenav-container class="layout" [class.collapsed]="collapsed()">
-  <mat-sidenav mode="side" opened class="sidebar">
+<div class="app-layout" [class.collapsed]="collapsed()">
+  <aside class="sidebar">
     <div class="brand">
       <div class="brand-logo">
         <mat-icon>workspaces</mat-icon>
@@ -42,10 +42,10 @@
         </div>
       }
     </div>
-  </mat-sidenav>
+  </aside>
 
-  <mat-sidenav-content>
-    <mat-toolbar class="topbar">
+  <div class="main-wrapper">
+    <header class="topbar">
       <button mat-icon-button (click)="toggleSidebar()" matTooltip="Réduire / agrandir le menu">
         <mat-icon>{{ collapsed() ? 'menu_open' : 'menu' }}</mat-icon>
       </button>
@@ -61,24 +61,43 @@
       </button>
       <mat-menu #notificationsMenu="matMenu" class="notifications-menu" xPosition="before">
         <div class="menu-header">
-          <span>Notifications</span>
-          <button mat-button (click)="markAllNotificationsRead()">Tout marquer lu</button>
+          <div class="menu-header-title">
+            <span>Notifications</span>
+            @if (unreadCount() > 0) {
+              <span class="menu-header-count">{{ unreadCount() }} non lue{{ unreadCount() > 1 ? 's' : '' }}</span>
+            }
+          </div>
+          @if (unreadCount() > 0) {
+            <button mat-button class="menu-mark-all" (click)="markAllNotificationsRead()">
+              <mat-icon>done_all</mat-icon>
+              Tout marquer lu
+            </button>
+          }
         </div>
-        @for (notification of notifications(); track notification.id) {
-          <button mat-menu-item class="notif-item" (click)="openNotification(notification)">
-            <mat-icon class="notif-icon" [class.unread]="!notification.read">{{ notificationIcon(notification.type) }}</mat-icon>
-            <span class="notif-text">
-              <span class="notif-msg">{{ notification.message }}</span>
-              <span class="notif-date">{{ notification.createdAt | date: 'dd/MM HH:mm' }}</span>
-            </span>
-          </button>
-        }
-        @if (notifications().length === 0) {
-          <div class="menu-empty">Aucune notification</div>
-        }
+        <div class="menu-list">
+          @for (notification of notifications(); track notification.id) {
+            <button mat-menu-item class="notif-item" [class.is-read]="notification.read"
+                    (click)="openNotification(notification)">
+              <mat-icon class="notif-icon" [class.unread]="!notification.read">{{ notificationIcon(notification.type) }}</mat-icon>
+              <span class="notif-text">
+                <span class="notif-msg" [class.unread]="!notification.read">{{ notification.message }}</span>
+                <span class="notif-date">{{ notification.createdAt | date: 'dd/MM/yyyy · HH:mm' }}</span>
+              </span>
+              @if (!notification.read) {
+                <span class="notif-dot" aria-label="Non lue"></span>
+              }
+            </button>
+          }
+          @if (notifications().length === 0) {
+            <div class="menu-empty">
+              <mat-icon>notifications_off</mat-icon>
+              <span>Aucune notification</span>
+            </div>
+          }
+        </div>
         <a mat-menu-item class="menu-link-all" [routerLink]="'/notifications'">
           <mat-icon>list</mat-icon>
-          <span>Voir tout</span>
+          <span>Voir toutes les notifications</span>
         </a>
       </mat-menu>
 
@@ -146,10 +165,10 @@
           <span>Déconnexion</span>
         </button>
       </mat-menu>
-    </mat-toolbar>
+    </header>
 
     <main class="content">
       <router-outlet />
     </main>
-  </mat-sidenav-content>
-</mat-sidenav-container>
+  </div>
+</div>

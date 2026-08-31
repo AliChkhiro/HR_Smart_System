@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,8 +39,10 @@ import { ProjectMembersDialogComponent, ProjectMembersDialogData } from './proje
 })
 export class Projects {
   private readonly projectsService = inject(ProjectsService);
+  private readonly route = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly isAdmin = inject(AuthService).isAdmin;
   protected readonly displayedColumns = ['name', 'dates', 'status', 'priority', 'memberCount', 'actions'];
@@ -98,6 +101,16 @@ export class Projects {
   }
 
   constructor() {
+<<<<<<< Updated upstream
+    const param = this.route.snapshot.queryParamMap.get('status') as ProjectStatus | '';
+    if (param && this.statuses.includes(param)) {
+      this.statusFilter = param;
+=======
+    const statusParam = this.route.snapshot.queryParamMap.get('status');
+    if (statusParam && (this.statuses as readonly string[]).includes(statusParam)) {
+      this.statusFilter = statusParam;
+>>>>>>> Stashed changes
+    }
     this.load();
   }
 

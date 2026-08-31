@@ -1,20 +1,33 @@
-.layout {
-  height: 100vh;
+<<<<<<< Updated upstream
+.app-layout {
+=======
+﻿.app-layout {
+>>>>>>> Stashed changes
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
 // ============ Sidebar ============
 .sidebar {
-  width: 252px;
+  width: 230px;
   background: linear-gradient(180deg, #141b34 0%, #0d1124 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.04);
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease;
+  flex-shrink: 0;
+}
 
-  ::ng-deep .mat-drawer-inner-container {
-    display: flex;
-    flex-direction: column;
-  }
+// ============ Main wrapper ============
+.main-wrapper {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
 }
 
 .brand {
@@ -176,13 +189,17 @@
 }
 
 // ============ Collapsed ============
-.layout.collapsed {
+.app-layout.collapsed {
   .sidebar {
-    width: 76px;
+    width: 70px;
+<<<<<<< Updated upstream
+=======
+    overflow: hidden;
+>>>>>>> Stashed changes
   }
 
   .brand {
-    padding: 20px 17px 18px;
+    padding: 20px 14px 18px;
     justify-content: center;
 
     .brand-text,
@@ -225,11 +242,14 @@
 
 // ============ Topbar ============
 .topbar {
+  display: flex;
+  align-items: center;
   background: #fff;
   border-bottom: 1px solid var(--line);
   padding: 0 24px;
   height: 64px;
   gap: 8px;
+  flex-shrink: 0;
 
   .topbar-title {
     font-size: 17px;
@@ -237,6 +257,9 @@
     color: var(--ink);
     margin-left: 6px;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 }
 
@@ -247,6 +270,20 @@
 .bell-button {
   color: var(--ink-soft);
   position: relative;
+  transition: color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    color: var(--brand-start);
+    background: #eef2ff;
+  }
+
+  mat-icon {
+    transition: transform 0.2s ease;
+  }
+
+  &:hover mat-icon {
+    transform: scale(1.1);
+  }
 }
 
 .topbar-user {
@@ -282,71 +319,43 @@
 }
 
 // ============ Notifications menu ============
-.menu-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--ink);
-}
-
-.menu-empty {
-  padding: 20px 16px;
-  color: var(--muted);
-  text-align: center;
-  font-size: 13px;
-}
-
-.notif-item {
-  height: auto !important;
-  min-height: 52px;
-  padding: 8px 16px !important;
-
-  .notif-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: var(--panel);
-    color: var(--brand-start);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-
-    &.unread {
-      background: #eef2ff;
-      color: var(--brand-start);
-    }
-  }
-
-  .notif-text {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.35;
-
-    .notif-msg {
-      font-size: 12.5px;
-      color: var(--ink-soft);
-      white-space: normal;
-    }
-
-    .notif-date {
-      font-size: 11px;
-      color: var(--muted);
-    }
-  }
-}
-
-.menu-link-all {
-  border-top: 1px solid var(--line)-soft;
-  font-size: 13px;
-  color: var(--brand-start);
-}
+// Les styles du panneau de notifications sont définis globalement dans styles.scss
+// (overlay CDK rendu hors du composant).
 
 // ============ Content ============
 .content {
   padding: 26px 28px 40px;
   min-height: calc(100vh - 64px);
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+}
+
+// ============ Responsive ============
+@media (max-width: 900px) {
+  .topbar .topbar-user-info {
+    display: none;
+  }
+
+  .content {
+    padding: 20px 16px 32px;
+  }
+}
+
+@media (max-width: 560px) {
+  .app-layout.collapsed .sidebar {
+    width: 56px;
+  }
+
+  .app-layout.collapsed .brand {
+<<<<<<< Updated upstream
+    padding: 20px 10px 18px;
+=======
+    padding: 20px 7px 18px;
+>>>>>>> Stashed changes
+  }
+
+  .content {
+    padding: 16px 12px 28px;
+  }
 }

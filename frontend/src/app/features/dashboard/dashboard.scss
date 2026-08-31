@@ -1,28 +1,41 @@
-.spinner {
+﻿.spinner {
   margin: 80px auto;
+}
+
+// ============ Clickable cards ============
+.clickable {
+  cursor: pointer;
+  outline: none;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.4);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #4f46e5;
+    outline-offset: 2px;
+  }
 }
 
 // ============ KPI cards ============
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 18px;
   margin-bottom: 24px;
 }
 
 .kpi {
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 26px -14px rgba(15, 23, 42, 0.3);
-  }
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
 
   .mat-mdc-card-content {
     display: flex;
     align-items: center;
     gap: 14px;
     padding: 18px;
+    min-width: 0;
   }
 }
 
@@ -121,7 +134,7 @@
 // ============ Panels ============
 .panels {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -304,5 +317,32 @@
 
   mat-icon {
     color: #22c55e;
+  }
+}
+
+// ============ Responsive ============
+@media (max-width: 1400px) {
+  .kpi-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .panels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panels {
+    grid-template-columns: 1fr;
   }
 }
