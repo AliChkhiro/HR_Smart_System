@@ -11,6 +11,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule, DatePipe } from '@angular/common';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { Chatbot } from '../../features/chatbot/chatbot';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { NotificationDto, NotificationType } from '../../core/models/notification.model';
 import { UserRole } from '../../core/models/user.model';
@@ -37,7 +38,8 @@ interface NavItem {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    Chatbot
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
