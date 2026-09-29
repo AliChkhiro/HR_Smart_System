@@ -26,6 +26,12 @@
     </header>
 
     <div class="chatbot-messages" #messagesArea>
+      @if (sending()) {
+        <div class="chatbot-typing">
+          <mat-spinner diameter="16" />
+          <span>Réflexion en cours…</span>
+        </div>
+      }
       @for (message of messages(); track message.id) {
         <div class="chatbot-bubble-row" [class.is-user]="message.from === 'user'">
           <div class="chatbot-bubble" [class.is-user]="message.from === 'user'">
@@ -36,10 +42,12 @@
     </div>
 
     <footer class="chatbot-foot">
-      <div class="chatbot-notice">
-        <mat-icon>info</mat-icon>
-        <span>Disponible bientot - le service IA n'est pas encore connecte.</span>
-      </div>
+      @if (!aiAvailable()) {
+        <div class="chatbot-notice">
+          <mat-icon>info</mat-icon>
+          <span>Service IA non encore branché — réponses provisoires.</span>
+        </div>
+      }
       <div class="chatbot-composer">
         <textarea
           rows="1"
@@ -52,7 +60,7 @@
           mat-fab
           type="button"
           class="chatbot-send"
-          [disabled]="!draft().trim()"
+          [disabled]="!draft().trim() || sending()"
           aria-label="Envoyer le message"
           (click)="send()"
         >

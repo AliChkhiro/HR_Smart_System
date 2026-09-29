@@ -3,6 +3,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { ChatbotService } from '../../core/services/chatbot.service';
 
 export interface ChatMessage {
   id: number;
@@ -12,7 +13,7 @@ export interface ChatMessage {
 
 /**
  * Widget flottant de l'assistant RH.
- * STEP 1 : coquille UI pure, aucun appel reseau.
+ * STEP 2 : appelle POST /api/chatbot/chat, le backend repond sans LLM.
  */
 @Component({
   selector: 'app-chatbot',
@@ -22,12 +23,15 @@ export interface ChatMessage {
 })
 export class Chatbot {
   private readonly host = inject(ElementRef<HTMLElement>);
+  private readonly chatbotService = inject(ChatbotService);
 
   private readonly messagesArea = viewChild<ElementRef<HTMLElement>>('messagesArea');
   private nextId = 1;
 
   protected readonly open = signal(false);
   protected readonly draft = signal('');
+  protected readonly sending = signal(false);
+  protected readonly aiAvailable = signal(false);
 
   protected readonly messages = signal<ChatMessage[]>([
     {
@@ -74,14 +78,27 @@ export class Chatbot {
 
   protected send(): void {
     const text = this.draft().trim();
-    if (!text) {
+    if (!text || this.sending()) {
       return;
     }
-    this.messages.update(list => [
-      ...list,
-      { id: this.nextId++, from: 'user', text },
-    ]);
+    this.append('user', text);
     this.draft.set('');
+    this.sending.set(true);
+    this.chatbotService.ask(text).subscribe({
+      next: response => {
+        this.aiAvailable.set(response.aiAvailable);
+        this.append('assistant', response.reply);
+        this.sending.set(false);
+      },
+      error: () => {
+        this.append('assistant', "Le service est injoignable pour le moment. Reessayez dans un instant.");
+        this.sending.set(false);
+      }
+    });
+  }
+
+  private append(from: 'user' | 'assistant', text: string): void {
+    this.messages.update(list => [...list, { id: this.nextId++, from, text }]);
     this.scrollToBottom();
   }
 
