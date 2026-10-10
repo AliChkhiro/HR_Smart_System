@@ -64,7 +64,16 @@ multi-tours et un rendu en flux (streaming). Le tout est scopé au JWT (RBAC) et
 protégé par une limite de débit. Les conversations sont persistées côté serveur
 (`chat_message`) et des métriques Micrometer sont exposées (`/api/actuator/metrics`).
 
-Documentation détaillée : [`docs/chatbot-ia.md`](docs/chatbot-ia.md).
+Documentation détaillée :
+- [`docs/chatbot-ia.md`](docs/chatbot-ia.md) — flux, endpoints, configuration, dépannage.
+- [`docs/module-ia-synthese.md`](docs/module-ia-synthese.md) — synthèse du module (soutenance).
+- [`docs/securite-ia.md`](docs/securite-ia.md) — audit sécurité.
+
+Démonstration automatisée de bout en bout (pile Docker démarrée) :
+
+```powershell
+.\scripts\demo-chatbot.ps1
+```
 
 ## Planning des sprints
 

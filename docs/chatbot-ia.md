@@ -86,7 +86,7 @@ demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM
 | Taille du message              | 2 000 caractères                         |
 | Historique transmis            | 12 messages max (4000 car. chacun)       |
 | Historique utilisé par le LLM  | 8 derniers échanges                      |
-| Débit par utilisateur          | 30 requêtes / 60 s (HTTP 429 au-delà)    |
+| Débit par utilisateur          | 30 appels LLM / 60 s (HTTP 429 au-delà)  |
 
 ## Configuration (variables d'environnement)
 
@@ -95,8 +95,9 @@ demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM
 | `CHATBOT_IA_SERVICE_URL`            | `http://localhost:8000`  | URL de l'ia-service               |
 | `CHATBOT_OLLAMA_MODEL`              | `llama3.2:3b`            | Modèle Ollama                     |
 | `CHATBOT_TIMEOUT_MS`                | `30000`                  | Timeout backend → ia-service      |
-| `CHATBOT_RATE_LIMIT_MAX`            | `30`                     | Requêtes max par fenêtre          |
+| `CHATBOT_RATE_LIMIT_MAX`            | `30`                     | Appels LLM max par fenêtre        |
 | `CHATBOT_RATE_LIMIT_WINDOW_SECONDS` | `60`                     | Taille de la fenêtre (s)          |
+| `CORS_ALLOWED_ORIGINS`              | `http://localhost:4200`  | Origines CORS autorisées (liste)  |
 | `OLLAMA_URL`                        | `http://ollama:11434`    | URL Ollama (ia-service)           |
 | `OLLAMA_MODEL`                      | `llama3.2:3b`            | Modèle (ia-service)               |
 | `OLLAMA_KEEP_ALIVE`                 | `24h`                    | Durée de maintien du modèle chargé|
@@ -142,6 +143,11 @@ npx ng test --watch=false
    `ia-service` (`/health`), `backend` (`/api/actuator/health`) et `frontend`
    (`/`), et `depends_on` conditionne le démarrage à leur bon état.
 4. Interface : http://localhost:4200 — API : http://localhost:8081/api.
+5. Démonstration automatisée : `.\scripts\demo-chatbot.ps1`
+   (ajouter `-IncludeRateLimit` pour tester le HTTP 429).
+
+Voir aussi : [`module-ia-synthese.md`](module-ia-synthese.md) (synthèse) et
+[`securite-ia.md`](securite-ia.md) (audit sécurité).
 
 ## Dépannage
 

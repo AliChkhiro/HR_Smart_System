@@ -10,6 +10,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Map;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +49,17 @@ class ChatbotRateLimitIntegrationTest extends AbstractIntegrationTest {
                         .content(body))
                 .andExpect(status().isTooManyRequests())
                 .andExpect(jsonPath("$.code").value("CHATBOT_RATE_LIMITED"));
+    }
+
+    @Test
+    void historyReadsAreNotRateLimited() throws Exception {
+        String token = login();
+
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(get("/chatbot/messages")
+                            .header("Authorization", "Bearer " + token))
+                    .andExpect(status().isOk());
+        }
     }
 
     private String login() throws Exception {

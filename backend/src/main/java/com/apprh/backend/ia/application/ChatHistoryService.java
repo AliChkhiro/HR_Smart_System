@@ -18,18 +18,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatHistoryService {
 
-    private static final int MAX_STORED = 40;
+    private static final int MAX_CONTENT_LENGTH = 4000;
 
     private final ChatMessageRepository repository;
 
     @Transactional
     public void recordExchange(Long userId, String userMessage, String assistantMessage) {
-        if (userMessage != null && !userMessage.isBlank()) {
-            repository.save(ChatMessage.builder().userId(userId).role("user").content(userMessage).build());
+        save(userId, "user", userMessage);
+        save(userId, "assistant", assistantMessage);
+    }
+
+    private void save(Long userId, String role, String content) {
+        if (content == null || content.isBlank()) {
+            return;
         }
-        if (assistantMessage != null && !assistantMessage.isBlank()) {
-            repository.save(ChatMessage.builder().userId(userId).role("assistant").content(assistantMessage).build());
-        }
+        String value = content.length() > MAX_CONTENT_LENGTH ? content.substring(0, MAX_CONTENT_LENGTH) : content;
+        repository.save(ChatMessage.builder().userId(userId).role(role).content(value).build());
     }
 
     @Transactional(readOnly = true)

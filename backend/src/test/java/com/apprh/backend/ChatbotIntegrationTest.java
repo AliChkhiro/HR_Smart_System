@@ -192,6 +192,12 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void metricsRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/actuator/metrics/chatbot.requests"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void exposesChatbotMetrics() throws Exception {
         String token = login();
 

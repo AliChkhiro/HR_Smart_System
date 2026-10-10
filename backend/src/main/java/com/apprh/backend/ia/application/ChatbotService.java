@@ -39,7 +39,7 @@ public class ChatbotService {
         if (quick.isPresent()) {
             log.info("chat - réponse déterministe pour utilisateur {}", principal.id());
             metrics.recordRequest("chat", "deterministic");
-            chatHistoryService.recordExchange(principal.id(), request.message(), quick.get());
+            persist(principal.id(), request.message(), quick.get());
             return new ChatResponse(quick.get(), true);
         }
         long start = System.nanoTime();
@@ -48,7 +48,7 @@ public class ChatbotService {
             ChatbotClient.ChatResult r = client.ask(request.message(), history(request), context);
             metrics.recordRequest("chat", "llm");
             metrics.recordLatency("chat", System.nanoTime() - start);
-            chatHistoryService.recordExchange(principal.id(), request.message(), r.reply());
+            persist(principal.id(), request.message(), r.reply());
             return new ChatResponse(r.reply(), r.aiAvailable());
         } catch (Exception e) {
             metrics.recordRequest("chat", "fallback");
@@ -73,7 +73,7 @@ public class ChatbotService {
             log.info("chat/stream - réponse déterministe pour utilisateur {}", principal.id());
             metrics.recordRequest("stream", "deterministic");
             writeQuickAnswer(outputStream, quick.get());
-            chatHistoryService.recordExchange(principal.id(), request.message(), quick.get());
+            persist(principal.id(), request.message(), quick.get());
             return;
         }
         ChatbotClient.ChatContext context = chatContextService.build(principal);
@@ -85,12 +85,24 @@ public class ChatbotService {
             metrics.recordLatency("stream", System.nanoTime() - start);
             String assembled = capture.assemble(objectMapper);
             if (!assembled.isBlank()) {
-                chatHistoryService.recordExchange(principal.id(), request.message(), assembled);
+                persist(principal.id(), request.message(), assembled);
             }
         } catch (Exception e) {
             metrics.recordRequest("stream", "fallback");
             log.warn("ia-service/chat stream indisponible: {}", e.getMessage());
             writeFallback(outputStream, principal.firstName());
+        }
+    }
+
+    /**
+     * Persiste l'échange sans jamais compromettre la réponse déjà produite :
+     * une défaillance d'écriture est journalisée mais n'entraîne pas de repli.
+     */
+    private void persist(Long userId, String userMessage, String assistantMessage) {
+        try {
+            chatHistoryService.recordExchange(userId, userMessage, assistantMessage);
+        } catch (Exception e) {
+            log.warn("historique non persisté pour utilisateur {}: {}", userId, e.getMessage());
         }
     }
 
