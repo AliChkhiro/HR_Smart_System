@@ -109,6 +109,16 @@ export class TaskDialogComponent {
     this.recommendations.set([]);
   }
 
+  protected criterionLabel(name: string): string {
+    const labels: Record<string, string> = {
+      skills: 'Compétences',
+      workload: 'Charge',
+      availability: 'Disponibilité',
+      reliability: 'Fiabilité'
+    };
+    return labels[name] ?? name;
+  }
+
   submit(): void {
     if (this.form.invalid) {
       return;

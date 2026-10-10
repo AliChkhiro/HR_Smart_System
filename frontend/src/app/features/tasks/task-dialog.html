@@ -108,6 +108,13 @@
                 </span>
                 <span class="rec-explanation">{{ rec.explanation }}</span>
               </div>
+              <div class="rec-criteria">
+                @for (criterion of rec.criteria; track criterion.name) {
+                  <span class="criterion-chip" [title]="criterion.explanation">
+                    {{ criterionLabel(criterion.name) }} : {{ criterion.score * 100 | number: '1.0-0' }} %
+                  </span>
+                }
+              </div>
             </div>
             <button mat-stroked-button color="primary" (click)="choose(rec.employeeId)">
               Choisir
