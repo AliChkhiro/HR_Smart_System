@@ -1,10 +1,14 @@
-import { Component, ElementRef, HostListener, NgZone, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, NgZone, computed, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChatbotService } from '../../core/services/chatbot.service';
-import { ChatStreamEvent } from '../../core/models/chat.model';
+import { ChatHistoryMessage, ChatStreamEvent } from '../../core/models/chat.model';
+import { MarkdownPipe } from './markdown.pipe';
+
+const MAX_HISTORY_MESSAGES = 8;
+const STORAGE_KEY = 'apprh.chatbot.messages';
 
 export interface ChatMessage {
   id: number;
@@ -15,35 +19,47 @@ export interface ChatMessage {
 /**
  * Widget flottant de l'assistant RH.
  * Appelle POST /api/chatbot/chat/stream ; le backend relaie la réponse de l'ia-service
- * (Ollama) en flux NDJSON, affichée progressivement.
+ * (Ollama) en flux NDJSON, affichée progressivement. L'historique est conservé dans
+ * sessionStorage afin de survivre à un rechargement de page.
  */
 @Component({
   selector: 'app-chatbot',
-  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule],
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule, MatTooltipModule, MarkdownPipe],
   templateUrl: './chatbot.html',
   styleUrl: './chatbot.scss',
 })
 export class Chatbot {
+  private static readonly STORAGE_KEY = 'apprh.chatbot.messages';
+  private static readonly MAX_HISTORY_MESSAGES = 8;
+  private static readonly SUGGESTIONS = [
+    'Combien de congés approuvés ai-je ?',
+    'Quelles sont mes tâches en cours ?',
+    'Sur quels projets je travaille ?',
+  ];
+
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly chatbotService = inject(ChatbotService);
   private readonly zone = inject(NgZone);
 
   private readonly messagesArea = viewChild<ElementRef<HTMLElement>>('messagesArea');
   private nextId = 1;
+  private controller: AbortController | null = null;
+  private copiedTimer?: ReturnType<typeof setTimeout>;
+
+  protected readonly suggestions = Chatbot.SUGGESTIONS;
 
   protected readonly open = signal(false);
   protected readonly draft = signal('');
   protected readonly sending = signal(false);
   protected readonly thinking = signal(false);
   protected readonly aiAvailable = signal(true);
+  protected readonly copiedId = signal<number | null>(null);
+  protected readonly messages = signal<ChatMessage[]>([]);
+  protected readonly showSuggestions = computed(() => !this.sending() && this.messages().length <= 1);
 
-  protected readonly messages = signal<ChatMessage[]>([
-    {
-      id: 0,
-      from: 'assistant',
-      text: 'Bonjour, je suis votre assistant RH. Posez-moi une question sur vos congés, vos tâches ou les projets.',
-    },
-  ]);
+  constructor() {
+    this.messages.set(this.restore());
+  }
 
   @HostListener('document:keydown.escape')
   protected onEscape(): void {
@@ -81,26 +97,65 @@ export class Chatbot {
   }
 
   protected send(): void {
-    const text = this.draft().trim();
-    if (!text || this.sending()) {
+    this.submit(this.draft());
+  }
+
+  protected submit(text: string): void {
+    const trimmed = text.trim();
+    if (!trimmed || this.sending()) {
       return;
     }
-    this.append('user', text);
+    const history = this.buildHistory();
     this.draft.set('');
+    this.append('user', trimmed);
+    const placeholderId = this.appendPlaceholder();
     this.sending.set(true);
     this.thinking.set(true);
-    const assistantId = this.appendPlaceholder();
+    const controller = new AbortController();
+    this.controller = controller;
     this.chatbotService
-      .stream(text, event => this.zone.run(() => this.onStreamEvent(assistantId, event)))
+      .stream(trimmed, history, event => this.zone.run(() => this.onStreamEvent(placeholderId, event)), controller.signal)
       .then(() => this.zone.run(() => this.finish()))
-      .catch(() => this.zone.run(() => {
-        this.updateMessage(assistantId, 'Le service est injoignable pour le moment. Réessayez dans un instant.');
-        this.finish();
-      }));
+      .catch(error => this.zone.run(() => this.onStreamError(placeholderId, error)));
+  }
+
+  protected stop(): void {
+    this.controller?.abort();
+  }
+
+  protected clear(): void {
+    this.controller?.abort();
+    this.controller = null;
+    this.nextId = 1;
+    this.messages.set([this.welcome()]);
+    this.draft.set('');
+    this.sending.set(false);
+    this.thinking.set(false);
+    this.aiAvailable.set(true);
+    this.copiedId.set(null);
+    this.save();
+  }
+
+  protected copy(message: ChatMessage): void {
+    navigator.clipboard?.writeText(message.text).then(() => {
+      this.copiedId.set(message.id);
+      if (this.copiedTimer) {
+        clearTimeout(this.copiedTimer);
+      }
+      this.copiedTimer = setTimeout(() => this.copiedId.set(null), 1500);
+    });
+  }
+
+  private buildHistory(): ChatHistoryMessage[] {
+    return this.messages()
+      .filter(message => message.text)
+      .slice(-Chatbot.MAX_HISTORY_MESSAGES)
+      .map(message => ({ role: message.from, content: message.text }));
   }
 
   private onStreamEvent(id: number, event: ChatStreamEvent): void {
     if (event.type === 'token') {
+      this.aiAvailable.set(true);
       this.thinking.set(false);
       this.appendText(id, event.text);
     } else if (event.type === 'fallback') {
@@ -115,10 +170,24 @@ export class Chatbot {
     }
   }
 
+  private onStreamError(id: number, error: unknown): void {
+    if ((error as { name?: string })?.name === 'AbortError') {
+      if (!this.textOf(id)) {
+        this.updateMessage(id, 'Réponse interrompue.');
+      }
+    } else {
+      this.aiAvailable.set(false);
+      this.updateMessage(id, "Je n'ai pas pu joindre le service IA. Réessayez dans un instant.");
+    }
+    this.finish();
+  }
+
   private finish(): void {
+    this.controller = null;
     this.sending.set(false);
     this.thinking.set(false);
     this.scrollToBottom();
+    this.save();
   }
 
   private append(from: 'user' | 'assistant', text: string): void {
@@ -145,10 +214,46 @@ export class Chatbot {
     this.scrollToBottom();
   }
 
+  private textOf(id: number): string {
+    return this.messages().find(message => message.id === id)?.text ?? '';
+  }
+
   private scrollToBottom(): void {
     const area = this.messagesArea()?.nativeElement;
     if (area) {
       area.scrollTop = area.scrollHeight;
+    }
+  }
+
+  private welcome(): ChatMessage {
+    return {
+      id: 0,
+      from: 'assistant',
+      text: 'Bonjour, je suis votre assistant RH. Posez-moi une question sur vos congés, vos tâches ou les projets.',
+    };
+  }
+
+  private restore(): ChatMessage[] {
+    try {
+      const raw = sessionStorage.getItem(Chatbot.STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as ChatMessage[];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.nextId = parsed.reduce((max, message) => Math.max(max, message.id), 0) + 1;
+          return parsed;
+        }
+      }
+    } catch {
+      // stockage indisponible : on repart de l'accueil
+    }
+    return [this.welcome()];
+  }
+
+  private save(): void {
+    try {
+      sessionStorage.setItem(Chatbot.STORAGE_KEY, JSON.stringify(this.messages()));
+    } catch {
+      // quota dépassé : on ignore
     }
   }
 }

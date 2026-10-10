@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,14 +24,20 @@ public class ChatbotService {
 
     private final ChatbotClient client;
     private final ChatContextService chatContextService;
+    private final ChatbotQuickAnswerService quickAnswerService;
     private final ObjectMapper objectMapper;
 
     public ChatResponse ask(UserPrincipal principal, ChatRequest request) {
         log.info("chat - utilisateur {} role {} - message de {} caractères",
                 principal.id(), principal.role(), request.message().length());
+        Optional<String> quick = quickAnswerService.answer(principal, request.message());
+        if (quick.isPresent()) {
+            log.info("chat - réponse déterministe pour utilisateur {}", principal.id());
+            return new ChatResponse(quick.get(), true);
+        }
         try {
             ChatbotClient.ChatContext context = chatContextService.build(principal);
-            ChatbotClient.ChatResult r = client.ask(request.message(), context);
+            ChatbotClient.ChatResult r = client.ask(request.message(), history(request), context);
             return new ChatResponse(r.reply(), r.aiAvailable());
         } catch (Exception e) {
             log.warn("ia-service/chat indisponible: {}", e.getMessage());
@@ -47,13 +55,40 @@ public class ChatbotService {
     public void stream(UserPrincipal principal, ChatRequest request, OutputStream outputStream) {
         log.info("chat/stream - utilisateur {} role {} - message de {} caractères",
                 principal.id(), principal.role(), request.message().length());
+        Optional<String> quick = quickAnswerService.answer(principal, request.message());
+        if (quick.isPresent()) {
+            log.info("chat/stream - réponse déterministe pour utilisateur {}", principal.id());
+            writeQuickAnswer(outputStream, quick.get());
+            return;
+        }
         ChatbotClient.ChatContext context = chatContextService.build(principal);
         try {
-            client.stream(request.message(), context, outputStream);
+            client.stream(request.message(), history(request), context, outputStream);
         } catch (Exception e) {
             log.warn("ia-service/chat stream indisponible: {}", e.getMessage());
             writeFallback(outputStream, principal.firstName());
         }
+    }
+
+    private void writeQuickAnswer(OutputStream outputStream, String answer) {
+        try {
+            outputStream.write((objectMapper.writeValueAsString(new StreamEvent("token", answer)) + "\n")
+                    .getBytes(StandardCharsets.UTF_8));
+            outputStream.write((objectMapper.writeValueAsString(new StreamEvent("done", null)) + "\n")
+                    .getBytes(StandardCharsets.UTF_8));
+            outputStream.flush();
+        } catch (IOException ignored) {
+            log.debug("flux interrompu, réponse déterministe non transmise");
+        }
+    }
+
+    private List<ChatbotClient.History> history(ChatRequest request) {
+        if (request.history() == null) {
+            return List.of();
+        }
+        return request.history().stream()
+                .map(h -> new ChatbotClient.History(h.role(), h.content()))
+                .toList();
     }
 
     private void writeFallback(OutputStream outputStream, String firstName) {

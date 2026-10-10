@@ -1,7 +1,7 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { ChatReplyDto, ChatStreamEvent } from '../models/chat.model';
+import { ChatHistoryMessage, ChatReplyDto, ChatStreamEvent } from '../models/chat.model';
 import { AuthService } from './auth.service';
 
 @Service()
@@ -19,6 +19,7 @@ export class ChatbotService {
    */
   async stream(
     message: string,
+    history: ChatHistoryMessage[],
     onEvent: (event: ChatStreamEvent) => void,
     signal?: AbortSignal,
   ): Promise<void> {
@@ -29,7 +30,7 @@ export class ChatbotService {
         'Content-Type': 'application/json',
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
-      body: JSON.stringify({ message }),
+      body: JSON.stringify({ message, history }),
       signal,
     });
     if (!response.ok || !response.body) {

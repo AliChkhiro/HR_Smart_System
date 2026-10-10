@@ -70,13 +70,13 @@ public class ChatContextService {
                 .filter(leave -> leave.getStatus() == LeaveStatus.APPROVED)
                 .mapToLong(this::inclusiveDays)
                 .sum();
-        return "approuvés: %d (%d jours), en attente: %d, refusés: %d".formatted(approved, approvedDays, pending, rejected);
+        return "congés — approuvés=%d (dont %d jours), en attente=%d, refusés=%d".formatted(approved, approvedDays, pending, rejected);
     }
 
     private List<String> recentLeaves(Long employeeId) {
         return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId).stream()
                 .sorted(Comparator.comparing(LeaveRequest::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-                .limit(5)
+                .limit(3)
                 .map(leave -> "%s du %s au %s - %s".formatted(
                         leave.getType(),
                         leave.getStartDate().format(DATE_FORMAT),
@@ -89,6 +89,7 @@ public class ChatContextService {
         return taskRepository
                 .findTop10ByAssigneeIdAndDeletedAtIsNullAndStatusNotOrderByDueDateAsc(employeeId, TaskStatus.DONE)
                 .stream()
+                .limit(5)
                 .map(this::describeTask)
                 .toList();
     }
@@ -103,7 +104,7 @@ public class ChatContextService {
         return projectMemberRepository.findAllByEmployeeId(employeeId).stream()
                 .map(ProjectMember::getProject)
                 .filter(project -> project.getDeletedAt() == null)
-                .limit(10)
+                .limit(5)
                 .map(project -> "%s [%s]".formatted(project.getName(), project.getStatus()))
                 .toList();
     }

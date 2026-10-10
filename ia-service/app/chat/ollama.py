@@ -16,14 +16,16 @@ class OllamaClient:
             "model": self.model,
             "messages": messages,
             "stream": stream,
+            "keep_alive": os.getenv("OLLAMA_KEEP_ALIVE", "24h"),
             "options": {
                 "temperature": temperature,
                 "top_p": top_p,
                 "num_predict": num_predict,
+                "repeat_penalty": 1.1,
             },
         }
 
-    def generate(self, messages: list[dict], temperature: float = 0.2, top_p: float = 0.9,
+    def generate(self, messages: list[dict], temperature: float = 0.1, top_p: float = 0.9,
                  num_predict: int = 180) -> str:
         try:
             with httpx.Client(timeout=self.timeout) as client:
@@ -38,7 +40,7 @@ class OllamaClient:
         except Exception as exc:
             raise RuntimeError(str(exc))
 
-    def generate_stream(self, messages: list[dict], temperature: float = 0.2, top_p: float = 0.9,
+    def generate_stream(self, messages: list[dict], temperature: float = 0.1, top_p: float = 0.9,
                         num_predict: int = 180):
         try:
             with httpx.Client(timeout=self.timeout) as client:

@@ -18,6 +18,8 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
     List<Task> findTop10ByAssigneeIdAndDeletedAtIsNullAndStatusNotOrderByDueDateAsc(Long assigneeId, TaskStatus status);
 
+    long countByAssigneeIdAndDeletedAtIsNullAndStatusNot(Long assigneeId, TaskStatus status);
+
     @Query("""
             select t.status, count(t) from Task t
             where t.deletedAt is null

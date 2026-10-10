@@ -88,7 +88,58 @@
 
 .chatbot-bubble-row {
   display: flex;
+  align-items: flex-end;
+  gap: 2px;
   justify-content: flex-start;
+}
+
+.chatbot-copy {
+  color: var(--muted);
+  flex-shrink: 0;
+  opacity: 0.45;
+  transition: opacity 0.15s ease;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.chatbot-bubble-row:hover .chatbot-copy {
+  opacity: 1;
+}
+
+.chatbot-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.chatbot-suggestions-label {
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.chatbot-suggestion {
+  padding: 9px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--brand-mid, var(--brand-start));
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.chatbot-suggestion:hover {
+  border-color: var(--brand-start);
+  background: rgba(15, 23, 42, 0.02);
 }
 
 .chatbot-bubble-row.is-user {
@@ -194,5 +245,32 @@
   mat-icon {
     margin: auto;
     font-size: 19px;
+  }
+
+  &.is-stop {
+    background: #dc2626;
+  }
+}
+
+.chatbot-bubble ::ng-deep {
+  p {
+    margin: 0 0 6px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  ul,
+  ol {
+    margin: 0 0 6px;
+    padding-left: 18px;
+  }
+
+  code {
+    padding: 1px 4px;
+    border-radius: 4px;
+    background: rgba(15, 23, 42, 0.06);
+    font-size: 12px;
   }
 }

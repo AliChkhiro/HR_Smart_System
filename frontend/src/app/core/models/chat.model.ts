@@ -5,6 +5,11 @@ export interface ChatReplyDto {
   aiAvailable: boolean;
 }
 
+export interface ChatHistoryMessage {
+  role: ChatAuthor;
+  content: string;
+}
+
 export type ChatStreamEvent =
   | { type: 'token'; text: string }
   | { type: 'done'; interrupted?: boolean }
