@@ -101,6 +101,7 @@ demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM
 | `OLLAMA_URL`                        | `http://ollama:11434`    | URL Ollama (ia-service)           |
 | `OLLAMA_MODEL`                      | `llama3.2:3b`            | Modèle (ia-service)               |
 | `OLLAMA_KEEP_ALIVE`                 | `24h`                    | Durée de maintien du modèle chargé|
+| `OLLAMA_WARMUP`                     | `true`                   | Préchargement du modèle au démarrage (cold start) |
 | `CHATBOT_TIMEOUT_SECONDS`           | `80`                     | Timeout ia-service → Ollama       |
 
 ## Comportement de repli
@@ -153,7 +154,7 @@ Voir aussi : [`module-ia-synthese.md`](module-ia-synthese.md) (synthèse) et
 
 | Symptôme                              | Cause / remède                                                |
 |---------------------------------------|---------------------------------------------------------------|
-| Première réponse très lente (~20 s)   | Chargement du modèle (cold start CPU), normal une seule fois. |
+| Première réponse très lente (~20 s)   | Cold start CPU : préchargement automatique (`OLLAMA_WARMUP=true`), normal une seule fois. |
 | HTTP 429                              | Limite de débit atteinte ; patienter ou ajuster les variables.|
 | `aiAvailable: false`                  | ia-service ou Ollama arrêté ; vérifier les conteneurs.        |
 | Réponses imprécises                   | Privilégier les questions de comptage (déterministes).        |

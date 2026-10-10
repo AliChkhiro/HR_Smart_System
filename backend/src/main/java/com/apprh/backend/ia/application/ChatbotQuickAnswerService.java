@@ -62,7 +62,7 @@ public class ChatbotQuickAnswerService {
             return Optional.of(leaveAnswer(employeeId, normalized));
         }
         if (normalized.contains("tache")) {
-            return Optional.of(taskAnswer(employeeId));
+            return Optional.of(taskAnswer(employeeId, normalized));
         }
         if (normalized.contains("projet")) {
             return Optional.of(projectAnswer(employeeId));
@@ -93,7 +93,12 @@ public class ChatbotQuickAnswerService {
                 .formatted(approved, approvedDays, pending, rejected, approved + pending + rejected);
     }
 
-    private String taskAnswer(Long employeeId) {
+    private String taskAnswer(Long employeeId, String normalized) {
+        if (normalized.contains("termin") || normalized.contains("complete") || normalized.contains("finie")
+                || normalized.contains("finies") || normalized.contains("realise")) {
+            long done = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatus(employeeId, TaskStatus.DONE);
+            return "Vous avez %d tâche(s) terminée(s).".formatted(done);
+        }
         long open = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatusNot(employeeId, TaskStatus.DONE);
         return "Vous avez %d tâche(s) en cours (non terminée(s)).".formatted(open);
     }

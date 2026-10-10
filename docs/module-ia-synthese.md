@@ -89,7 +89,8 @@ persistance/effacement, RBAC (401), limite de débit (429), métriques.
 
 ## 8. Limites et pistes d'évolution
 
-- Cold start Ollama ~20 s (atténué par `OLLAMA_KEEP_ALIVE=24h`).
+- Cold start Ollama ~20 s (atténué par `OLLAMA_KEEP_ALIVE=24h` et le
+  préchargement automatique `OLLAMA_WARMUP=true`).
 - Qualité limitée de `llama3.2:3b` sur CPU → mitigée par le mode déterministe.
 - Évolutions : RAG sur la documentation RH, outils d'action, évaluation
   automatique de la qualité des réponses.

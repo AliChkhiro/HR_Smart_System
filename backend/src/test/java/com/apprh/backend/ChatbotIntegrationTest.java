@@ -3,6 +3,8 @@ package com.apprh.backend;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
 import com.apprh.backend.leaves.domain.LeaveStatus;
 import com.apprh.backend.leaves.infrastructure.LeaveRequestRepository;
+import com.apprh.backend.tasks.domain.TaskStatus;
+import com.apprh.backend.tasks.infrastructure.TaskRepository;
 import com.apprh.backend.users.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +47,24 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Test
+    void deterministicDoneTaskCountMatchesDatabase() throws Exception {
+        String token = login();
+        long done = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatus(employeeId(), TaskStatus.DONE);
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de tâches ai-je terminées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("terminée")))
+                .andExpect(jsonPath("$.reply", containsString(String.valueOf(done))));
+    }
 
     @Test
     void chatRequiresAuthentication() throws Exception {
@@ -215,11 +235,14 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
     }
 
     private long approvedLeaveCount() {
-        Long userId = userRepository.findByEmailAndDeletedAtIsNull(EMPLOYEE_EMAIL).orElseThrow().getId();
-        Long employeeId = employeeRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow().getId();
-        return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId).stream()
+        return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId()).stream()
                 .filter(leave -> leave.getStatus() == LeaveStatus.APPROVED)
                 .count();
+    }
+
+    private Long employeeId() {
+        Long userId = userRepository.findByEmailAndDeletedAtIsNull(EMPLOYEE_EMAIL).orElseThrow().getId();
+        return employeeRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow().getId();
     }
 
     private String login() throws Exception {
