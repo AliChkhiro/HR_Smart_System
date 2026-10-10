@@ -1,9 +1,10 @@
-import { Component, ElementRef, HostListener, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, NgZone, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChatbotService } from '../../core/services/chatbot.service';
+import { ChatStreamEvent } from '../../core/models/chat.model';
 
 export interface ChatMessage {
   id: number;
@@ -13,7 +14,8 @@ export interface ChatMessage {
 
 /**
  * Widget flottant de l'assistant RH.
- * Appelle POST /api/chatbot/chat ; le backend relaie vers l'ia-service (Ollama).
+ * Appelle POST /api/chatbot/chat/stream ; le backend relaie la réponse de l'ia-service
+ * (Ollama) en flux NDJSON, affichée progressivement.
  */
 @Component({
   selector: 'app-chatbot',
@@ -24,6 +26,7 @@ export interface ChatMessage {
 export class Chatbot {
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly chatbotService = inject(ChatbotService);
+  private readonly zone = inject(NgZone);
 
   private readonly messagesArea = viewChild<ElementRef<HTMLElement>>('messagesArea');
   private nextId = 1;
@@ -31,6 +34,7 @@ export class Chatbot {
   protected readonly open = signal(false);
   protected readonly draft = signal('');
   protected readonly sending = signal(false);
+  protected readonly thinking = signal(false);
   protected readonly aiAvailable = signal(true);
 
   protected readonly messages = signal<ChatMessage[]>([
@@ -84,21 +88,60 @@ export class Chatbot {
     this.append('user', text);
     this.draft.set('');
     this.sending.set(true);
-    this.chatbotService.ask(text).subscribe({
-      next: response => {
-        this.aiAvailable.set(response.aiAvailable);
-        this.append('assistant', response.reply);
-        this.sending.set(false);
-      },
-      error: () => {
-        this.append('assistant', "Le service est injoignable pour le moment. Reessayez dans un instant.");
-        this.sending.set(false);
+    this.thinking.set(true);
+    const assistantId = this.appendPlaceholder();
+    this.chatbotService
+      .stream(text, event => this.zone.run(() => this.onStreamEvent(assistantId, event)))
+      .then(() => this.zone.run(() => this.finish()))
+      .catch(() => this.zone.run(() => {
+        this.updateMessage(assistantId, 'Le service est injoignable pour le moment. Réessayez dans un instant.');
+        this.finish();
+      }));
+  }
+
+  private onStreamEvent(id: number, event: ChatStreamEvent): void {
+    if (event.type === 'token') {
+      this.thinking.set(false);
+      this.appendText(id, event.text);
+    } else if (event.type === 'fallback') {
+      this.aiAvailable.set(false);
+      this.thinking.set(false);
+      this.appendText(id, event.text);
+    } else if (event.type === 'done') {
+      if (event.interrupted) {
+        this.aiAvailable.set(false);
       }
-    });
+      this.thinking.set(false);
+    }
+  }
+
+  private finish(): void {
+    this.sending.set(false);
+    this.thinking.set(false);
+    this.scrollToBottom();
   }
 
   private append(from: 'user' | 'assistant', text: string): void {
     this.messages.update(list => [...list, { id: this.nextId++, from, text }]);
+    this.scrollToBottom();
+  }
+
+  private appendPlaceholder(): number {
+    const id = this.nextId++;
+    this.messages.update(list => [...list, { id, from: 'assistant', text: '' }]);
+    this.scrollToBottom();
+    return id;
+  }
+
+  private appendText(id: number, text: string): void {
+    this.messages.update(list => list.map(message =>
+      message.id === id ? { ...message, text: message.text + text } : message));
+    this.scrollToBottom();
+  }
+
+  private updateMessage(id: number, text: string): void {
+    this.messages.update(list => list.map(message =>
+      message.id === id ? { ...message, text } : message));
     this.scrollToBottom();
   }
 
