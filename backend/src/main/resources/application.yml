@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   application:
     name: apprh-backend
   datasource:
@@ -39,6 +39,10 @@ app:
     from: ${MAIL_FROM:no-reply@apprh.local}
   ia-service:
     url: ${IA_SERVICE_URL:http://localhost:8000}
+  chatbot:
+    base-url: ${CHATBOT_IA_SERVICE_URL:}
+    model: ${CHATBOT_OLLAMA_MODEL:llama3.2:3b}
+    timeout-ms: ${CHATBOT_TIMEOUT_MS:30000}
 
 springdoc:
   swagger-ui:

@@ -13,6 +13,8 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, Lo
 
     List<ProjectMember> findAllByProjectIdIn(Collection<Long> projectIds);
 
+    List<ProjectMember> findAllByEmployeeId(Long employeeId);
+
     boolean existsByProjectIdAndEmployeeId(Long projectId, Long employeeId);
 
     Optional<ProjectMember> findByProjectIdAndEmployeeId(Long projectId, Long employeeId);

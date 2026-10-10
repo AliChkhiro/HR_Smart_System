@@ -13,7 +13,7 @@ export interface ChatMessage {
 
 /**
  * Widget flottant de l'assistant RH.
- * STEP 2 : appelle POST /api/chatbot/chat, le backend repond sans LLM.
+ * Appelle POST /api/chatbot/chat ; le backend relaie vers l'ia-service (Ollama).
  */
 @Component({
   selector: 'app-chatbot',
@@ -31,7 +31,7 @@ export class Chatbot {
   protected readonly open = signal(false);
   protected readonly draft = signal('');
   protected readonly sending = signal(false);
-  protected readonly aiAvailable = signal(false);
+  protected readonly aiAvailable = signal(true);
 
   protected readonly messages = signal<ChatMessage[]>([
     {
