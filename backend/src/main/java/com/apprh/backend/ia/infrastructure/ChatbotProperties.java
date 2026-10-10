@@ -6,6 +6,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record ChatbotProperties(
         String baseUrl,
         String model,
-        long timeoutMs
+        long timeoutMs,
+        int rateLimitMax,
+        long rateLimitWindowSeconds
 ) {
 }

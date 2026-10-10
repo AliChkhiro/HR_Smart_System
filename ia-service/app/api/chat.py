@@ -11,9 +11,15 @@ from ..chat.ollama import OllamaClient
 router = APIRouter(tags=["chat"])
 
 
+class HistoryMessage(BaseModel):
+    role: str = Field(pattern="^(user|assistant)$")
+    content: str = Field(min_length=1, max_length=4000)
+
+
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=2000)
     user_context: dict | None = None
+    history: list[HistoryMessage] | None = None
 
 
 class ChatResponse(BaseModel):
@@ -35,6 +41,9 @@ def build_messages(req: ChatRequest) -> list[dict]:
             "content": "Contexte utilisateur (source unique de vérité, lecture seule) :\n"
                        + json.dumps(req.user_context, ensure_ascii=False),
         })
+    if req.history:
+        for item in req.history[-8:]:
+            messages.append({"role": item.role, "content": item.content})
     messages.append({"role": "user", "content": req.message})
     return messages
 

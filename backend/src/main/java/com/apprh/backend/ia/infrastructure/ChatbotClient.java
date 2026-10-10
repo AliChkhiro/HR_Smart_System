@@ -47,8 +47,8 @@ public class ChatbotClient {
                 .build();
     }
 
-    public ChatResult ask(String message, ChatContext context) {
-        ChatReq req = new ChatReq(message, context);
+    public ChatResult ask(String message, List<History> history, ChatContext context) {
+        ChatReq req = new ChatReq(message, context, history);
         try {
             ChatRes res = restClient.post()
                     .uri("/api/v1/chat")
@@ -69,8 +69,9 @@ public class ChatbotClient {
      * Relaie le flux NDJSON de l'ia-service vers le flux de sortie HTTP,
      * en propageant chaque fragment dès sa réception.
      */
-    public void stream(String message, ChatContext context, OutputStream output) throws IOException, InterruptedException {
-        String payload = objectMapper.writeValueAsString(new ChatReq(message, context));
+    public void stream(String message, List<History> history, ChatContext context, OutputStream output)
+            throws IOException, InterruptedException {
+        String payload = objectMapper.writeValueAsString(new ChatReq(message, context, history));
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + "/api/v1/chat/stream"))
                 .header("Content-Type", "application/json")
@@ -112,7 +113,10 @@ public class ChatbotClient {
     ) {
     }
 
-    private record ChatReq(String message, ChatContext user_context) {
+    public record History(String role, String content) {
+    }
+
+    private record ChatReq(String message, ChatContext user_context, List<History> history) {
     }
 
     private record ChatRes(String reply, boolean ai_available) {

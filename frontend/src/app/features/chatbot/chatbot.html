@@ -20,6 +20,17 @@
         <span class="chatbot-title">Assistant RH</span>
         <span class="chatbot-subtitle">Assistant virtuel</span>
       </div>
+      @if (messages().length > 1) {
+        <button
+          mat-icon-button
+          type="button"
+          aria-label="Effacer la conversation"
+          matTooltip="Effacer la conversation"
+          (click)="clear()"
+        >
+          <mat-icon>delete_sweep</mat-icon>
+        </button>
+      }
       <button mat-icon-button type="button" aria-label="Fermer" (click)="close()">
         <mat-icon>close</mat-icon>
       </button>
@@ -32,12 +43,40 @@
           <span>Réflexion en cours…</span>
         </div>
       }
+
+      @if (showSuggestions()) {
+        <div class="chatbot-suggestions">
+          <span class="chatbot-suggestions-label">Suggestions</span>
+          @for (suggestion of suggestions; track suggestion) {
+            <button type="button" class="chatbot-suggestion" (click)="submit(suggestion)">
+              {{ suggestion }}
+            </button>
+          }
+        </div>
+      }
+
       @for (message of messages(); track message.id) {
         @if (message.text) {
           <div class="chatbot-bubble-row" [class.is-user]="message.from === 'user'">
             <div class="chatbot-bubble" [class.is-user]="message.from === 'user'">
-              {{ message.text }}
+              @if (message.from === 'assistant') {
+                <div [innerHTML]="message.text | markdown"></div>
+              } @else {
+                {{ message.text }}
+              }
             </div>
+            @if (message.from === 'assistant') {
+              <button
+                mat-icon-button
+                type="button"
+                class="chatbot-copy"
+                [matTooltip]="copiedId() === message.id ? 'Copié' : 'Copier'"
+                [attr.aria-label]="copiedId() === message.id ? 'Copié' : 'Copier la réponse'"
+                (click)="copy(message)"
+              >
+                <mat-icon>{{ copiedId() === message.id ? 'check' : 'content_copy' }}</mat-icon>
+              </button>
+            }
           </div>
         }
       }
@@ -58,16 +97,29 @@
           (input)="onDraftInput($event)"
           (keydown)="onKeydown($event)"
         ></textarea>
-        <button
-          mat-fab
-          type="button"
-          class="chatbot-send"
-          [disabled]="!draft().trim() || sending()"
-          aria-label="Envoyer le message"
-          (click)="send()"
-        >
-          <mat-icon>send</mat-icon>
-        </button>
+        @if (sending()) {
+          <button
+            mat-fab
+            type="button"
+            class="chatbot-send is-stop"
+            aria-label="Arrêter la génération"
+            matTooltip="Arrêter"
+            (click)="stop()"
+          >
+            <mat-icon>stop</mat-icon>
+          </button>
+        } @else {
+          <button
+            mat-fab
+            type="button"
+            class="chatbot-send"
+            [disabled]="!draft().trim()"
+            aria-label="Envoyer le message"
+            (click)="send()"
+          >
+            <mat-icon>send</mat-icon>
+          </button>
+        }
       </div>
     </footer>
   </section>
