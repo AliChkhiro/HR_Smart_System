@@ -32,7 +32,7 @@ def build_messages(req: ChatRequest) -> list[dict]:
     if req.user_context:
         messages.append({
             "role": "system",
-            "content": "Contexte utilisateur (données personnelles autorisées, en lecture seule):\n"
+            "content": "Contexte utilisateur (source unique de vérité, lecture seule) :\n"
                        + json.dumps(req.user_context, ensure_ascii=False),
         })
     messages.append({"role": "user", "content": req.message})
