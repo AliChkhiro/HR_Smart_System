@@ -23,25 +23,53 @@ services:
       DB_URL: jdbc:postgresql://db:5432/apprh
       DB_USERNAME: apprh
       DB_PASSWORD: apprh
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-a-changer-avant-production}
+      JWT_SECRET: 
       IA_SERVICE_URL: http://ia-service:8000
-      MAIL_ENABLED: ${MAIL_ENABLED:-false}
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-no-reply@apprh.local}
+      CHATBOT_IA_SERVICE_URL: http://ia-service:8000
+      CHATBOT_OLLAMA_MODEL: llama3.2:3b
+      CHATBOT_TIMEOUT_MS: 90000
+      MAIL_ENABLED: 
+      MAIL_HOST: 
+      MAIL_PORT: 
+      MAIL_USERNAME: 
+      MAIL_PASSWORD: 
+      MAIL_FROM: 
     ports:
       - "8081:8080"
     depends_on:
       db:
         condition: service_healthy
+      ia-service:
+        condition: service_started
 
   ia-service:
     build: ./ia-service
     container_name: apprh-ia-service
+    environment:
+      OLLAMA_URL: http://ollama:11434
+      OLLAMA_MODEL: llama3.2:3b
+      CHATBOT_TIMEOUT_SECONDS: 80
     ports:
       - "8000:8000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:0.6.7
+    container_name: apprh-ollama
+    environment:
+      OLLAMA_KEEP_ALIVE: 24h
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD-SHELL", "ollama --version >/dev/null 2>&1 || curl -fsS http://localhost:11434/api/version >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   frontend:
     build: ./frontend
@@ -53,3 +81,4 @@ services:
 
 volumes:
   pgdata:
+  ollama:

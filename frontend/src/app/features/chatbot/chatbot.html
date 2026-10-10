@@ -1,0 +1,72 @@
+<button
+  mat-fab
+  type="button"
+  class="chatbot-launcher"
+  [class.is-open]="open()"
+  [attr.aria-expanded]="open()"
+  aria-label="Ouvrir l'assistant RH"
+  (click)="toggle()"
+>
+  <mat-icon>{{ open() ? 'close' : 'forum' }}</mat-icon>
+</button>
+
+@if (open()) {
+  <section class="chatbot-panel" role="dialog" aria-label="Assistant RH">
+    <header class="chatbot-head">
+      <div class="chatbot-head-icon">
+        <mat-icon>forum</mat-icon>
+      </div>
+      <div class="chatbot-head-text">
+        <span class="chatbot-title">Assistant RH</span>
+        <span class="chatbot-subtitle">Assistant virtuel</span>
+      </div>
+      <button mat-icon-button type="button" aria-label="Fermer" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </header>
+
+    <div class="chatbot-messages" #messagesArea>
+      @if (sending()) {
+        <div class="chatbot-typing">
+          <mat-spinner diameter="16" />
+          <span>Réflexion en cours…</span>
+        </div>
+      }
+      @for (message of messages(); track message.id) {
+        <div class="chatbot-bubble-row" [class.is-user]="message.from === 'user'">
+          <div class="chatbot-bubble" [class.is-user]="message.from === 'user'">
+            {{ message.text }}
+          </div>
+        </div>
+      }
+    </div>
+
+    <footer class="chatbot-foot">
+      @if (!aiAvailable()) {
+        <div class="chatbot-notice">
+          <mat-icon>info</mat-icon>
+          <span>Service IA momentanément indisponible — réponses limitées.</span>
+        </div>
+      }
+      <div class="chatbot-composer">
+        <textarea
+          rows="1"
+          placeholder="Posez votre question..."
+          [value]="draft()"
+          (input)="onDraftInput($event)"
+          (keydown)="onKeydown($event)"
+        ></textarea>
+        <button
+          mat-fab
+          type="button"
+          class="chatbot-send"
+          [disabled]="!draft().trim() || sending()"
+          aria-label="Envoyer le message"
+          (click)="send()"
+        >
+          <mat-icon>send</mat-icon>
+        </button>
+      </div>
+    </footer>
+  </section>
+}

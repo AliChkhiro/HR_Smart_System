@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -12,6 +11,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { CommonModule, DatePipe } from '@angular/common';
 import { filter } from 'rxjs';
 import { AuthService } from '../../core/services/auth.service';
+import { Chatbot } from '../../features/chatbot/chatbot';
 import { NotificationsService } from '../../core/services/notifications.service';
 import { NotificationDto, NotificationType } from '../../core/models/notification.model';
 import { UserRole } from '../../core/models/user.model';
@@ -31,7 +31,6 @@ interface NavItem {
     DatePipe,
     RouterOutlet,
     RouterLink,
-    MatSidenavModule,
     MatToolbarModule,
     MatListModule,
     MatIconModule,
@@ -39,7 +38,8 @@ interface NavItem {
     MatMenuModule,
     MatTooltipModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    Chatbot
   ],
   templateUrl: './main-layout.html',
   styleUrl: './main-layout.scss',
@@ -127,7 +127,12 @@ export class MainLayout {
 
   protected openNotification(notification: NotificationDto): void {
     if (!notification.read) {
-      this.notificationsService.markRead(notification.id).subscribe(() => this.loadNotifications());
+      this.notificationsService.markRead(notification.id).subscribe(() => {
+        this.loadNotifications();
+        this.router.navigate(['/notifications']);
+      });
+    } else {
+      this.router.navigate(['/notifications']);
     }
   }
 

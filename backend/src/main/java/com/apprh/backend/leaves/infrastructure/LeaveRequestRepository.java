@@ -17,6 +17,8 @@ public interface LeaveRequestRepository extends JpaRepository<LeaveRequest, Long
     List<LeaveRequest> findByEmployeeIdAndStatusInAndDeletedAtIsNull(
             Long employeeId, List<com.apprh.backend.leaves.domain.LeaveStatus> statuses);
 
+    List<LeaveRequest> findByEmployeeIdAndDeletedAtIsNull(Long employeeId);
+
     long countByStatusAndDeletedAtIsNull(com.apprh.backend.leaves.domain.LeaveStatus status);
 
     List<LeaveRequest> findByStatusAndDeletedAtIsNullOrderByCreatedAtAsc(
