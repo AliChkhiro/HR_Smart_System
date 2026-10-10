@@ -26,18 +26,20 @@
     </header>
 
     <div class="chatbot-messages" #messagesArea>
-      @if (sending()) {
+      @if (thinking()) {
         <div class="chatbot-typing">
           <mat-spinner diameter="16" />
           <span>Réflexion en cours…</span>
         </div>
       }
       @for (message of messages(); track message.id) {
-        <div class="chatbot-bubble-row" [class.is-user]="message.from === 'user'">
-          <div class="chatbot-bubble" [class.is-user]="message.from === 'user'">
-            {{ message.text }}
+        @if (message.text) {
+          <div class="chatbot-bubble-row" [class.is-user]="message.from === 'user'">
+            <div class="chatbot-bubble" [class.is-user]="message.from === 'user'">
+              {{ message.text }}
+            </div>
           </div>
-        </div>
+        }
       }
     </div>
 
