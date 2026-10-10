@@ -1,4 +1,5 @@
 <button
+  #launcher
   mat-fab
   type="button"
   class="chatbot-launcher"
@@ -36,7 +37,7 @@
       </button>
     </header>
 
-    <div class="chatbot-messages" #messagesArea>
+    <div class="chatbot-messages" #messagesArea role="log" aria-live="polite" aria-relevant="additions text">
       @if (thinking()) {
         <div class="chatbot-typing">
           <mat-spinner diameter="16" />
@@ -91,8 +92,10 @@
       }
       <div class="chatbot-composer">
         <textarea
+          #composer
           rows="1"
           placeholder="Posez votre question..."
+          aria-label="Votre question à l'assistant RH"
           [value]="draft()"
           (input)="onDraftInput($event)"
           (keydown)="onKeydown($event)"

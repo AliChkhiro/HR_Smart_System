@@ -1,5 +1,6 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ChatHistoryMessage, ChatReplyDto, ChatStreamEvent } from '../models/chat.model';
 import { AuthService } from './auth.service';
@@ -11,6 +12,15 @@ export class ChatbotService {
 
   ask(message: string) {
     return this.http.post<ChatReplyDto>(`${environment.apiUrl}/chatbot/chat`, { message });
+  }
+
+  /** Historique persistant côté serveur pour l'utilisateur connecté. */
+  loadHistory(): Promise<ChatHistoryMessage[]> {
+    return firstValueFrom(this.http.get<ChatHistoryMessage[]>(`${environment.apiUrl}/chatbot/messages`));
+  }
+
+  async clearHistory(): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${environment.apiUrl}/chatbot/messages`));
   }
 
   /**

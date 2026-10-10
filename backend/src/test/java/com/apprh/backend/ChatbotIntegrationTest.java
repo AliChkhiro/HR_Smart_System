@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -150,6 +152,60 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("\"type\":\"token\"")))
                 .andExpect(content().string(containsString(String.valueOf(approved))))
                 .andExpect(content().string(containsString("\"type\":\"done\"")));
+    }
+
+    @Test
+    void persistsExchangesAndAllowsClearing() throws Exception {
+        String token = login();
+
+        mockMvc.perform(delete("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de congés approuvés ai-je ?"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].role").value("user"))
+                .andExpect(jsonPath("$[1].role").value("assistant"));
+
+        mockMvc.perform(delete("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void messagesRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/chatbot/messages"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void exposesChatbotMetrics() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de congés approuvés ai-je ?"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/actuator/metrics/chatbot.requests")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("chatbot.requests"));
     }
 
     private long approvedLeaveCount() {

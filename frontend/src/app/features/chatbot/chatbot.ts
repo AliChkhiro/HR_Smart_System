@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, NgZone, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, NgZone, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -6,9 +6,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChatbotService } from '../../core/services/chatbot.service';
 import { ChatHistoryMessage, ChatStreamEvent } from '../../core/models/chat.model';
 import { MarkdownPipe } from './markdown.pipe';
-
-const MAX_HISTORY_MESSAGES = 8;
-const STORAGE_KEY = 'apprh.chatbot.messages';
 
 export interface ChatMessage {
   id: number;
@@ -42,6 +39,8 @@ export class Chatbot {
   private readonly zone = inject(NgZone);
 
   private readonly messagesArea = viewChild<ElementRef<HTMLElement>>('messagesArea');
+  private readonly composer = viewChild<ElementRef<HTMLTextAreaElement>>('composer');
+  private readonly launcher = viewChild<ElementRef<HTMLButtonElement>>('launcher');
   private nextId = 1;
   private controller: AbortController | null = null;
   private copiedTimer?: ReturnType<typeof setTimeout>;
@@ -59,6 +58,13 @@ export class Chatbot {
 
   constructor() {
     this.messages.set(this.restore());
+    this.loadServerHistory();
+
+    effect(() => {
+      if (this.open() && this.composer()) {
+        this.composer()!.nativeElement.focus();
+      }
+    });
   }
 
   @HostListener('document:keydown.escape')
@@ -83,6 +89,7 @@ export class Chatbot {
 
   protected close(): void {
     this.open.set(false);
+    this.launcher()?.nativeElement.focus();
   }
 
   protected onDraftInput(event: Event): void {
@@ -134,6 +141,7 @@ export class Chatbot {
     this.aiAvailable.set(true);
     this.copiedId.set(null);
     this.save();
+    this.chatbotService.clearHistory().catch(() => undefined);
   }
 
   protected copy(message: ChatMessage): void {
@@ -211,6 +219,31 @@ export class Chatbot {
   private updateMessage(id: number, text: string): void {
     this.messages.update(list => list.map(message =>
       message.id === id ? { ...message, text } : message));
+    this.scrollToBottom();
+  }
+
+  private loadServerHistory(): void {
+    this.chatbotService.loadHistory()
+      .then(messages => {
+        if (!this.sending() && messages.length > 0) {
+          this.applyServerHistory(messages);
+        }
+      })
+      .catch(() => undefined);
+  }
+
+  private applyServerHistory(messages: ChatHistoryMessage[]): void {
+    const mapped: ChatMessage[] = [
+      this.welcome(),
+      ...messages.map((message, index) => ({
+        id: index + 1,
+        from: message.role,
+        text: message.content,
+      })),
+    ];
+    this.nextId = mapped.reduce((max, message) => Math.max(max, message.id), 0) + 1;
+    this.messages.set(mapped);
+    this.save();
     this.scrollToBottom();
   }
 

@@ -36,11 +36,17 @@ services:
       MAIL_FROM: 
     ports:
       - "8081:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/api/actuator/health | grep -q UP"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
     depends_on:
       db:
         condition: service_healthy
       ia-service:
-        condition: service_started
+        condition: service_healthy
 
   ia-service:
     build: ./ia-service
@@ -51,6 +57,12 @@ services:
       CHATBOT_TIMEOUT_SECONDS: 80
     ports:
       - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
     depends_on:
       ollama:
         condition: service_healthy
@@ -76,8 +88,14 @@ services:
     container_name: apprh-frontend
     ports:
       - "4200:80"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost/ >/dev/null 2>&1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
 
 volumes:
   pgdata:

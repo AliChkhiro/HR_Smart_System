@@ -26,6 +26,8 @@ Widget Angular ──► Backend Spring ──► ia-service (FastAPI) ──►
 |---------|----------------------------|------------------------------------------|
 | POST    | `/api/chatbot/chat`        | `{ "reply": string, "aiAvailable": bool }` |
 | POST    | `/api/chatbot/chat/stream` | Flux NDJSON `application/x-ndjson`        |
+| GET     | `/api/chatbot/messages`    | Historique serveur `[{ "role", "content" }]` |
+| DELETE  | `/api/chatbot/messages`    | `204 No Content` (efface l'historique)     |
 
 Corps de requête (identique pour les deux) :
 
@@ -66,6 +68,17 @@ Les questions de comptage (congés, tâches, projets) sont interceptées par
 LLM est court-circuité. Cela garantit des chiffres exacts. Si la question
 demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM.
 
+## Persistance et observabilité
+
+- **Persistance serveur** : chaque échange (question + réponse) est enregistré
+  dans la table `chat_message` (migration Flyway `V6`), rattaché à l'utilisateur
+  du JWT. `GET /api/chatbot/messages` renvoie les 40 derniers messages ;
+  `DELETE /api/chatbot/messages` efface l'historique de l'utilisateur.
+- **Observabilité** : métriques Micrometer exposées sur `/api/actuator/metrics` :
+  - `chatbot.requests` (tags `surface` = `chat` | `stream`, `mode` = `deterministic` | `llm` | `fallback`) ;
+  - `chatbot.latency` (tag `surface`) ;
+  - `chatbot.rate.limited` (compteur des requêtes rejetées en HTTP 429).
+
 ## Limites et validation
 
 | Limite                         | Valeur                                   |
@@ -97,14 +110,38 @@ indisponible ». Les réponses déterministes fonctionnent même dans ce cas.
 
 ## Tests
 
+Backend (JUnit + Testcontainers) :
+
 - `ChatbotIntegrationTest` : authentification, validation, historique,
-  réponses déterministes, repli, flux NDJSON.
+  réponses déterministes, repli, flux NDJSON, persistance, métriques.
 - `ChatbotRateLimitIntegrationTest` : renvoi HTTP 429 au-delà de la limite.
 
 ```bash
 cd backend
 .\mvnw.cmd test
 ```
+
+Frontend (vitest via `@angular/build:unit-test`) :
+
+```bash
+cd frontend
+npx ng test --watch=false
+```
+
+- `markdown.pipe.spec.ts` : rendu Markdown (échappement, listes, emphase, code).
+- `chatbot.service.spec.ts` : `ask`, `loadHistory`, `clearHistory`, flux NDJSON.
+- `chatbot.spec.ts` : restauration de session, envoi, réponse diffusée, effacement.
+
+## Déploiement
+
+1. Copier la configuration : `Copy-Item .env.example .env` puis renseigner les
+   valeurs (voir `README.md` → *Configuration*).
+2. Construire et démarrer la pile : `docker compose up -d --build`.
+3. La pile est prête lorsque tous les services sont `healthy` :
+   `docker compose ps`. Des **healthchecks** couvrent `db`, `ollama`,
+   `ia-service` (`/health`), `backend` (`/api/actuator/health`) et `frontend`
+   (`/`), et `depends_on` conditionne le démarrage à leur bon état.
+4. Interface : http://localhost:4200 — API : http://localhost:8081/api.
 
 ## Dépannage
 
