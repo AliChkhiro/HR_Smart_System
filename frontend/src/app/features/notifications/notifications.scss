@@ -16,7 +16,7 @@
   gap: 14px;
   width: 100%;
   padding: 14px 16px;
-  border: 1px solid #eef1f6;
+  border: 1px solid #f2e8d3;
   border-radius: 12px;
   background: #fff;
   cursor: pointer;
@@ -24,13 +24,13 @@
   transition: background 0.15s ease, border-color 0.15s ease;
 
   &:hover {
-    background: #f8faff;
-    border-color: #c7d2fe;
+    background: #f9f2e1;
+    border-color: #ead7b3;
   }
 
   &.unread {
-    background: #f8faff;
-    border-color: #c7d2fe;
+    background: #f9f2e1;
+    border-color: #ead7b3;
   }
 }
 
@@ -38,8 +38,8 @@
   width: 42px;
   height: 42px;
   border-radius: 12px;
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #ffe0b2;
+  color: #4a3422;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,19 +62,19 @@
 
 .notif-msg {
   font-size: 13.5px;
-  color: #334155;
+  color: #4a3422;
   font-weight: 500;
 }
 
 .notif-date {
   font-size: 12px;
-  color: #94a3b8;
+  color: #6b6b6b;
 }
 
 .unread-dot {
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  background: #4f46e5;
+  background: #8b6f47;
   flex-shrink: 0;
 }

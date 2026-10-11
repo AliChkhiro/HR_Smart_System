@@ -9,11 +9,11 @@
 
   &:hover {
     transform: translateY(-3px);
-    box-shadow: 0 14px 30px -16px rgba(15, 23, 42, 0.4);
+    box-shadow: 0 14px 30px -16px rgba(74, 52, 34, 0.4);
   }
 
   &:focus-visible {
-    outline: 2px solid #4f46e5;
+    outline: 2px solid #8b6f47;
     outline-offset: 2px;
   }
 }
@@ -56,18 +56,18 @@
 }
 
 .tile-indigo {
-  background: #eef2ff;
-  color: #4f46e5;
+  background: #ffe0b2;
+  color: #4a3422;
 }
 
 .tile-cyan {
-  background: #cffafe;
-  color: #0e7490;
+  background: #f9f2e1;
+  color: #8b6f47;
 }
 
 .tile-blue {
-  background: #dbeafe;
-  color: #1d4ed8;
+  background: #f2e8d3;
+  color: #4a3422;
 }
 
 .tile-amber {
@@ -81,21 +81,21 @@
 }
 
 .tile-teal {
-  background: #ccfbf1;
-  color: #0f766e;
+  background: #ffe0b2;
+  color: #8b6f47;
 }
 
 .tile-rose {
-  background: #ffe4e6;
-  color: #be123c;
+  background: #f9f2e1;
+  color: #8b6f47;
 }
 
 .kpi-hero .mat-mdc-card-content {
-  background: linear-gradient(135deg, #4f46e5, #4338ca);
+  background: linear-gradient(135deg, #8b6f47, #4a3422);
   color: #fff;
 
   .kpi-label {
-    color: #c7d2fe;
+    color: #ffe0b2;
   }
 }
 
@@ -106,14 +106,14 @@
 
 .kpi-hero .kpi-arrow {
   margin-left: auto;
-  color: #c7d2fe;
+  color: #ffe0b2;
 }
 
 .kpi-value {
   font-size: 26px;
   font-weight: 700;
   line-height: 1.15;
-  color: #0f172a;
+  color: #4a3422;
 }
 
 .kpi-hero .kpi-value {
@@ -121,7 +121,7 @@
 }
 
 .kpi-label {
-  color: #64748b;
+  color: #6b6b6b;
   font-size: 12.5px;
 }
 
@@ -155,21 +155,21 @@
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: #eef1f6;
+  background: #f2e8d3;
   overflow: hidden;
 }
 
 .completion-fill {
   height: 100%;
   border-radius: 4px;
-  background: linear-gradient(90deg, #4f46e5, #22d3ee);
+  background: linear-gradient(90deg, #8b6f47, #ffe0b2);
   transition: width 0.5s ease;
 }
 
 .completion-label {
   font-size: 12.5px;
   font-weight: 600;
-  color: #475569;
+  color: #6b6b6b;
   white-space: nowrap;
 }
 
@@ -188,11 +188,11 @@
 }
 
 .dot-accent {
-  background: #22d3ee;
+  background: #8b6f47;
 }
 
 .dot-primary {
-  background: #4f46e5;
+  background: #4a3422;
 }
 
 .dot-warn {
@@ -206,14 +206,14 @@
 .status-label {
   width: 80px;
   font-size: 13px;
-  color: #475569;
+  color: #6b6b6b;
 }
 
 .status-bar {
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: #eef1f6;
+  background: #f2e8d3;
   overflow: hidden;
 }
 
@@ -224,11 +224,11 @@
 }
 
 .fill-accent {
-  background: #22d3ee;
+  background: #8b6f47;
 }
 
 .fill-primary {
-  background: #4f46e5;
+  background: #4a3422;
 }
 
 .fill-warn {
@@ -244,7 +244,7 @@
   text-align: right;
   font-weight: 700;
   font-size: 13px;
-  color: #0f172a;
+  color: #4a3422;
 }
 
 // --- task lines ---
@@ -273,7 +273,7 @@
 .task-line-name {
   font-weight: 600;
   font-size: 13.5px;
-  color: #0f172a;
+  color: #4a3422;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -281,7 +281,7 @@
 
 .task-line-sub {
   font-size: 12px;
-  color: #64748b;
+  color: #6b6b6b;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -293,7 +293,7 @@
   gap: 6px;
   font-size: 12.5px;
   font-weight: 600;
-  color: #1d4ed8;
+  color: #8b6f47;
   white-space: nowrap;
 
   mat-icon {
@@ -304,19 +304,6 @@
 
   &.late {
     color: #b91c1c;
-  }
-}
-
-.all-good {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  color: #15803d;
-  font-size: 13.5px;
-
-  mat-icon {
-    color: #22c55e;
   }
 }
 
