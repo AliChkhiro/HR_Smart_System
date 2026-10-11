@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <div class="page-header">
     <div class="page-ico"><mat-icon>badge</mat-icon></div>
     <div class="page-titles">
@@ -27,10 +27,10 @@
         <div class="error-state">
           <mat-icon>cloud_off</mat-icon>
           <b>Impossible de charger les informations</b>
-          <p>V├®rifiez votre connexion puis r├®essayez.</p>
+          <p>Vérifiez votre connexion puis réessayez.</p>
           <button mat-flat-button color="primary" (click)="retry()">
             <mat-icon>refresh</mat-icon>
-            R├®essayer
+            Réessayer
           </button>
         </div>
       </mat-card-content>
@@ -76,7 +76,7 @@
           <div class="hero-side">
             <div class="hero-stat">
               <span class="hero-stat-value">{{ approvedDays() }}</span>
-              <span class="hero-stat-label">jours de cong├®s utilis├®s</span>
+              <span class="hero-stat-label">jours de congés utilisés</span>
             </div>
             <div class="hero-stat">
               <span class="hero-stat-value">{{ pendingLeaves().length }}</span>
@@ -106,14 +106,14 @@
                       @if (employee.departmentName) {
                         <li>
                           <mat-icon>account_balance</mat-icon>
-                          <span class="info-label">D├®partement</span>
+                          <span class="info-label">Département</span>
                           <span class="info-value">{{ employee.departmentName }}</span>
                         </li>
                       }
                     }
                     <li>
                       <mat-icon>manage_accounts</mat-icon>
-                      <span class="info-label">R├┤le</span>
+                      <span class="info-label">Rôle</span>
                       <span class="info-value">{{ roleLabels[user.role] }}</span>
                     </li>
                   </ul>
@@ -122,8 +122,8 @@
 
               <mat-card class="overview-card">
                 <mat-card-header>
-                  <mat-card-title>Pr├®sence</mat-card-title>
-                  <mat-card-subtitle>Disponibilit├® en temps r├®el</mat-card-subtitle>
+                  <mat-card-title>Présence</mat-card-title>
+                  <mat-card-subtitle>Disponibilité en temps réel</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                   <ul class="info-list">
@@ -143,7 +143,7 @@
                       <span class="info-value">
                         <span class="chip-status" [class.chip-green]="user.status === 'ACTIVE'"
                               [class.chip-gray]="user.status === 'DISABLED'">
-                          {{ user.status === 'ACTIVE' ? 'Actif' : 'D├®sactiv├®' }}
+                          {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
                         </span>
                       </span>
                     </li>
@@ -153,8 +153,8 @@
 
               <mat-card class="overview-card overview-leaves">
                 <mat-card-header>
-                  <mat-card-title>Cong├®s & absences</mat-card-title>
-                  <mat-card-subtitle>Synth├¿se de vos demandes</mat-card-subtitle>
+                  <mat-card-title>Congés & absences</mat-card-title>
+                  <mat-card-subtitle>Synthèse de vos demandes</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                   <div class="leave-summary-row">
@@ -164,7 +164,7 @@
                     </div>
                     <div class="leave-stat">
                       <span class="leave-stat-value">{{ approvedDays() }}</span>
-                      <span class="leave-stat-label">jours utilis├®s</span>
+                      <span class="leave-stat-label">jours utilisés</span>
                     </div>
                     <div class="leave-stat">
                       <span class="leave-stat-value">{{ pendingLeaves().length }}</span>
@@ -175,13 +175,13 @@
                     <div class="next-leave">
                       <mat-icon>event</mat-icon>
                       <span>
-                        <b>Prochain cong├® :</b>
-                        {{ next.startDate | date: 'dd/MM/yyyy' }} ÔÇö {{ next.endDate | date: 'dd/MM/yyyy' }}
+                        <b>Prochain congé :</b>
+                        {{ next.startDate | date: 'dd/MM/yyyy' }} — {{ next.endDate | date: 'dd/MM/yyyy' }}
                         ({{ leaveTypeLabels[next.type] }})
                       </span>
                     </div>
                   } @else {
-                    <p class="empty">Aucun cong├® approuv├® ├á venir.</p>
+                    <p class="empty">Aucun congé approuvé à venir.</p>
                   }
                   <div class="card-action">
                     <button mat-stroked-button (click)="openLeaves()">
@@ -194,12 +194,12 @@
 
               <mat-card class="overview-card">
                 <mat-card-header>
-                  <mat-card-title>Activit├® r├®cente</mat-card-title>
-                  <mat-card-subtitle>Derni├¿res notifications</mat-card-subtitle>
+                  <mat-card-title>Activité récente</mat-card-title>
+                  <mat-card-subtitle>Dernières notifications</mat-card-subtitle>
                 </mat-card-header>
                 <mat-card-content>
                   @if (recentActivities().length === 0) {
-                    <p class="empty">Aucune activit├® r├®cente.</p>
+                    <p class="empty">Aucune activité récente.</p>
                   } @else {
                     <ul class="activity-list">
                       @for (activity of recentActivities(); track activity.id) {
@@ -223,19 +223,19 @@
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>{{ editing() ? 'Modifier mes informations' : 'Identit├®' }}</mat-card-title>
-                <mat-card-subtitle>{{ editing() ? 'Mettez ├á jour vos coordonn├®es personnelles' : 'Donn├®es de votre compte' }}</mat-card-subtitle>
+                <mat-card-title>{{ editing() ? 'Modifier mes informations' : 'Identité' }}</mat-card-title>
+                <mat-card-subtitle>{{ editing() ? 'Mettez à jour vos coordonnées personnelles' : 'Données de votre compte' }}</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
                 @if (editing()) {
                   <form [formGroup]="form" (ngSubmit)="save()" class="profile-form">
                     <div class="form-grid">
                       <mat-form-field appearance="outline">
-                        <mat-label>Pr├®nom</mat-label>
+                        <mat-label>Prénom</mat-label>
                         <mat-icon matIconPrefix>person</mat-icon>
-                        <input matInput formControlName="firstName" placeholder="Votre pr├®nom" />
+                        <input matInput formControlName="firstName" placeholder="Votre prénom" />
                         @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
-                          <mat-error>Le pr├®nom est requis.</mat-error>
+                          <mat-error>Le prénom est requis.</mat-error>
                         }
                       </mat-form-field>
                       <mat-form-field appearance="outline">
@@ -268,7 +268,7 @@
                     </li>
                     <li>
                       <mat-icon>badge</mat-icon>
-                      <span class="info-label">Pr├®nom</span>
+                      <span class="info-label">Prénom</span>
                       <span class="info-value">{{ user.firstName }}</span>
                     </li>
                     <li>
@@ -278,7 +278,7 @@
                     </li>
                     <li>
                       <mat-icon>event</mat-icon>
-                      <span class="info-label">Compte cr├®├® le</span>
+                      <span class="info-label">Compte créé le</span>
                       <span class="info-value">{{ user.createdAt | date: 'dd/MM/yyyy' }}</span>
                     </li>
                   </ul>
@@ -292,7 +292,7 @@
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Carri├¿re</mat-card-title>
+                <mat-card-title>Carrière</mat-card-title>
                 <mat-card-subtitle>Votre situation au sein de l'entreprise</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
@@ -306,7 +306,7 @@
                     @if (employee.departmentName) {
                       <li>
                         <mat-icon>account_balance</mat-icon>
-                        <span class="info-label">D├®partement</span>
+                        <span class="info-label">Département</span>
                         <span class="info-value">{{ employee.departmentName }}</span>
                       </li>
                     }
@@ -317,7 +317,7 @@
                     </li>
                     <li>
                       <mat-icon>schedule</mat-icon>
-                      <span class="info-label">Anciennet├®</span>
+                      <span class="info-label">Ancienneté</span>
                       <span class="info-value">
                         {{ seniorityYears() }} an{{ seniorityYears() && seniorityYears() > 1 ? 's' : '' }}
                       </span>
@@ -341,11 +341,11 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Coordonn├®es">
+        <mat-tab label="Coordonnées">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Coordonn├®es</mat-card-title>
+                <mat-card-title>Coordonnées</mat-card-title>
                 <mat-card-subtitle>Comment vous joindre</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
@@ -360,7 +360,7 @@
                 <div class="coming-soon">
                   <mat-icon>add_ic_call</mat-icon>
                   <div>
-                    <b>T├®l├®phone et adresse</b>
+                    <b>Téléphone et adresse</b>
                     <p>Ces informations seront disponibles prochainement.</p>
                   </div>
                 </div>
@@ -369,16 +369,16 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Cong├®s & absences">
+        <mat-tab label="Congés & absences">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Mes demandes de cong├®s</mat-card-title>
-                <mat-card-subtitle>{{ leaves().length }} demande(s) enregistr├®e(s)</mat-card-subtitle>
+                <mat-card-title>Mes demandes de congés</mat-card-title>
+                <mat-card-subtitle>{{ leaves().length }} demande(s) enregistrée(s)</mat-card-subtitle>
                 <div class="card-actions">
                   <button mat-stroked-button (click)="openLeaves()">
                     <mat-icon>add</mat-icon>
-                    G├®rer mes demandes
+                    Gérer mes demandes
                   </button>
                 </div>
               </mat-card-header>
@@ -386,7 +386,7 @@
                 <div class="leave-summary-row leave-summary-big">
                   <div class="leave-stat">
                     <span class="leave-stat-value">{{ approvedDays() }}</span>
-                    <span class="leave-stat-label">jours approuv├®s / utilis├®s</span>
+                    <span class="leave-stat-label">jours approuvés / utilisés</span>
                   </div>
                   <div class="leave-stat">
                     <span class="leave-stat-value">{{ pendingLeaves().length }}</span>
@@ -394,19 +394,19 @@
                   </div>
                 </div>
                 @if (leaves().length === 0) {
-                  <p class="empty">Aucune demande de cong├®s.</p>
+                  <p class="empty">Aucune demande de congés.</p>
                 } @else {
                   <div class="leave-table">
                     <div class="leave-table-head">
                       <span>Type</span>
-                      <span>P├®riode</span>
-                      <span>Dur├®e</span>
+                      <span>Période</span>
+                      <span>Durée</span>
                       <span>Statut</span>
                     </div>
                     @for (leave of leaves(); track leave.id) {
                       <div class="leave-table-row">
                         <span class="leave-type">{{ leaveTypeLabels[leave.type] }}</span>
-                        <span>{{ leave.startDate | date: 'dd/MM/yyyy' }} ÔÇö {{ leave.endDate | date: 'dd/MM/yyyy' }}</span>
+                        <span>{{ leave.startDate | date: 'dd/MM/yyyy' }} — {{ leave.endDate | date: 'dd/MM/yyyy' }}</span>
                         <span>{{ days(leave) }} j</span>
                         <span class="chip-status" [class]="leaveStatusClass(leave.status)">
                           {{ leaveStatusLabels[leave.status] }}
@@ -420,17 +420,17 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Comp├®tences">
+        <mat-tab label="Compétences">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Comp├®tences</mat-card-title>
-                <mat-card-subtitle>Votre profil de comp├®tences</mat-card-subtitle>
+                <mat-card-title>Compétences</mat-card-title>
+                <mat-card-subtitle>Votre profil de compétences</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
                 @if (employee(); as employee) {
                   @if (employee.skills.length === 0) {
-                    <p class="empty">Aucune comp├®tence enregistr├®e.</p>
+                    <p class="empty">Aucune compétence enregistrée.</p>
                   } @else {
                     <div class="skills-grid">
                       @for (skill of employee.skills; track skill.skillId) {
@@ -452,23 +452,23 @@
                     </div>
                   }
                 } @else {
-                  <p class="empty">Aucune comp├®tence disponible.</p>
+                  <p class="empty">Aucune compétence disponible.</p>
                 }
               </mat-card-content>
             </mat-card>
           </div>
         </mat-tab>
 
-        <mat-tab label="Activit├® r├®cente">
+        <mat-tab label="Activité récente">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Votre activit├®</mat-card-title>
-                <mat-card-subtitle>Derni├¿res notifications et ├®v├®nements</mat-card-subtitle>
+                <mat-card-title>Votre activité</mat-card-title>
+                <mat-card-subtitle>Dernières notifications et événements</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
                 @if (recentActivities().length === 0) {
-                  <p class="empty">Aucune activit├® r├®cente.</p>
+                  <p class="empty">Aucune activité récente.</p>
                 } @else {
                   <ul class="activity-list activity-timeline">
                     @for (activity of recentActivities(); track activity.id) {
@@ -487,23 +487,23 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="S├®curit├®">
+        <mat-tab label="Sécurité">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>S├®curit├® du compte</mat-card-title>
-                <mat-card-subtitle>Protection de votre acc├¿s</mat-card-subtitle>
+                <mat-card-title>Sécurité du compte</mat-card-title>
+                <mat-card-subtitle>Protection de votre accès</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
                 <ul class="info-list info-list-single">
                   <li>
                     <mat-icon>password</mat-icon>
                     <span class="info-label">Mot de passe</span>
-                    <span class="info-value">G├®r├® via votre compte administrateur</span>
+                    <span class="info-value">Géré via votre compte administrateur</span>
                   </li>
                   <li>
                     <mat-icon>security</mat-icon>
-                    <span class="info-label">R├┤le</span>
+                    <span class="info-label">Rôle</span>
                     <span class="info-value">{{ roleLabels[user.role] }}</span>
                   </li>
                   <li>
@@ -512,7 +512,7 @@
                     <span class="info-value">
                       <span class="chip-status" [class.chip-green]="user.status === 'ACTIVE'"
                             [class.chip-gray]="user.status === 'DISABLED'">
-                        {{ user.status === 'ACTIVE' ? 'Actif' : 'D├®sactiv├®' }}
+                        {{ user.status === 'ACTIVE' ? 'Actif' : 'Désactivé' }}
                       </span>
                     </span>
                   </li>
@@ -522,7 +522,7 @@
                   <mat-icon>phonelink_lock</mat-icon>
                   <div>
                     <b>Double authentification et sessions</b>
-                    <p>Ces fonctionnalit├®s de s├®curit├® avanc├®e seront propos├®es prochainement.</p>
+                    <p>Ces fonctionnalités de sécurité avancée seront proposées prochainement.</p>
                   </div>
                 </div>
               </mat-card-content>
@@ -530,11 +530,11 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Pr├®f├®rences">
+        <mat-tab label="Préférences">
           <div class="tab-body">
             <mat-card class="content-card">
               <mat-card-header>
-                <mat-card-title>Pr├®f├®rences</mat-card-title>
+                <mat-card-title>Préférences</mat-card-title>
                 <mat-card-subtitle>Personnalisation de votre interface</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content>
@@ -543,25 +543,25 @@
                     <mat-icon>palette</mat-icon>
                     <div>
                       <b>Apparence</b>
-                      <p>Clair / Sombre / Syst├¿me</p>
+                      <p>Clair / Sombre / Système</p>
                     </div>
-                    <span class="chip-status chip-amber">Bient├┤t</span>
+                    <span class="chip-status chip-amber">Bientôt</span>
                   </div>
                   <div class="pref-item">
                     <mat-icon>language</mat-icon>
                     <div>
                       <b>Langue</b>
-                      <p>Fran├ºais (actuellement)</p>
+                      <p>Français (actuellement)</p>
                     </div>
-                    <span class="chip-status chip-amber">Bient├┤t</span>
+                    <span class="chip-status chip-amber">Bientôt</span>
                   </div>
                   <div class="pref-item">
                     <mat-icon>notifications</mat-icon>
                     <div>
                       <b>Notifications</b>
-                      <p>Pr├®f├®rences de r├®ception des notifications</p>
+                      <p>Préférences de réception des notifications</p>
                     </div>
-                    <span class="chip-status chip-amber">Bient├┤t</span>
+                    <span class="chip-status chip-amber">Bientôt</span>
                   </div>
                 </div>
               </mat-card-content>

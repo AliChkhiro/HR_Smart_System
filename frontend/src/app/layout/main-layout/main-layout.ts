@@ -1,6 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet, NavigationEnd } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -31,7 +30,6 @@ interface NavItem {
     DatePipe,
     RouterOutlet,
     RouterLink,
-    MatSidenavModule,
     MatToolbarModule,
     MatListModule,
     MatIconModule,
@@ -127,7 +125,12 @@ export class MainLayout {
 
   protected openNotification(notification: NotificationDto): void {
     if (!notification.read) {
-      this.notificationsService.markRead(notification.id).subscribe(() => this.loadNotifications());
+      this.notificationsService.markRead(notification.id).subscribe(() => {
+        this.loadNotifications();
+        this.router.navigate(['/notifications']);
+      });
+    } else {
+      this.router.navigate(['/notifications']);
     }
   }
 
