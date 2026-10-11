@@ -8,8 +8,8 @@
 // ============ Sidebar ============
 .sidebar {
   width: 230px;
-  background: linear-gradient(180deg, #141b34 0%, #0d1124 100%);
-  border-right: 1px solid rgba(255, 255, 255, 0.04);
+  background: #ffe0b2;
+  border-right: 1px solid #ead7b3;
   display: flex;
   flex-direction: column;
   transition: width 0.25s ease;
@@ -26,6 +26,7 @@
   overflow-x: hidden;
 }
 
+// ============ Brand ============
 .brand {
   display: flex;
   align-items: center;
@@ -39,8 +40,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #6366f1, #4338ca);
-    box-shadow: 0 6px 16px -6px rgba(99, 102, 241, 0.7);
+    background: linear-gradient(135deg, #8b6f47, #4a3422);
+    box-shadow: 0 6px 16px -6px rgba(74, 52, 34, 0.45);
     color: #fff;
     flex-shrink: 0;
 
@@ -60,13 +61,13 @@
     .brand-name {
       font-size: 19px;
       font-weight: 700;
-      color: #fff;
+      color: #4a3422;
       letter-spacing: -0.01em;
     }
 
     .brand-tag {
       font-size: 11px;
-      color: #94a3b8;
+      color: #6b6b6b;
     }
   }
 }
@@ -83,7 +84,7 @@
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: #64748b;
+  color: #8b6f47;
   white-space: nowrap;
 }
 
@@ -94,7 +95,7 @@
   padding: 10px 12px;
   margin: 2px 0;
   border-radius: 10px;
-  color: #cbd5e1;
+  color: #4a3422;
   text-decoration: none;
   transition: background 0.15s ease, color 0.15s ease;
   white-space: nowrap;
@@ -104,7 +105,7 @@
     width: 21px;
     height: 21px;
     flex-shrink: 0;
-    color: #94a3b8;
+    color: #8b6f47;
     transition: color 0.15s ease;
   }
 
@@ -114,27 +115,24 @@
   }
 
   &:hover {
-    background: rgba(255, 255, 255, 0.06);
-    color: #fff;
-
-    .nav-icon {
-      color: #c7d2fe;
-    }
+    background: rgba(255, 255, 255, 0.55);
+    color: #4a3422;
   }
 
   &.active {
-    background: linear-gradient(90deg, rgba(99, 102, 241, 0.28), rgba(99, 102, 241, 0.08));
-    color: #fff;
+    background: #ffffff;
+    color: #4a3422;
+    box-shadow: 0 2px 8px -3px rgba(74, 52, 34, 0.25);
 
     .nav-icon {
-      color: #a5b4fc;
+      color: #8b6f47;
     }
   }
 }
 
 .sidebar-footer {
+  border-top: 1px solid #ead7b3;
   padding: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
 
   .user-card {
     display: flex;
@@ -142,7 +140,7 @@
     gap: 10px;
     padding: 10px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.55);
     min-width: 0;
 
     .user-info {
@@ -155,20 +153,20 @@
       .user-name {
         font-size: 13px;
         font-weight: 600;
-        color: #fff;
+        color: #4a3422;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
       .user-role {
         font-size: 11px;
-        color: #94a3b8;
+        color: #6b6b6b;
       }
     }
 
     .logout-btn {
       margin-left: auto;
-      color: #94a3b8;
+      color: #8b6f47;
       width: 34px;
       height: 34px;
       line-height: 34px;
@@ -178,7 +176,7 @@
       }
 
       &:hover {
-        color: #fca5a5;
+        color: #b91c1c;
       }
     }
   }
@@ -267,7 +265,7 @@
 
   &:hover {
     color: var(--brand-start);
-    background: #eef2ff;
+    background: #ffe0b2;
   }
 
   mat-icon {

@@ -11,7 +11,7 @@
   flex: 1;
   font-size: 20px;
   font-weight: 700;
-  color: #0f172a;
+  color: #4a3422;
 }
 
 .calendar-grid {
@@ -24,7 +24,7 @@
   text-align: center;
   font-weight: 700;
   font-size: 11px;
-  color: #64748b;
+  color: #6b6b6b;
   padding: 8px 0;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -32,30 +32,30 @@
 
 .day-cell {
   min-height: 96px;
-  border: 1px solid #eef1f6;
+  border: 1px solid #f2e8d3;
   border-radius: 10px;
   padding: 6px 8px;
   background: #fff;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
 
   &:hover {
-    border-color: #c7d2fe;
-    box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.12);
+    border-color: #ead7b3;
+    box-shadow: 0 4px 14px -6px rgba(74, 52, 34, 0.12);
   }
 
   &.outside {
-    background: #f8fafc;
+    background: #f9f2e1;
     opacity: 0.55;
   }
 
   &.today {
-    border: 2px solid #4f46e5;
-    background: #f8faff;
-    box-shadow: 0 4px 14px -6px rgba(79, 70, 229, 0.35);
+    border: 2px solid #8b6f47;
+    background: #f9f2e1;
+    box-shadow: 0 4px 14px -6px rgba(139, 111, 71, 0.35);
   }
 
   &.has-tasks {
-    border-color: #dbeafe;
+    border-color: #ead7b3;
   }
 
   &.holiday {
@@ -127,9 +127,9 @@
   flex-wrap: wrap;
   margin-top: 14px;
   padding-top: 10px;
-  border-top: 1px solid #eef1f6;
+  border-top: 1px solid #f2e8d3;
   font-size: 12px;
-  color: #64748b;
+  color: #6b6b6b;
 
   .legend-item {
     display: inline-flex;
@@ -155,14 +155,14 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background: #4f46e5;
+    background: #8b6f47;
   }
 }
 
 .day-number {
   font-size: 12px;
   font-weight: 600;
-  color: #475569;
+  color: #6b6b6b;
 }
 
 .day-cell.today .day-number {
@@ -172,7 +172,7 @@
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #4f46e5;
+  background: #8b6f47;
   color: #fff;
 }
 
@@ -192,10 +192,10 @@
   cursor: default;
   padding: 2px 6px;
   border-radius: 6px;
-  background: #f8fafc;
+  background: #f9f2e1;
 
   &:hover {
-    background: #eef2ff;
+    background: #ffe0b2;
   }
 }
 
@@ -210,6 +210,6 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #334155;
+  color: #4a3422;
   font-weight: 500;
 }

@@ -1,14 +1,56 @@
-// AppRH — Professional design system
+// AppRH — Beige Elegance design system
 // Angular Material 3 theming + global component refinements.
+@use 'sass:map';
 @use '@angular/material' as mat;
+
+// Palette "Beige Elegance" : brun + beige chaud + crème.
+// On complete une palette Material existante pour que les sous-palettes
+// (surfaces, outlines, dialogs, menus) gardent une teinte chaleureuse.
+$apprh-primary: map.merge(mat.$orange-palette, (
+  0: #000000,
+  10: #2a1f14,
+  20: #40311f,
+  25: #4a3422,
+  30: #58462f,
+  35: #645138,
+  40: #8b6f47,
+  50: #a08a68,
+  60: #b8a182,
+  70: #d0bda0,
+  80: #e6d9c5,
+  90: #ffe0b2,
+  95: #f9f2e1,
+  98: #fdfbf6,
+  99: #fffcfa,
+  100: #ffffff,
+));
+
+$apprh-tertiary: map.merge(mat.$orange-palette, (
+  0: #000000,
+  10: #2e2008,
+  20: #46320f,
+  25: #543d15,
+  30: #62481b,
+  35: #705421,
+  40: #8b6f47,
+  50: #a98b5c,
+  60: #c4a878,
+  70: #ddc596,
+  80: #ead7b3,
+  90: #ffe0b2,
+  95: #f9f2e1,
+  98: #fdfbf6,
+  99: #fffcfa,
+  100: #ffffff,
+));
 
 html {
   height: 100%;
   @include mat.theme(
     (
       color: (
-        primary: mat.$violet-palette,
-        tertiary: mat.$cyan-palette,
+        primary: $apprh-primary,
+        tertiary: $apprh-tertiary,
       ),
       typography: Roboto,
       density: 0,
@@ -17,15 +59,43 @@ html {
 }
 
 :root {
-  --ink: #0f172a;
-  --ink-soft: #475569;
-  --muted: #64748b;
-  --line: #e7ebf3;
-  --line-soft: #eef1f6;
-  --panel: #f8fafc;
-  --brand-start: #4f46e5;
-  --brand-mid: #4338ca;
-  --brand-end: #1e1b4b;
+  // Palette imposée « Beige Elegance ».
+  --beige: #ffe0b2;      // beige chaud : accents, boutons, sélections
+  --cream: #f9f2e1;      // crème : fond de pages
+  --brown-dark: #4a3422; // brun foncé : titres / texte important
+  --brown-mid: #8b6f47;  // brun moyen : icônes / accents secondaires
+  --gray: #6b6b6b;       // gris : texte secondaire
+  --border: #ead7b3;     // bordures
+
+  // Tokens applicatifs (héritage de l'ancien design system).
+  --ink: #4a3422;
+  --ink-soft: #6b6b6b;
+  --muted: #8b6f47;
+  --line: #ead7b3;
+  --line-soft: #f2e8d3;
+  --panel: #f9f2e1;
+  --brand-start: #8b6f47;
+  --brand-mid: #8b6f47;
+  --brand-end: #4a3422;
+
+  // Tokens Material 3 : surfaces crème/blanches, contours beige.
+  --mat-sys-surface: #f9f2e1;
+  --mat-sys-surface-dim: #f4ead6;
+  --mat-sys-surface-bright: #ffffff;
+  --mat-sys-on-surface: #4a3422;
+  --mat-sys-surface-variant: #f2e8d3;
+  --mat-sys-on-surface-variant: #6b6b6b;
+  --mat-sys-background: #f9f2e1;
+  --mat-sys-on-background: #4a3422;
+  --mat-sys-outline: #ead7b3;
+  --mat-sys-outline-variant: #f0e6d2;
+  --mat-sys-surface-container-lowest: #ffffff;
+  --mat-sys-surface-container-low: #fdf8ee;
+  --mat-sys-surface-container: #f9f2e1;
+  --mat-sys-surface-container-high: #f4ead6;
+  --mat-sys-surface-container-highest: #efe3cb;
+  --mat-sys-primary-container: #ffe0b2;
+  --mat-sys-on-primary-container: #4a3422;
 }
 
 body {
@@ -35,7 +105,7 @@ body {
   font: var(--mat-sys-body-medium);
   margin: 0;
   height: 100%;
-  background: #f3f5fa;
+  background: var(--cream);
 }
 
 * {
@@ -52,12 +122,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: #e0cda6;
   border-radius: 8px;
-  border: 2px solid #f3f5fa;
+  border: 2px solid var(--cream);
 
   &:hover {
-    background: #94a3b8;
+    background: #d0b98c;
   }
 }
 
@@ -80,7 +150,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+    background: linear-gradient(135deg, #ffe0b2, #f9f2e1);
     color: var(--brand-start);
     flex-shrink: 0;
 
@@ -124,7 +194,7 @@ body {
   --mdc-elevated-card-container-shape: 14px;
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 8px 24px -18px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 1px 3px rgba(74, 52, 34, 0.06), 0 8px 24px -18px rgba(74, 52, 34, 0.2);
   background: #fff;
 }
 
@@ -172,7 +242,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: 0 1px 2px rgba(74, 52, 34, 0.05);
   background: #fff;
 }
 
@@ -201,7 +271,7 @@ body {
   transition: background 0.15s ease;
 
   &:hover {
-    background: #f8faff;
+    background: var(--panel);
   }
 
   &:last-child {
@@ -249,6 +319,7 @@ body {
   }
 }
 
+// Couleurs sémantiques conservées (succès / erreur / avertissement).
 .chip-green {
   color: #15803d;
   background: #dcfce7;
@@ -264,24 +335,25 @@ body {
   background: #fef3c7;
 }
 
+// Teintes décoratives harmonisées sur la palette beige.
 .chip-blue {
-  color: #1d4ed8;
-  background: #dbeafe;
+  color: #4a3422;
+  background: #ffe0b2;
 }
 
 .chip-cyan {
-  color: #0e7490;
-  background: #cffafe;
+  color: #8b6f47;
+  background: #f9f2e1;
 }
 
 .chip-violet {
-  color: #6d28d9;
-  background: #ede9fe;
+  color: #6b6b6b;
+  background: #f2e8d3;
 }
 
 .chip-gray {
-  color: #475569;
-  background: #e2e8f0;
+  color: #6b6b6b;
+  background: #f2e8d3;
 }
 
 // ============ Avatar ============
@@ -340,19 +412,32 @@ body {
   font-weight: 500;
 }
 
+// Boutons primaires remplis / élevés : beige chaud, texte brun.
+.mat-mdc-unelevated-button.mat-primary,
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-container-color: #ffe0b2;
+  --mdc-filled-button-label-text-color: #4a3422;
+  --mdc-filled-button-disabled-container-color: #f2e8d3;
+  --mdc-filled-button-disabled-label-text-color: #a89b86;
+  --mdc-protected-button-container-color: #ffe0b2;
+  --mdc-protected-button-label-text-color: #4a3422;
+  --mdc-protected-button-disabled-container-color: #f2e8d3;
+  --mdc-protected-button-disabled-label-text-color: #a89b86;
+}
+
 // ============ Form fields ============
 .mat-mdc-form-field {
   font-size: 13.5px;
 }
 
 .mdc-text-field--outlined {
-  --mdc-outlined-text-field-outline-color: #d6dce7;
+  --mdc-outlined-text-field-outline-color: #ead7b3;
 }
 
 // ============ Dialogs ============
 .mat-mdc-dialog-container .mat-mdc-dialog-surface {
   border-radius: 16px;
-  box-shadow: 0 24px 60px -12px rgba(15, 23, 42, 0.3);
+  box-shadow: 0 24px 60px -12px rgba(74, 52, 34, 0.3);
 }
 
 .mat-mdc-dialog-title {
@@ -384,7 +469,7 @@ body {
   min-width: 280px;
   border-radius: 14px;
   padding: 6px;
-  box-shadow: 0 20px 50px -12px rgba(15, 23, 42, 0.28);
+  box-shadow: 0 20px 50px -12px rgba(74, 52, 34, 0.28);
 
   .mat-mdc-menu-item {
     border-radius: 8px;
@@ -398,11 +483,11 @@ body {
     }
 
     mat-icon {
-      color: #64748b;
+      color: #8b6f47;
     }
 
     &:hover {
-      background: #f1f5f9;
+      background: var(--panel);
     }
   }
 

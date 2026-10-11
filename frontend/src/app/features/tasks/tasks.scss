@@ -20,8 +20,8 @@
 }
 
 .column {
-  background: #f8fafc;
-  border: 1px solid #eef1f6;
+  background: #f9f2e1;
+  border: 1px solid #f2e8d3;
   border-radius: 14px;
   padding: 12px;
 }
@@ -41,15 +41,15 @@
   .column-title {
     font-weight: 700;
     font-size: 13px;
-    color: #334155;
+    color: #4a3422;
     text-transform: uppercase;
     letter-spacing: 0.04em;
   }
 
   .column-count {
     margin-left: auto;
-    background: #e2e8f0;
-    color: #475569;
+    background: #f2e8d3;
+    color: #6b6b6b;
     font-size: 12px;
     font-weight: 700;
     border-radius: 999px;
@@ -62,7 +62,7 @@
 }
 
 .dot-in_progress {
-  background: #3b82f6;
+  background: #8b6f47;
 }
 
 .dot-blocked {
@@ -82,16 +82,16 @@
 
 .task-card {
   background: #fff;
-  border: 1px solid #e7ebf3;
-  border-left: 4px solid #cbd5e1;
+  border: 1px solid #ead7b3;
+  border-left: 4px solid #ead7b3;
   border-radius: 12px;
   padding: 12px 14px;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 1px 3px rgba(74, 52, 34, 0.06);
   cursor: grab;
   transition: box-shadow 0.15s ease, transform 0.15s ease;
 
   &:hover {
-    box-shadow: 0 8px 20px -10px rgba(15, 23, 42, 0.22);
+    box-shadow: 0 8px 20px -10px rgba(74, 52, 34, 0.2);
     transform: translateY(-1px);
   }
 
@@ -104,7 +104,7 @@
   }
 
   &.cdk-drag-preview {
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+    box-shadow: 0 12px 28px rgba(74, 52, 34, 0.22);
     border-radius: 12px;
   }
 }
@@ -119,7 +119,7 @@
   flex: 1;
   font-weight: 600;
   font-size: 13.5px;
-  color: #0f172a;
+  color: #4a3422;
   line-height: 1.35;
 }
 
@@ -138,13 +138,13 @@
   align-items: center;
   gap: 5px;
   font-size: 12px;
-  color: #64748b;
+  color: #6b6b6b;
 
   mat-icon {
     font-size: 15px;
     width: 15px;
     height: 15px;
-    color: #94a3b8;
+    color: #8b6f47;
   }
 
   &.late {
@@ -160,7 +160,7 @@
 .task-desc {
   margin-top: 6px;
   font-size: 12px;
-  color: #94a3b8;
+  color: #6b6b6b;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -173,7 +173,7 @@
   gap: 12px;
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px dashed #eef1f6;
+  border-top: 1px dashed #f2e8d3;
 }
 
 .task-actions {

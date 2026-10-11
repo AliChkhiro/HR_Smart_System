@@ -22,7 +22,7 @@
     font-size: 44px;
     width: 44px;
     height: 44px;
-    color: #94a3b8;
+    color: #8b6f47;
   }
 
   b {
@@ -65,7 +65,7 @@
   color: #fff;
   background: linear-gradient(135deg, var(--brand-start), var(--brand-end));
   flex-shrink: 0;
-  box-shadow: 0 8px 20px -8px rgba(79, 70, 229, 0.6);
+  box-shadow: 0 8px 20px -8px rgba(74, 52, 34, 0.45);
 }
 
 .hero-info {
@@ -114,7 +114,7 @@
   font-size: 15px;
   width: 15px;
   height: 15px;
-  color: #cbd5e1;
+  color: #ead7b3;
 }
 
 .hero-status {
@@ -296,7 +296,7 @@
   margin-top: 12px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: #eef2ff;
+  background: #ffe0b2;
   color: var(--ink-soft);
   font-size: 13px;
 
@@ -349,7 +349,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #eef2ff;
+  background: #ffe0b2;
   color: var(--brand-start);
   flex-shrink: 0;
 }
@@ -471,7 +471,7 @@
   flex: 1;
   height: 7px;
   border-radius: 999px;
-  background: #eef1f6;
+  background: #f2e8d3;
   overflow: hidden;
 }
 
@@ -485,7 +485,7 @@
 }
 
 .skill-fill-mid {
-  background: #6366f1;
+  background: #8b6f47;
 }
 
 .skill-fill-low {
@@ -505,17 +505,17 @@
   align-items: center;
   gap: 16px;
   padding: 18px 0 4px;
-  color: #64748b;
+  color: #6b6b6b;
 
   mat-icon {
     font-size: 40px;
     width: 40px;
     height: 40px;
-    color: #94a3b8;
+    color: #8b6f47;
   }
 
   b {
-    color: #334155;
+    color: #4a3422;
   }
 
   p {

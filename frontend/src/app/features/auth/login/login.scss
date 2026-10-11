@@ -7,9 +7,9 @@
 .brand-panel {
   flex: 1.1;
   background:
-    radial-gradient(1200px 600px at -10% -10%, rgba(99, 102, 241, 0.45), transparent 55%),
-    radial-gradient(900px 500px at 110% 110%, rgba(34, 211, 238, 0.22), transparent 55%),
-    linear-gradient(160deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%);
+    radial-gradient(1100px 560px at -10% -10%, rgba(255, 224, 178, 0.95), transparent 60%),
+    radial-gradient(900px 500px at 110% 110%, rgba(139, 111, 71, 0.2), transparent 55%),
+    linear-gradient(160deg, #f9f2e1 0%, #ffe0b2 55%, #f9f2e1 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -22,7 +22,7 @@
     content: '';
     position: absolute;
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(74, 52, 34, 0.1);
   }
 
   &::before {
@@ -42,7 +42,7 @@
 
 .brand-inner {
   max-width: 460px;
-  color: #fff;
+  color: #4a3422;
   position: relative;
   z-index: 1;
 }
@@ -54,8 +54,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #818cf8, #6366f1);
-  box-shadow: 0 12px 32px -8px rgba(129, 140, 248, 0.8);
+  background: linear-gradient(135deg, #8b6f47, #4a3422);
+  box-shadow: 0 12px 28px -8px rgba(74, 52, 34, 0.45);
+  color: #fff;
   margin-bottom: 28px;
 
   mat-icon {
@@ -68,13 +69,14 @@
 .brand-title {
   font-size: 42px;
   font-weight: 800;
+  color: #4a3422;
   letter-spacing: -0.02em;
   margin: 0 0 8px;
 }
 
 .brand-subtitle {
   font-size: 16px;
-  color: #c7d2fe;
+  color: #6b6b6b;
   margin: 0 0 40px;
   line-height: 1.6;
 }
@@ -91,12 +93,12 @@
   gap: 14px;
   padding: 14px 16px;
   border-radius: 14px;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(74, 52, 34, 0.12);
   backdrop-filter: blur(4px);
 
   mat-icon {
-    color: #a5b4fc;
+    color: #8b6f47;
     margin-top: 2px;
   }
 
@@ -104,12 +106,13 @@
     display: block;
     font-weight: 600;
     font-size: 14px;
+    color: #4a3422;
     margin-bottom: 2px;
   }
 
   .feature-desc {
     font-size: 12.5px;
-    color: #cbd5e1;
+    color: #6b6b6b;
     line-height: 1.5;
   }
 }
@@ -132,13 +135,13 @@
 .form-title {
   font-size: 28px;
   font-weight: 800;
-  color: #0f172a;
+  color: #4a3422;
   letter-spacing: -0.01em;
   margin: 0 0 4px;
 }
 
 .form-subtitle {
-  color: #64748b;
+  color: #6b6b6b;
   margin: 0 0 32px;
   font-size: 14px;
 }
@@ -179,9 +182,9 @@
   margin-top: 26px;
   padding: 12px 14px;
   border-radius: 10px;
-  background: #f8fafc;
-  border: 1px solid #e7ebf3;
-  color: #475569;
+  background: #f9f2e1;
+  border: 1px solid #ead7b3;
+  color: #6b6b6b;
   font-size: 12px;
   line-height: 1.5;
 
@@ -189,7 +192,7 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
-    color: #64748b;
+    color: #8b6f47;
     flex-shrink: 0;
     margin-top: 1px;
   }
@@ -198,11 +201,11 @@
 .register-switch {
   margin-top: 26px;
   text-align: center;
-  color: #64748b;
+  color: #6b6b6b;
   font-size: 14px;
 
   a {
-    color: #4f46e5;
+    color: #8b6f47;
     font-weight: 600;
     text-decoration: none;
 
