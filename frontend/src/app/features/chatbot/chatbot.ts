@@ -11,6 +11,7 @@ export interface ChatMessage {
   id: number;
   from: 'user' | 'assistant';
   text: string;
+  sources?: string[];
 }
 
 /**
@@ -166,6 +167,8 @@ export class Chatbot {
       this.aiAvailable.set(true);
       this.thinking.set(false);
       this.appendText(id, event.text);
+    } else if (event.type === 'sources') {
+      this.setSources(id, event.sources);
     } else if (event.type === 'fallback') {
       this.aiAvailable.set(false);
       this.thinking.set(false);
@@ -220,6 +223,14 @@ export class Chatbot {
     this.messages.update(list => list.map(message =>
       message.id === id ? { ...message, text } : message));
     this.scrollToBottom();
+  }
+
+  private setSources(id: number, sources: string[]): void {
+    if (!sources || sources.length === 0) {
+      return;
+    }
+    this.messages.update(list => list.map(message =>
+      message.id === id ? { ...message, sources } : message));
   }
 
   private loadServerHistory(): void {

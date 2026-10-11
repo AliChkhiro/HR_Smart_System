@@ -63,11 +63,14 @@ tâches et ses projets, avec des réponses de comptage déterministes, un histor
 multi-tours et un rendu en flux (streaming). Le tout est scopé au JWT (RBAC) et
 protégé par une limite de débit. Les conversations sont persistées côté serveur
 (`chat_message`) et des métriques Micrometer sont exposées (`/api/actuator/metrics`).
+L'assistant s'appuie sur une base de connaissances documentaire locale (RAG, BM25)
+pour les questions de politique RH, avec citation des sources.
 
 Documentation détaillée :
 - [`docs/chatbot-ia.md`](docs/chatbot-ia.md) — flux, endpoints, configuration, dépannage.
 - [`docs/module-ia-synthese.md`](docs/module-ia-synthese.md) — synthèse du module (soutenance).
 - [`docs/securite-ia.md`](docs/securite-ia.md) — audit sécurité.
+- [`docs/rag-ia.md`](docs/rag-ia.md) — base de connaissances documentaire (RAG).
 
 Démonstration automatisée de bout en bout (pile Docker démarrée) :
 

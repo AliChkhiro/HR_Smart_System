@@ -143,6 +143,7 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                                 Map.of("message", "Combien de congés approuvés ai-je ?"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.sources").isArray())
                 .andExpect(jsonPath("$.reply", containsString(String.valueOf(approved))));
     }
 

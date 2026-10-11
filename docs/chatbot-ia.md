@@ -103,6 +103,7 @@ demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM
 | `OLLAMA_KEEP_ALIVE`                 | `24h`                    | Durée de maintien du modèle chargé|
 | `OLLAMA_WARMUP`                     | `true`                   | Préchargement du modèle au démarrage (cold start) |
 | `CHATBOT_TIMEOUT_SECONDS`           | `80`                     | Timeout ia-service → Ollama       |
+| `HR_DOCS_DIR`                       | `data/hr_docs`           | Corpus documentaire (RAG) de l'ia-service |
 
 ## Comportement de repli
 
@@ -147,8 +148,9 @@ npx ng test --watch=false
 5. Démonstration automatisée : `.\scripts\demo-chatbot.ps1`
    (ajouter `-IncludeRateLimit` pour tester le HTTP 429).
 
-Voir aussi : [`module-ia-synthese.md`](module-ia-synthese.md) (synthèse) et
-[`securite-ia.md`](securite-ia.md) (audit sécurité).
+Voir aussi : [`module-ia-synthese.md`](module-ia-synthese.md) (synthèse),
+[`securite-ia.md`](securite-ia.md) (audit sécurité) et
+[`rag-ia.md`](rag-ia.md) (base de connaissances).
 
 ## Dépannage
 

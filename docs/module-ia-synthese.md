@@ -8,16 +8,20 @@ l'extérieur) et moteur de recommandation d'attribution.
 
 - **Assistant RH IA** : widget flottant Angular permettant à un utilisateur
   connecté d'interroger ses congés, tâches et projets en langage naturel.
+- **Base de connaissances (RAG)** : recherche documentaire **100 % locale** (BM25)
+  sur les politiques RH, avec citation des sources affichée dans le widget.
 - **Garde-fous** : le LLM ne décide jamais des droits ; il n'accède qu'au
   contexte RH de l'utilisateur courant, construit côté serveur à partir du JWT.
-- **Hors périmètre** : RAG documentaire, exécution d'actions, mémoire globale.
+- **Hors périmètre** : exécution d'actions (tools), mémoire globale inter-utilisateurs.
 
 ## 2. Architecture
 
 ```
 Widget Angular ──► Backend Spring ──► ia-service (FastAPI) ──► Ollama (local, llama3.2:3b)
-   (NDJSON)          /api/chatbot/*      /api/v1/chat*
-                        │
+   (NDJSON)          /api/chatbot/*      /api/v1/chat*              ▲
+                        │                    │                     │
+                        │                    └─ RAG BM25 ───────────┘
+                        │                       (data/hr_docs/*.md)
                         └─ PostgreSQL (chat_message) + Actuator (métriques)
 ```
 
@@ -29,7 +33,8 @@ Composants :
   (persistance).
 - `ia/infrastructure` : `ChatbotClient` (HTTP + streaming NDJSON), `ChatbotRateLimiter`,
   `ChatbotMetrics`, `ChatMessageRepository`, `ChatbotProperties`.
-- `ia-service` (Python/FastAPI) : `app/api/chat.py`, `app/chat/{prompts,ollama}.py`.
+- `ia-service` (Python/FastAPI) : `app/api/chat.py`, `app/chat/{prompts,ollama}.py`,
+  `app/rag/*` (corpus + index BM25). Corpus : `data/hr_docs/*.md`.
 - Frontend : `features/chatbot/*` (widget, pipe Markdown), `core/services/chatbot.service.ts`.
 
 ## 3. Fonctionnalités
@@ -37,6 +42,7 @@ Composants :
 | Fonctionnalité | Description |
 |----------------|-------------|
 | Réponses déterministes | Questions de comptage (congés, tâches, projets) calculées en base, LLM court-circuité → chiffres exacts. |
+| Base de connaissances (RAG) | Questions de politique enrichies par les extraits RH les plus pertinents (BM25 local), sources citées dans le widget. |
 | Conversation multi-tours | Historique (8 derniers messages) réinjecté dans le prompt. |
 | Streaming temps réel | Réponse diffusée en NDJSON et affichée progressivement. |
 | Persistance serveur | Chaque échange stocké dans `chat_message` (Flyway V6), scopé au JWT ; `GET`/`DELETE /chatbot/messages`. |
@@ -55,8 +61,8 @@ CORS restreint, secrets externalisés.
 
 | Méthode | Chemin | Réponse |
 |---------|--------|---------|
-| POST | `/api/chatbot/chat` | `{ reply, aiAvailable }` |
-| POST | `/api/chatbot/chat/stream` | Flux NDJSON `application/x-ndjson` |
+| POST | `/api/chatbot/chat` | `{ reply, aiAvailable, sources }` |
+| POST | `/api/chatbot/chat/stream` | Flux NDJSON `application/x-ndjson` (+ événement `sources`) |
 | GET | `/api/chatbot/messages` | 40 derniers messages de l'utilisateur |
 | DELETE | `/api/chatbot/messages` | `204` |
 
@@ -64,8 +70,9 @@ CORS restreint, secrets externalisés.
 
 | Périmètre | Résultat |
 |-----------|----------|
-| Backend (`.\mvnw.cmd test`) | **54 tests**, 10 classes, 0 échec |
-| Frontend (`npx ng test --watch=false`) | **19 tests**, 4 fichiers, 0 échec |
+| Backend (`.\mvnw.cmd test`) | **56 tests**, 11 classes, 0 échec |
+| Frontend (`npx ng test --watch=false`) | **25 tests**, 5 fichiers, 0 échec |
+| ia-service (`pytest`) | **7 tests** (RAG), 0 échec |
 | Couverture backend (JaCoCo) | **78,2 %** lignes · 47,3 % branches |
 
 Rapport de couverture : `backend/target/site/jacoco/index.html`.
@@ -92,5 +99,6 @@ persistance/effacement, RBAC (401), limite de débit (429), métriques.
 - Cold start Ollama ~20 s (atténué par `OLLAMA_KEEP_ALIVE=24h` et le
   préchargement automatique `OLLAMA_WARMUP=true`).
 - Qualité limitée de `llama3.2:3b` sur CPU → mitigée par le mode déterministe.
-- Évolutions : RAG sur la documentation RH, outils d'action, évaluation
-  automatique de la qualité des réponses.
+- Évolutions : exécution d'actions (tools) avec confirmation utilisateur,
+  embeddings pour affiner la recherche documentaire, évaluation automatique de la
+  qualité des réponses.

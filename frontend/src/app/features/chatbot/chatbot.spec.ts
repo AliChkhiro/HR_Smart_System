@@ -80,4 +80,24 @@ describe('Chatbot', () => {
     expect(component.messages().length).toBe(1);
     expect(serviceMock.clearHistory).toHaveBeenCalled();
   });
+
+  it('attaches documentary sources returned by the stream', async () => {
+    serviceMock.stream = vi.fn().mockImplementation(
+      (_message: string, _history: unknown, onEvent: (event: ChatStreamEvent) => void) => {
+        onEvent({ type: 'sources', sources: ['Télétravail'] });
+        onEvent({ type: 'token', text: 'Deux jours par semaine.' });
+        onEvent({ type: 'done' });
+        return Promise.resolve();
+      },
+    );
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      messages: () => { from: string; text: string; sources?: string[] }[];
+      submit: (text: string) => void;
+    };
+    component.submit('Combien de jours de télétravail ?');
+    await fixture.whenStable();
+    const withSources = component.messages().find(message => message.sources?.length);
+    expect(withSources?.sources).toContain('Télétravail');
+  });
 });

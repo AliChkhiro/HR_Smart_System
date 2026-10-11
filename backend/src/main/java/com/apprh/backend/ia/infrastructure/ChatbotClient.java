@@ -56,9 +56,9 @@ public class ChatbotClient {
                     .retrieve()
                     .body(ChatRes.class);
             if (res == null) {
-                return new ChatResult("L'IA est indisponible.", false);
+                return new ChatResult("L'IA est indisponible.", false, List.of());
             }
-            return new ChatResult(res.reply(), res.ai_available());
+            return new ChatResult(res.reply(), res.ai_available(), res.sources() == null ? List.of() : res.sources());
         } catch (Exception e) {
             log.warn("ia-service/chat indisponible: {}", e.getMessage());
             throw e;
@@ -96,7 +96,7 @@ public class ChatbotClient {
         }
     }
 
-    public record ChatResult(String reply, boolean aiAvailable) {
+    public record ChatResult(String reply, boolean aiAvailable, List<String> sources) {
     }
 
     public record ChatContext(
@@ -119,6 +119,6 @@ public class ChatbotClient {
     private record ChatReq(String message, ChatContext user_context, List<History> history) {
     }
 
-    private record ChatRes(String reply, boolean ai_available) {
+    private record ChatRes(String reply, boolean ai_available, List<String> sources) {
     }
 }

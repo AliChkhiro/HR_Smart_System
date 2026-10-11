@@ -49,7 +49,7 @@ public class ChatbotService {
             metrics.recordRequest("chat", "llm");
             metrics.recordLatency("chat", System.nanoTime() - start);
             persist(principal.id(), request.message(), r.reply());
-            return new ChatResponse(r.reply(), r.aiAvailable());
+            return new ChatResponse(r.reply(), r.aiAvailable(), r.sources());
         } catch (Exception e) {
             metrics.recordRequest("chat", "fallback");
             log.warn("ia-service/chat indisponible: {}", e.getMessage());

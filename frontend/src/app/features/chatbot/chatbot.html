@@ -79,6 +79,15 @@
               </button>
             }
           </div>
+          @if (message.from === 'assistant' && message.sources?.length) {
+            <div class="chatbot-sources">
+              <mat-icon class="chatbot-sources-icon">menu_book</mat-icon>
+              <span class="chatbot-sources-label">Sources</span>
+              @for (source of message.sources; track source) {
+                <span class="chatbot-source">{{ source }}</span>
+              }
+            </div>
+          }
         }
       }
     </div>
