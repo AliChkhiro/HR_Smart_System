@@ -84,13 +84,15 @@ moindre donnée. Une demande hors périmètre renvoie un refus explicite.
 |----------------------|------------------------------------|-----------------------------------------------------|
 | `my_open_tasks`      | tous                               | Tâches en cours de l'utilisateur (10 max)           |
 | `my_leaves`          | tous                               | Congés de l'utilisateur (10 max)                    |
+| `my_projects`        | tous                               | Projets de l'utilisateur (10 max)                   |
 | `pending_leaves`     | tous → les siens ; RH/ADMIN → équipe | Demandes de congé en attente                      |
 | `unassigned_tasks`   | RH / ADMIN / CHEF_PROJET           | Tâches sans assigné (10 max)                        |
 
 Exemples de déclencheurs : « Liste mes tâches en cours », « Quels sont mes
-congés ? », « Quelles demandes de congé sont en attente ? », « Quelles tâches ne
-sont pas assignées ? ». Les réponses des outils sont **déterministes** (calculées
-en base) et fonctionnent même si l'ia-service est indisponible.
+congés ? », « Sur quels projets je travaille ? », « Quelles demandes de congé
+sont en attente ? », « Quelles tâches ne sont pas assignées ? ». Les réponses des
+outils sont **déterministes** (calculées en base) et fonctionnent même si
+l'ia-service est indisponible.
 
 ## Persistance et observabilité
 
@@ -157,8 +159,10 @@ npx ng test --watch=false
 ```
 
 - `markdown.pipe.spec.ts` : rendu Markdown (échappement, listes, emphase, code).
-- `chatbot.service.spec.ts` : `ask`, `loadHistory`, `clearHistory`, flux NDJSON.
-- `chatbot.spec.ts` : restauration de session, envoi, réponse diffusée, effacement.
+- `chatbot.service.spec.ts` : `ask`, `loadHistory`, `clearHistory`, flux NDJSON
+  (découpage en morceaux, événement `sources`, lignes invalides).
+- `chatbot.spec.ts` : session, envoi, réponse diffusée, `sources`, repli, erreur,
+  interruption (`AbortError`), arrêt (`stop`), suggestions, touche Entrée.
 
 ## Déploiement
 

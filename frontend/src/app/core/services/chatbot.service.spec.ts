@@ -28,6 +28,23 @@ describe('ChatbotService', () => {
     globalThis.fetch = originalFetch;
   });
 
+  function mockStream(chunks: string[]): void {
+    let index = 0;
+    const encoder = new TextEncoder();
+    globalThis.fetch = vi.fn(async () => ({
+      ok: true,
+      status: 200,
+      body: {
+        getReader: () => ({
+          read: async () =>
+            index < chunks.length
+              ? { value: encoder.encode(chunks[index++]), done: false }
+              : { value: undefined, done: true },
+        }),
+      },
+    })) as unknown as typeof fetch;
+  }
+
   it('posts the message for ask()', () => {
     service.ask('bonjour').subscribe();
     const req = http.expectOne(request => request.url.endsWith('/chatbot/chat'));
@@ -85,5 +102,36 @@ describe('ChatbotService', () => {
   it('throws when the stream response is not ok', async () => {
     globalThis.fetch = vi.fn(async () => ({ ok: false, status: 500, body: null })) as unknown as typeof fetch;
     await expect(service.stream('salut', [], () => undefined)).rejects.toThrow('API 500');
+  });
+
+  it('emits a sources event from the stream', async () => {
+    mockStream(['{"type":"sources","sources":["Télétravail"]}\n{"type":"token","text":"Deux jours."}\n{"type":"done"}\n']);
+    const events: ChatStreamEvent[] = [];
+    await service.stream('question', [], event => events.push(event));
+    expect(events).toEqual([
+      { type: 'sources', sources: ['Télétravail'] },
+      { type: 'token', text: 'Deux jours.' },
+      { type: 'done' },
+    ]);
+  });
+
+  it('reassembles events split across chunk boundaries', async () => {
+    mockStream(['{"type":"tok', 'en","text":"Bon"}\n{"type":"do', 'ne"}\n']);
+    const events: ChatStreamEvent[] = [];
+    await service.stream('bonjour', [], event => events.push(event));
+    expect(events).toEqual([
+      { type: 'token', text: 'Bon' },
+      { type: 'done' },
+    ]);
+  });
+
+  it('ignores malformed lines and emits the final partial line', async () => {
+    mockStream(['pas-json\n{"type":"token","text":"Hi"}\n', '{"type":"done"}']);
+    const events: ChatStreamEvent[] = [];
+    await service.stream('bonjour', [], event => events.push(event));
+    expect(events).toEqual([
+      { type: 'token', text: 'Hi' },
+      { type: 'done' },
+    ]);
   });
 });

@@ -97,7 +97,99 @@ describe('Chatbot', () => {
     };
     component.submit('Combien de jours de télétravail ?');
     await fixture.whenStable();
+    component.submit('Combien de jours de télétravail ?');
+    await fixture.whenStable();
     const withSources = component.messages().find(message => message.sources?.length);
     expect(withSources?.sources).toContain('Télétravail');
+  });
+
+  it('marks the assistant unavailable when a fallback event is received', async () => {
+    serviceMock.stream = vi.fn().mockImplementation(
+      (_message: string, _history: unknown, onEvent: (event: ChatStreamEvent) => void) => {
+        onEvent({ type: 'fallback', text: 'Service IA indisponible.' });
+        onEvent({ type: 'done' });
+        return Promise.resolve();
+      },
+    );
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      messages: () => { text: string }[];
+      aiAvailable: () => boolean;
+      submit: (text: string) => void;
+    };
+    component.submit('Bonjour');
+    await fixture.whenStable();
+    expect(component.aiAvailable()).toBe(false);
+    expect(component.messages().some(message => message.text.includes('indisponible'))).toBe(true);
+  });
+
+  it('shows an error message when the stream fails', async () => {
+    serviceMock.stream = vi.fn().mockRejectedValue(new Error('API 500'));
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      messages: () => { text: string }[];
+      aiAvailable: () => boolean;
+      submit: (text: string) => void;
+    };
+    component.submit('Bonjour');
+    await fixture.whenStable();
+    expect(component.aiAvailable()).toBe(false);
+    expect(component.messages().some(message => message.text.includes("n'ai pas pu joindre"))).toBe(true);
+  });
+
+  it('reports an interrupted answer when aborted before any token', async () => {
+    serviceMock.stream = vi.fn().mockRejectedValue(
+      Object.assign(new Error('aborted'), { name: 'AbortError' }),
+    );
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      messages: () => { text: string }[];
+      submit: (text: string) => void;
+    };
+    component.submit('Bonjour');
+    await fixture.whenStable();
+    expect(component.messages().some(message => message.text === 'Réponse interrompue.')).toBe(true);
+  });
+
+  it('aborts the active stream when stop() is called', () => {
+    let capturedSignal: AbortSignal | undefined;
+    serviceMock.stream = vi.fn().mockImplementation(
+      (_message: string, _history: unknown, _onEvent: unknown, signal?: AbortSignal) => {
+        capturedSignal = signal;
+        return new Promise<void>(() => undefined);
+      },
+    );
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      submit: (text: string) => void;
+      stop: () => void;
+    };
+    component.submit('Bonjour');
+    expect(capturedSignal?.aborted).toBe(false);
+    component.stop();
+    expect(capturedSignal?.aborted).toBe(true);
+  });
+
+  it('hides suggestions once a message is sent', () => {
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      showSuggestions: () => boolean;
+      submit: (text: string) => void;
+    };
+    expect(component.showSuggestions()).toBe(true);
+    component.submit('Bonjour');
+    expect(component.showSuggestions()).toBe(false);
+  });
+
+  it('sends the draft on Enter without Shift', () => {
+    const fixture = TestBed.createComponent(Chatbot);
+    const component = fixture.componentInstance as unknown as {
+      messages: () => { from: string; text: string }[];
+      onDraftInput: (event: Event) => void;
+      onKeydown: (event: KeyboardEvent) => void;
+    };
+    component.onDraftInput({ target: { value: 'Bonjour' } } as unknown as Event);
+    component.onKeydown({ key: 'Enter', shiftKey: false, preventDefault: vi.fn() } as unknown as KeyboardEvent);
+    expect(component.messages().some(message => message.from === 'user' && message.text === 'Bonjour')).toBe(true);
   });
 });

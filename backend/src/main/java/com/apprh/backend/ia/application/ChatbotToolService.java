@@ -5,6 +5,8 @@ import com.apprh.backend.employees.infrastructure.EmployeeRepository;
 import com.apprh.backend.leaves.domain.LeaveRequest;
 import com.apprh.backend.leaves.domain.LeaveStatus;
 import com.apprh.backend.leaves.infrastructure.LeaveRequestRepository;
+import com.apprh.backend.projects.domain.ProjectMember;
+import com.apprh.backend.projects.infrastructure.ProjectMemberRepository;
 import com.apprh.backend.tasks.domain.Task;
 import com.apprh.backend.tasks.domain.TaskStatus;
 import com.apprh.backend.tasks.infrastructure.TaskRepository;
@@ -43,6 +45,7 @@ public class ChatbotToolService {
     private final EmployeeRepository employeeRepository;
     private final LeaveRequestRepository leaveRequestRepository;
     private final TaskRepository taskRepository;
+    private final ProjectMemberRepository projectMemberRepository;
 
     @Transactional(readOnly = true)
     public Optional<String> answer(UserPrincipal principal, String message) {
@@ -60,6 +63,10 @@ public class ChatbotToolService {
         if (asksLeaveList(normalized)) {
             return employeeRepository.findByUserIdAndDeletedAtIsNull(principal.id())
                     .map(employee -> myLeaves(employee.getId()));
+        }
+        if (asksProjectList(normalized)) {
+            return employeeRepository.findByUserIdAndDeletedAtIsNull(principal.id())
+                    .map(employee -> myProjects(employee.getId()));
         }
         return Optional.empty();
     }
@@ -84,10 +91,14 @@ public class ChatbotToolService {
         return n.contains("conge") && listIntent(n);
     }
 
+    private boolean asksProjectList(String n) {
+        return n.contains("projet") && listIntent(n);
+    }
+
     private boolean listIntent(String n) {
         return n.contains("liste") || n.contains("lesquel") || n.contains("detail")
                 || n.contains("affiche") || n.contains("montre") || n.contains("donne moi")
-                || n.contains("quelles sont") || n.contains("quels sont");
+                || n.contains("quelles sont") || n.contains("quels sont") || n.contains("sur quel");
     }
 
     // --- Outils (lecture seule, scopés RBAC) ---
@@ -147,6 +158,19 @@ public class ChatbotToolService {
         List<LeaveRequest> limited = leaves.stream().limit(MAX_ITEMS).toList();
         return "Vos congés (%d) :\n%s".formatted(limited.size(),
                 limited.stream().map(this::describeLeave).collect(Collectors.joining("\n")));
+    }
+
+    private String myProjects(Long employeeId) {
+        List<String> projects = projectMemberRepository.findAllByEmployeeId(employeeId).stream()
+                .map(ProjectMember::getProject)
+                .filter(project -> project.getDeletedAt() == null)
+                .limit(MAX_ITEMS)
+                .map(project -> "- %s [%s]".formatted(project.getName(), project.getStatus()))
+                .toList();
+        if (projects.isEmpty()) {
+            return "Vous ne participez à aucun projet.";
+        }
+        return "Vos projets (%d) :\n%s".formatted(projects.size(), String.join("\n", projects));
     }
 
     private String describeTasks(List<Task> tasks) {

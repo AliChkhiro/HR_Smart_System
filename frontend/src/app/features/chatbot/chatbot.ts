@@ -95,6 +95,7 @@ export class Chatbot {
 
   protected onDraftInput(event: Event): void {
     this.draft.set((event.target as HTMLTextAreaElement).value);
+    this.autoGrow();
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -115,6 +116,7 @@ export class Chatbot {
     }
     const history = this.buildHistory();
     this.draft.set('');
+    this.resetComposer();
     this.append('user', trimmed);
     const placeholderId = this.appendPlaceholder();
     this.sending.set(true);
@@ -137,6 +139,7 @@ export class Chatbot {
     this.nextId = 1;
     this.messages.set([this.welcome()]);
     this.draft.set('');
+    this.resetComposer();
     this.sending.set(false);
     this.thinking.set(false);
     this.aiAvailable.set(true);
@@ -198,6 +201,9 @@ export class Chatbot {
     this.sending.set(false);
     this.thinking.set(false);
     this.scrollToBottom();
+    if (this.open()) {
+      this.composer()?.nativeElement.focus();
+    }
     this.save();
   }
 
@@ -260,6 +266,22 @@ export class Chatbot {
 
   private textOf(id: number): string {
     return this.messages().find(message => message.id === id)?.text ?? '';
+  }
+
+  private autoGrow(): void {
+    const el = this.composer()?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }
+
+  private resetComposer(): void {
+    const el = this.composer()?.nativeElement;
+    if (el) {
+      el.style.height = 'auto';
+    }
   }
 
   private scrollToBottom(): void {

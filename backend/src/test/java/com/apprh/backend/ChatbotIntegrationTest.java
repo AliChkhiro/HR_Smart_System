@@ -333,6 +333,20 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("\"type\":\"done\"")));
     }
 
+    @Test
+    void toolListsOwnProjectsDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Sur quels projets je travaille ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("projet")));
+    }
+
     private long approvedLeaveCount() {
         return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId()).stream()
                 .filter(leave -> leave.getStatus() == LeaveStatus.APPROVED)

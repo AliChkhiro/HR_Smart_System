@@ -37,7 +37,7 @@
       </button>
     </header>
 
-    <div class="chatbot-messages" #messagesArea role="log" aria-live="polite" aria-relevant="additions text">
+    <div class="chatbot-messages" #messagesArea role="log" aria-live="polite" aria-relevant="additions text" [attr.aria-busy]="sending()">
       @if (thinking()) {
         <div class="chatbot-typing">
           <mat-spinner diameter="16" />

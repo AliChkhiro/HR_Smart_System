@@ -71,8 +71,8 @@ CORS restreint, secrets externalisés.
 
 | Périmètre | Résultat |
 |-----------|----------|
-| Backend (`.\mvnw.cmd test`) | **62 tests**, 11 classes, 0 échec |
-| Frontend (`npx ng test --watch=false`) | **25 tests**, 5 fichiers, 0 échec |
+| Backend (`.\mvnw.cmd test`) | **63 tests**, 11 classes, 0 échec |
+| Frontend (`npx ng test --watch=false`) | **34 tests**, 5 fichiers, 0 échec |
 | ia-service (`pytest`) | **7 tests** (RAG), 0 échec |
 | Couverture backend (JaCoCo) | **78,2 %** lignes · 47,3 % branches |
 
