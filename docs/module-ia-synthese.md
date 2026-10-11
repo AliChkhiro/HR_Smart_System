@@ -29,8 +29,8 @@ Composants :
 - `ia/api` : `ChatbotController` (REST + flux), `ChatRequest`/`ChatResponse`,
   `ChatMessageDto`, `ChatbotRateLimitInterceptor`.
 - `ia/application` : `ChatbotService` (orchestration), `ChatbotQuickAnswerService`
-  (réponses déterministes), `ChatContextService` (contexte scopé), `ChatHistoryService`
-  (persistance).
+  (réponses déterministes), `ChatbotToolService` (outils serveur scopés RBAC),
+  `ChatContextService` (contexte scopé), `ChatHistoryService` (persistance).
 - `ia/infrastructure` : `ChatbotClient` (HTTP + streaming NDJSON), `ChatbotRateLimiter`,
   `ChatbotMetrics`, `ChatMessageRepository`, `ChatbotProperties`.
 - `ia-service` (Python/FastAPI) : `app/api/chat.py`, `app/chat/{prompts,ollama}.py`,
@@ -43,6 +43,7 @@ Composants :
 |----------------|-------------|
 | Réponses déterministes | Questions de comptage (congés, tâches, projets) calculées en base, LLM court-circuité → chiffres exacts. |
 | Base de connaissances (RAG) | Questions de politique enrichies par les extraits RH les plus pertinents (BM25 local), sources citées dans le widget. |
+| Outils serveur (tools) | Consultations en lecture seule (tâches, congés, tâches non assignées) routées de façon déterministe et scopées RBAC. |
 | Conversation multi-tours | Historique (8 derniers messages) réinjecté dans le prompt. |
 | Streaming temps réel | Réponse diffusée en NDJSON et affichée progressivement. |
 | Persistance serveur | Chaque échange stocké dans `chat_message` (Flyway V6), scopé au JWT ; `GET`/`DELETE /chatbot/messages`. |
@@ -70,14 +71,15 @@ CORS restreint, secrets externalisés.
 
 | Périmètre | Résultat |
 |-----------|----------|
-| Backend (`.\mvnw.cmd test`) | **56 tests**, 11 classes, 0 échec |
+| Backend (`.\mvnw.cmd test`) | **62 tests**, 11 classes, 0 échec |
 | Frontend (`npx ng test --watch=false`) | **25 tests**, 5 fichiers, 0 échec |
 | ia-service (`pytest`) | **7 tests** (RAG), 0 échec |
 | Couverture backend (JaCoCo) | **78,2 %** lignes · 47,3 % branches |
 
 Rapport de couverture : `backend/target/site/jacoco/index.html`.
-Tests notables : réponses déterministes conformes à la base, repli, flux NDJSON,
-persistance/effacement, RBAC (401), limite de débit (429), métriques.
+Tests notables : réponses déterministes conformes à la base, outils serveur +
+RBAC (refus hors rôle), repli, flux NDJSON, persistance/effacement, RBAC (401),
+limite de débit (429), métriques.
 
 ## 7. Déploiement et démonstration
 

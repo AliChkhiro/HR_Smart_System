@@ -28,6 +28,7 @@ public class ChatbotService {
     private final ChatbotClient client;
     private final ChatContextService chatContextService;
     private final ChatbotQuickAnswerService quickAnswerService;
+    private final ChatbotToolService toolService;
     private final ChatHistoryService chatHistoryService;
     private final ChatbotMetrics metrics;
     private final ObjectMapper objectMapper;
@@ -41,6 +42,13 @@ public class ChatbotService {
             metrics.recordRequest("chat", "deterministic");
             persist(principal.id(), request.message(), quick.get());
             return new ChatResponse(quick.get(), true);
+        }
+        Optional<String> tool = toolService.answer(principal, request.message());
+        if (tool.isPresent()) {
+            log.info("chat - outil serveur pour utilisateur {}", principal.id());
+            metrics.recordRequest("chat", "tool");
+            persist(principal.id(), request.message(), tool.get());
+            return new ChatResponse(tool.get(), true);
         }
         long start = System.nanoTime();
         try {
@@ -72,8 +80,16 @@ public class ChatbotService {
         if (quick.isPresent()) {
             log.info("chat/stream - réponse déterministe pour utilisateur {}", principal.id());
             metrics.recordRequest("stream", "deterministic");
-            writeQuickAnswer(outputStream, quick.get());
+            writeDeterministic(outputStream, quick.get());
             persist(principal.id(), request.message(), quick.get());
+            return;
+        }
+        Optional<String> tool = toolService.answer(principal, request.message());
+        if (tool.isPresent()) {
+            log.info("chat/stream - outil serveur pour utilisateur {}", principal.id());
+            metrics.recordRequest("stream", "tool");
+            writeDeterministic(outputStream, tool.get());
+            persist(principal.id(), request.message(), tool.get());
             return;
         }
         ChatbotClient.ChatContext context = chatContextService.build(principal);
@@ -115,7 +131,7 @@ public class ChatbotService {
                 .toList();
     }
 
-    private void writeQuickAnswer(OutputStream outputStream, String answer) {
+    private void writeDeterministic(OutputStream outputStream, String answer) {
         try {
             outputStream.write((objectMapper.writeValueAsString(new StreamEvent("token", answer)) + "\n")
                     .getBytes(StandardCharsets.UTF_8));

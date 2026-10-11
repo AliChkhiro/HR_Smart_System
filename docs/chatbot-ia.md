@@ -65,8 +65,32 @@ Corps de requête (identique pour les deux) :
 
 Les questions de comptage (congés, tâches, projets) sont interceptées par
 `ChatbotQuickAnswerService` : la réponse est calculée directement en base et le
-LLM est court-circuité. Cela garantit des chiffres exacts. Si la question
+LLM est court-circuité. Cela garantit des chiffres exacts. Les questions
+demandant un détail (« lesquels », « liste », « en attente ») sont traitées par
+les **outils serveur** (voir ci-dessous), également déterministes.
+
 demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM.
+
+## Outils serveur (« tools »)
+
+Au-delà des comptages, une seconde famille de demandes est traitée par un
+**registre d'outils côté backend** (`ChatbotToolService`) : consultations en
+lecture seule, **routées de façon déterministe** et strictement scopées RBAC. Le
+LLM ne choisit ni n'exécute ces outils et ne décide jamais des autorisations ;
+chaque outil vérifie le rôle de l'utilisateur (issu du JWT) avant de renvoyer la
+moindre donnée. Une demande hors périmètre renvoie un refus explicite.
+
+| Outil                | Rôles autorisés                    | Retour                                              |
+|----------------------|------------------------------------|-----------------------------------------------------|
+| `my_open_tasks`      | tous                               | Tâches en cours de l'utilisateur (10 max)           |
+| `my_leaves`          | tous                               | Congés de l'utilisateur (10 max)                    |
+| `pending_leaves`     | tous → les siens ; RH/ADMIN → équipe | Demandes de congé en attente                      |
+| `unassigned_tasks`   | RH / ADMIN / CHEF_PROJET           | Tâches sans assigné (10 max)                        |
+
+Exemples de déclencheurs : « Liste mes tâches en cours », « Quels sont mes
+congés ? », « Quelles demandes de congé sont en attente ? », « Quelles tâches ne
+sont pas assignées ? ». Les réponses des outils sont **déterministes** (calculées
+en base) et fonctionnent même si l'ia-service est indisponible.
 
 ## Persistance et observabilité
 
@@ -75,7 +99,7 @@ demande aussi un détail (« lesquels », « liste »), elle est laissée au LLM
   du JWT. `GET /api/chatbot/messages` renvoie les 40 derniers messages ;
   `DELETE /api/chatbot/messages` efface l'historique de l'utilisateur.
 - **Observabilité** : métriques Micrometer exposées sur `/api/actuator/metrics` :
-  - `chatbot.requests` (tags `surface` = `chat` | `stream`, `mode` = `deterministic` | `llm` | `fallback`) ;
+  - `chatbot.requests` (tags `surface` = `chat` | `stream`, `mode` = `deterministic` | `tool` | `llm` | `fallback`) ;
   - `chatbot.latency` (tag `surface`) ;
   - `chatbot.rate.limited` (compteur des requêtes rejetées en HTTP 429).
 
@@ -116,7 +140,8 @@ indisponible ». Les réponses déterministes fonctionnent même dans ce cas.
 Backend (JUnit + Testcontainers) :
 
 - `ChatbotIntegrationTest` : authentification, validation, historique,
-  réponses déterministes, repli, flux NDJSON, persistance, métriques.
+  réponses déterministes, **outils serveur + RBAC**, repli, flux NDJSON,
+  persistance, métriques.
 - `ChatbotRateLimitIntegrationTest` : renvoi HTTP 429 au-delà de la limite.
 
 ```bash

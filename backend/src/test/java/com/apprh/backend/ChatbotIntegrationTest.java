@@ -251,6 +251,88 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(jsonPath("$.name").value("chatbot.requests"));
     }
 
+    @Test
+    void toolListsOwnOpenTasksDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Liste mes tâches en cours"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("tâche")));
+    }
+
+    @Test
+    void toolListsOwnPendingLeavesDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles sont mes demandes de congé en attente ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("attente")));
+    }
+
+    @Test
+    void toolDeniesUnassignedTasksForEmployee() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles tâches ne sont pas assignées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("réservé")));
+    }
+
+    @Test
+    void toolAllowsUnassignedTasksForRh() throws Exception {
+        String token = login("rh@apprh.local");
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles tâches ne sont pas assignées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("assignée")));
+    }
+
+    @Test
+    void toolShowsTeamPendingLeavesForRh() throws Exception {
+        String token = login("rh@apprh.local");
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles demandes de congé sont en attente ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("Yassine")));
+    }
+
+    @Test
+    void streamReturnsDeterministicAnswerForTool() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat/stream")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Liste mes tâches en cours"))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"type\":\"token\"")))
+                .andExpect(content().string(containsString("\"type\":\"done\"")));
+    }
+
     private long approvedLeaveCount() {
         return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId()).stream()
                 .filter(leave -> leave.getStatus() == LeaveStatus.APPROVED)
@@ -263,8 +345,12 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
     }
 
     private String login() throws Exception {
+        return login(EMPLOYEE_EMAIL);
+    }
+
+    private String login(String email) throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "email", EMPLOYEE_EMAIL,
+                "email", email,
                 "password", PASSWORD));
         String response = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
