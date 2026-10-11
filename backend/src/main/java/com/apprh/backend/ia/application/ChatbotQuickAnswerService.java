@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.text.Normalizer;
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Locale;
@@ -94,6 +95,11 @@ public class ChatbotQuickAnswerService {
     }
 
     private String taskAnswer(Long employeeId, String normalized) {
+        if (normalized.contains("retard")) {
+            long overdue = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatusNotAndDueDateBefore(
+                    employeeId, TaskStatus.DONE, LocalDate.now());
+            return "Vous avez %d tâche(s) en retard.".formatted(overdue);
+        }
         if (normalized.contains("termin") || normalized.contains("complete") || normalized.contains("finie")
                 || normalized.contains("finies") || normalized.contains("realise")) {
             long done = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatus(employeeId, TaskStatus.DONE);

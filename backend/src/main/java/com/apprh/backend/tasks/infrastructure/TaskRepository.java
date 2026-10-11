@@ -22,6 +22,9 @@ public interface TaskRepository extends JpaRepository<Task, Long>, JpaSpecificat
 
     long countByAssigneeIdAndDeletedAtIsNullAndStatus(Long assigneeId, TaskStatus status);
 
+    long countByAssigneeIdAndDeletedAtIsNullAndStatusNotAndDueDateBefore(Long assigneeId, TaskStatus status,
+                                                                        LocalDate dueDate);
+
     @Query("""
             select t.status, count(t) from Task t
             where t.deletedAt is null

@@ -67,6 +67,22 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void deterministicOverdueTaskCountMatchesDatabase() throws Exception {
+        String token = login();
+        long overdue = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatusNotAndDueDateBefore(
+                employeeId(), TaskStatus.DONE, java.time.LocalDate.now());
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de tâches en retard ai-je ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("retard")))
+                .andExpect(jsonPath("$.reply", containsString(String.valueOf(overdue))));
+    }
+
+    @Test
     void chatRequiresAuthentication() throws Exception {
         mockMvc.perform(post("/chatbot/chat")
                         .contentType(MediaType.APPLICATION_JSON)
