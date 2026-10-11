@@ -3,6 +3,8 @@ package com.apprh.backend;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
 import com.apprh.backend.leaves.domain.LeaveStatus;
 import com.apprh.backend.leaves.infrastructure.LeaveRequestRepository;
+import com.apprh.backend.tasks.domain.TaskStatus;
+import com.apprh.backend.tasks.infrastructure.TaskRepository;
 import com.apprh.backend.users.infrastructure.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +18,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -43,6 +47,40 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private LeaveRequestRepository leaveRequestRepository;
+
+    @Autowired
+    private TaskRepository taskRepository;
+
+    @Test
+    void deterministicDoneTaskCountMatchesDatabase() throws Exception {
+        String token = login();
+        long done = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatus(employeeId(), TaskStatus.DONE);
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de tâches ai-je terminées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("terminée")))
+                .andExpect(jsonPath("$.reply", containsString(String.valueOf(done))));
+    }
+
+    @Test
+    void deterministicOverdueTaskCountMatchesDatabase() throws Exception {
+        String token = login();
+        long overdue = taskRepository.countByAssigneeIdAndDeletedAtIsNullAndStatusNotAndDueDateBefore(
+                employeeId(), TaskStatus.DONE, java.time.LocalDate.now());
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de tâches en retard ai-je ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("retard")))
+                .andExpect(jsonPath("$.reply", containsString(String.valueOf(overdue))));
+    }
 
     @Test
     void chatRequiresAuthentication() throws Exception {
@@ -105,6 +143,7 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                                 Map.of("message", "Combien de congés approuvés ai-je ?"))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.sources").isArray())
                 .andExpect(jsonPath("$.reply", containsString(String.valueOf(approved))));
     }
 
@@ -152,17 +191,180 @@ class ChatbotIntegrationTest extends AbstractIntegrationTest {
                 .andExpect(content().string(containsString("\"type\":\"done\"")));
     }
 
+    @Test
+    void persistsExchangesAndAllowsClearing() throws Exception {
+        String token = login();
+
+        mockMvc.perform(delete("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(0));
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de congés approuvés ai-je ?"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].role").value("user"))
+                .andExpect(jsonPath("$[1].role").value("assistant"));
+
+        mockMvc.perform(delete("/chatbot/messages")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+    }
+
+    @Test
+    void messagesRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/chatbot/messages"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void metricsRequireAuthentication() throws Exception {
+        mockMvc.perform(get("/actuator/metrics/chatbot.requests"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void exposesChatbotMetrics() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Combien de congés approuvés ai-je ?"))))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/actuator/metrics/chatbot.requests")
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("chatbot.requests"));
+    }
+
+    @Test
+    void toolListsOwnOpenTasksDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Liste mes tâches en cours"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("tâche")));
+    }
+
+    @Test
+    void toolListsOwnPendingLeavesDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles sont mes demandes de congé en attente ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("attente")));
+    }
+
+    @Test
+    void toolDeniesUnassignedTasksForEmployee() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles tâches ne sont pas assignées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("réservé")));
+    }
+
+    @Test
+    void toolAllowsUnassignedTasksForRh() throws Exception {
+        String token = login("rh@apprh.local");
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles tâches ne sont pas assignées ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("assignée")));
+    }
+
+    @Test
+    void toolShowsTeamPendingLeavesForRh() throws Exception {
+        String token = login("rh@apprh.local");
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Quelles demandes de congé sont en attente ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.reply", containsString("Yassine")));
+    }
+
+    @Test
+    void streamReturnsDeterministicAnswerForTool() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat/stream")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Liste mes tâches en cours"))))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("\"type\":\"token\"")))
+                .andExpect(content().string(containsString("\"type\":\"done\"")));
+    }
+
+    @Test
+    void toolListsOwnProjectsDeterministically() throws Exception {
+        String token = login();
+
+        mockMvc.perform(post("/chatbot/chat")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(
+                                Map.of("message", "Sur quels projets je travaille ?"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.aiAvailable").value(true))
+                .andExpect(jsonPath("$.reply", containsString("projet")));
+    }
+
     private long approvedLeaveCount() {
-        Long userId = userRepository.findByEmailAndDeletedAtIsNull(EMPLOYEE_EMAIL).orElseThrow().getId();
-        Long employeeId = employeeRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow().getId();
-        return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId).stream()
+        return leaveRequestRepository.findByEmployeeIdAndDeletedAtIsNull(employeeId()).stream()
                 .filter(leave -> leave.getStatus() == LeaveStatus.APPROVED)
                 .count();
     }
 
+    private Long employeeId() {
+        Long userId = userRepository.findByEmailAndDeletedAtIsNull(EMPLOYEE_EMAIL).orElseThrow().getId();
+        return employeeRepository.findByUserIdAndDeletedAtIsNull(userId).orElseThrow().getId();
+    }
+
     private String login() throws Exception {
+        return login(EMPLOYEE_EMAIL);
+    }
+
+    private String login(String email) throws Exception {
         String body = objectMapper.writeValueAsString(Map.of(
-                "email", EMPLOYEE_EMAIL,
+                "email", email,
                 "password", PASSWORD));
         String response = mockMvc.perform(post("/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)

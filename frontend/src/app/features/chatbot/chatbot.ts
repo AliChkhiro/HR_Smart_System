@@ -1,4 +1,4 @@
-import { Component, ElementRef, HostListener, NgZone, computed, inject, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, NgZone, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -7,13 +7,11 @@ import { ChatbotService } from '../../core/services/chatbot.service';
 import { ChatHistoryMessage, ChatStreamEvent } from '../../core/models/chat.model';
 import { MarkdownPipe } from './markdown.pipe';
 
-const MAX_HISTORY_MESSAGES = 8;
-const STORAGE_KEY = 'apprh.chatbot.messages';
-
 export interface ChatMessage {
   id: number;
   from: 'user' | 'assistant';
   text: string;
+  sources?: string[];
 }
 
 /**
@@ -42,6 +40,8 @@ export class Chatbot {
   private readonly zone = inject(NgZone);
 
   private readonly messagesArea = viewChild<ElementRef<HTMLElement>>('messagesArea');
+  private readonly composer = viewChild<ElementRef<HTMLTextAreaElement>>('composer');
+  private readonly launcher = viewChild<ElementRef<HTMLButtonElement>>('launcher');
   private nextId = 1;
   private controller: AbortController | null = null;
   private copiedTimer?: ReturnType<typeof setTimeout>;
@@ -59,6 +59,13 @@ export class Chatbot {
 
   constructor() {
     this.messages.set(this.restore());
+    this.loadServerHistory();
+
+    effect(() => {
+      if (this.open() && this.composer()) {
+        this.composer()!.nativeElement.focus();
+      }
+    });
   }
 
   @HostListener('document:keydown.escape')
@@ -83,10 +90,12 @@ export class Chatbot {
 
   protected close(): void {
     this.open.set(false);
+    this.launcher()?.nativeElement.focus();
   }
 
   protected onDraftInput(event: Event): void {
     this.draft.set((event.target as HTMLTextAreaElement).value);
+    this.autoGrow();
   }
 
   protected onKeydown(event: KeyboardEvent): void {
@@ -107,6 +116,7 @@ export class Chatbot {
     }
     const history = this.buildHistory();
     this.draft.set('');
+    this.resetComposer();
     this.append('user', trimmed);
     const placeholderId = this.appendPlaceholder();
     this.sending.set(true);
@@ -129,11 +139,13 @@ export class Chatbot {
     this.nextId = 1;
     this.messages.set([this.welcome()]);
     this.draft.set('');
+    this.resetComposer();
     this.sending.set(false);
     this.thinking.set(false);
     this.aiAvailable.set(true);
     this.copiedId.set(null);
     this.save();
+    this.chatbotService.clearHistory().catch(() => undefined);
   }
 
   protected copy(message: ChatMessage): void {
@@ -158,6 +170,8 @@ export class Chatbot {
       this.aiAvailable.set(true);
       this.thinking.set(false);
       this.appendText(id, event.text);
+    } else if (event.type === 'sources') {
+      this.setSources(id, event.sources);
     } else if (event.type === 'fallback') {
       this.aiAvailable.set(false);
       this.thinking.set(false);
@@ -187,6 +201,9 @@ export class Chatbot {
     this.sending.set(false);
     this.thinking.set(false);
     this.scrollToBottom();
+    if (this.open()) {
+      this.composer()?.nativeElement.focus();
+    }
     this.save();
   }
 
@@ -214,8 +231,57 @@ export class Chatbot {
     this.scrollToBottom();
   }
 
+  private setSources(id: number, sources: string[]): void {
+    if (!sources || sources.length === 0) {
+      return;
+    }
+    this.messages.update(list => list.map(message =>
+      message.id === id ? { ...message, sources } : message));
+  }
+
+  private loadServerHistory(): void {
+    this.chatbotService.loadHistory()
+      .then(messages => {
+        if (!this.sending() && messages.length > 0) {
+          this.applyServerHistory(messages);
+        }
+      })
+      .catch(() => undefined);
+  }
+
+  private applyServerHistory(messages: ChatHistoryMessage[]): void {
+    const mapped: ChatMessage[] = [
+      this.welcome(),
+      ...messages.map((message, index) => ({
+        id: index + 1,
+        from: message.role,
+        text: message.content,
+      })),
+    ];
+    this.nextId = mapped.reduce((max, message) => Math.max(max, message.id), 0) + 1;
+    this.messages.set(mapped);
+    this.save();
+    this.scrollToBottom();
+  }
+
   private textOf(id: number): string {
     return this.messages().find(message => message.id === id)?.text ?? '';
+  }
+
+  private autoGrow(): void {
+    const el = this.composer()?.nativeElement;
+    if (!el) {
+      return;
+    }
+    el.style.height = 'auto';
+    el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+  }
+
+  private resetComposer(): void {
+    const el = this.composer()?.nativeElement;
+    if (el) {
+      el.style.height = 'auto';
+    }
   }
 
   private scrollToBottom(): void {

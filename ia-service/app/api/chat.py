@@ -6,9 +6,12 @@ from pydantic import BaseModel, Field
 
 from ..chat.prompts import SYSTEM_PROMPT
 from ..chat.ollama import OllamaClient
+from ..rag import get_retriever
 
 
 router = APIRouter(tags=["chat"])
+
+TOP_K_DOCS = 3
 
 
 class HistoryMessage(BaseModel):
@@ -25,6 +28,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
     ai_available: bool
+    sources: list[str] = Field(default_factory=list)
 
 
 FALLBACK_REPLY = (
@@ -33,8 +37,38 @@ FALLBACK_REPLY = (
 )
 
 
-def build_messages(req: ChatRequest) -> list[dict]:
+def retrieve(message: str) -> list:
+    try:
+        return get_retriever().retrieve(message, top_k=TOP_K_DOCS)
+    except Exception:
+        return []
+
+
+def sources_of(retrieved: list) -> list[str]:
+    titles: list[str] = []
+    for item in retrieved:
+        title = item.chunk.doc_title
+        if title not in titles:
+            titles.append(title)
+    return titles
+
+
+def build_messages(req: ChatRequest, retrieved: list | None = None) -> list[dict]:
     messages = [{"role": "system", "content": SYSTEM_PROMPT}]
+    if retrieved:
+        passages = "\n\n".join(
+            f"[{item.chunk.doc_title} — {item.chunk.heading}]\n{item.chunk.text}"
+            for item in retrieved
+        )
+        messages.append({
+            "role": "system",
+            "content": (
+                "Documentation RH (extraits pertinents, source de vérité en lecture "
+                "seule). Pour les questions de politique ou de procédure, appuie-toi "
+                "sur ces extraits et cite le titre du document entre crochets, par "
+                "exemple [Télétravail] :\n\n" + passages
+            ),
+        })
     if req.user_context:
         messages.append({
             "role": "system",
@@ -50,23 +84,30 @@ def build_messages(req: ChatRequest) -> list[dict]:
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
+    retrieved = retrieve(req.message)
     try:
-        text = OllamaClient().generate(build_messages(req))
+        text = OllamaClient().generate(build_messages(req, retrieved))
         if not text:
             text = "Je n'ai pas pu générer de réponse."
-        return ChatResponse(reply=text, ai_available=True)
+        return ChatResponse(reply=text, ai_available=True, sources=sources_of(retrieved))
     except Exception:
-        return ChatResponse(reply=FALLBACK_REPLY, ai_available=False)
+        return ChatResponse(reply=FALLBACK_REPLY, ai_available=False, sources=[])
 
 
 @router.post("/chat/stream")
 def chat_stream(req: ChatRequest):
-    def event_stream():
+    retrieved = retrieve(req.message)
+    sources = sources_of(retrieved)
+    messages = build_messages(req, retrieved)
+
+    def generate():
+        if sources:
+            yield json.dumps({"type": "sources", "sources": sources}) + "\n"
         produced = False
         try:
-            for delta in OllamaClient().generate_stream(build_messages(req)):
+            for chunk in OllamaClient().generate_stream(messages):
                 produced = True
-                yield json.dumps({"type": "token", "text": delta}, ensure_ascii=False) + "\n"
+                yield json.dumps({"type": "token", "text": chunk}, ensure_ascii=False) + "\n"
             yield json.dumps({"type": "done"}) + "\n"
         except Exception:
             if produced:
@@ -75,4 +116,4 @@ def chat_stream(req: ChatRequest):
                 yield json.dumps({"type": "fallback", "text": FALLBACK_REPLY},
                                  ensure_ascii=False) + "\n"
 
-    return StreamingResponse(event_stream(), media_type="application/x-ndjson")
+    return StreamingResponse(generate(), media_type="application/x-ndjson")

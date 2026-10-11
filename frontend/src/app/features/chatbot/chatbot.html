@@ -1,4 +1,5 @@
 <button
+  #launcher
   mat-fab
   type="button"
   class="chatbot-launcher"
@@ -36,7 +37,7 @@
       </button>
     </header>
 
-    <div class="chatbot-messages" #messagesArea>
+    <div class="chatbot-messages" #messagesArea role="log" aria-live="polite" aria-relevant="additions text" [attr.aria-busy]="sending()">
       @if (thinking()) {
         <div class="chatbot-typing">
           <mat-spinner diameter="16" />
@@ -78,6 +79,15 @@
               </button>
             }
           </div>
+          @if (message.from === 'assistant' && message.sources?.length) {
+            <div class="chatbot-sources">
+              <mat-icon class="chatbot-sources-icon">menu_book</mat-icon>
+              <span class="chatbot-sources-label">Sources</span>
+              @for (source of message.sources; track source) {
+                <span class="chatbot-source">{{ source }}</span>
+              }
+            </div>
+          }
         }
       }
     </div>
@@ -91,8 +101,10 @@
       }
       <div class="chatbot-composer">
         <textarea
+          #composer
           rows="1"
           placeholder="Posez votre question..."
+          aria-label="Votre question à l'assistant RH"
           [value]="draft()"
           (input)="onDraftInput($event)"
           (keydown)="onKeydown($event)"

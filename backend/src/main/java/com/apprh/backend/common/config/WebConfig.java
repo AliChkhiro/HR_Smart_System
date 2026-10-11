@@ -14,6 +14,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(chatbotRateLimitInterceptor).addPathPatterns("/chatbot/**");
+        // Seuls les appels coûteux (LLM) sont limités ; la lecture/le nettoyage de
+        // l'historique (GET/DELETE /chatbot/messages) ne consomme pas le quota.
+        registry.addInterceptor(chatbotRateLimitInterceptor)
+                .addPathPatterns("/chatbot/chat", "/chatbot/chat/stream");
     }
 }

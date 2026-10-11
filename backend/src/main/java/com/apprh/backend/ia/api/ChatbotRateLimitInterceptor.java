@@ -2,6 +2,7 @@ package com.apprh.backend.ia.api;
 
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.common.security.UserPrincipal;
+import com.apprh.backend.ia.infrastructure.ChatbotMetrics;
 import com.apprh.backend.ia.infrastructure.ChatbotRateLimiter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -17,10 +18,12 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class ChatbotRateLimitInterceptor implements HandlerInterceptor {
 
     private final ChatbotRateLimiter rateLimiter;
+    private final ChatbotMetrics metrics;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         if (!rateLimiter.tryAcquire(resolveKey(request))) {
+            metrics.recordRateLimited();
             throw new ApiException(HttpStatus.TOO_MANY_REQUESTS, "CHATBOT_RATE_LIMITED",
                     "Trop de requêtes au chatbot. Veuillez patienter quelques instants.");
         }

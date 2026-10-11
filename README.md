@@ -47,15 +47,39 @@ Arrêt : `docker compose down` (ajouter `-v` pour supprimer le volume PostgreSQL
 Toutes les valeurs sensibles passent par variables d'environnement (voir `application.yml` et `docker-compose.yml`) :
 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `IA_SERVICE_URL`.
 
+Pour le déploiement Docker, copiez le modèle puis renseignez vos valeurs :
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Le fichier `.env` est ignoré par git : n'y committez jamais de secret.
+
 ## Assistant RH IA (chatbot)
 
 Un assistant conversationnel 100 % local (Ollama) est intégré sous forme de widget
 flottant : il répond aux questions de l'utilisateur connecté sur ses congés, ses
 tâches et ses projets, avec des réponses de comptage déterministes, un historique
 multi-tours et un rendu en flux (streaming). Le tout est scopé au JWT (RBAC) et
-protégé par une limite de débit.
+protégé par une limite de débit. Les conversations sont persistées côté serveur
+(`chat_message`) et des métriques Micrometer sont exposées (`/api/actuator/metrics`).
+L'assistant s'appuie sur une base de connaissances documentaire locale (RAG, BM25)
+pour les questions de politique RH, avec citation des sources. Des **outils
+serveur** en lecture seule (listes de tâches, congés, tâches non assignées)
+répondent de façon déterministe, strictement scopés au rôle de l'utilisateur
+(RBAC appliqué côté backend).
 
-Documentation détaillée : [`docs/chatbot-ia.md`](docs/chatbot-ia.md).
+Documentation détaillée :
+- [`docs/chatbot-ia.md`](docs/chatbot-ia.md) — flux, endpoints, configuration, dépannage.
+- [`docs/module-ia-synthese.md`](docs/module-ia-synthese.md) — synthèse du module (soutenance).
+- [`docs/securite-ia.md`](docs/securite-ia.md) — audit sécurité.
+- [`docs/rag-ia.md`](docs/rag-ia.md) — base de connaissances documentaire (RAG).
+
+Démonstration automatisée de bout en bout (pile Docker démarrée) :
+
+```powershell
+.\scripts\demo-chatbot.ps1
+```
 
 ## Planning des sprints
 

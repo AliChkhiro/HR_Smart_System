@@ -94,3 +94,19 @@ mat-dialog-content {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.rec-criteria {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.criterion-chip {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.7);
+  cursor: help;
+}

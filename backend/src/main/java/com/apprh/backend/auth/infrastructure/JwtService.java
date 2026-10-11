@@ -4,6 +4,8 @@ import com.apprh.backend.users.domain.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -18,11 +20,18 @@ import java.util.UUID;
 @Service
 public class JwtService {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
+    private static final String DEFAULT_SECRET = "dev-secret-a-changer-avant-production";
+
     private final JwtProperties properties;
     private final SecretKey key;
 
     public JwtService(JwtProperties properties) {
         this.properties = properties;
+        if (DEFAULT_SECRET.equals(properties.secret())) {
+            log.warn("JWT_SECRET non défini : secret de développement utilisé. "
+                    + "Définissez un secret fort (32+ caractères) avant toute mise en production.");
+        }
         this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
     }
 
