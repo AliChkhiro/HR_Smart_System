@@ -65,7 +65,7 @@ public class SkillService {
         long linked = employeeSkillRepository.countBySkillId(id);
         if (linked > 0) {
             throw new ApiException(HttpStatus.CONFLICT, "SKILL_IN_USE",
-                    "Cette compÃ©tence est encore associÃ©e Ã  " + linked + " employÃ©(s)");
+                    "Cette compétence est encore associée à " + linked + " employé(s)");
         }
         skill.setDeletedAt(Instant.now());
         skillRepository.save(skill);
@@ -73,12 +73,12 @@ public class SkillService {
 
     private Skill findActive(Long id) {
         return skillRepository.findByIdAndDeletedAtIsNull(id)
-                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SKILL_NOT_FOUND", "CompÃ©tence introuvable"));
+                .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "SKILL_NOT_FOUND", "Compétence introuvable"));
     }
 
     private void checkNameAvailable(String name) {
         if (skillRepository.findByNameIgnoreCaseAndDeletedAtIsNull(name).isPresent()) {
-            throw new ApiException(HttpStatus.CONFLICT, "SKILL_NAME_EXISTS", "Une compÃ©tence porte dÃ©jÃ  ce nom");
+            throw new ApiException(HttpStatus.CONFLICT, "SKILL_NAME_EXISTS", "Une compétence porte déjà ce nom");
         }
     }
 
