@@ -29,7 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -156,11 +158,11 @@ public class TaskService {
 
     private List<Skill> findSkills(List<Long> skillIds) {
         if (skillIds == null || skillIds.isEmpty()) {
-            return List.of();
+            return new ArrayList<>();
         }
         List<Skill> skills = skillRepository.findAllById(skillIds).stream()
                 .filter(skill -> skill.getDeletedAt() == null)
-                .toList();
+                .collect(Collectors.toCollection(ArrayList::new));
         if (skills.size() != skillIds.size()) {
             throw new ApiException(HttpStatus.BAD_REQUEST, "SKILL_NOT_FOUND",
                     "Une ou plusieurs compétences sont introuvables");

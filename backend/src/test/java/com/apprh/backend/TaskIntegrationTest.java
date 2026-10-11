@@ -67,6 +67,38 @@ class TaskIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
+    void chefDeProjetCanEditTaskSkillsIncludingClearing() throws Exception {
+        String chefToken = login("chefprojet@apprh.local");
+        long projectId = createProject(chefToken);
+        long employeeId = firstEmployeeId(chefToken);
+        long skillId = firstSkillId(chefToken);
+
+        MvcResult created = mockMvc.perform(post("/tasks")
+                        .header("Authorization", "Bearer " + chefToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\":\"Tâche compétences " + System.nanoTime() + "\","
+                                + "\"projectId\":" + projectId + ",\"assigneeId\":" + employeeId + ","
+                                + "\"skillIds\":[" + skillId + "]}"))
+                .andExpect(status().isCreated())
+                .andReturn();
+        long taskId = id(created);
+
+        mockMvc.perform(patch("/tasks/" + taskId)
+                        .header("Authorization", "Bearer " + chefToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"assigneeId\":" + employeeId + ",\"skillIds\":[]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.skillIds").isEmpty());
+
+        mockMvc.perform(patch("/tasks/" + taskId)
+                        .header("Authorization", "Bearer " + chefToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"skillIds\":[" + skillId + "]}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.skillIds[0]").value(Math.toIntExact(skillId)));
+    }
+
+    @Test
     void assigneeCanMoveOwnTaskInKanban() throws Exception {
         String chefToken = login("chefprojet@apprh.local");
         String employeeToken = login("employe@apprh.local");
