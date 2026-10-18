@@ -85,23 +85,23 @@
           }
         </mat-form-field>
 
-        @if (errorMessage) {
+        @if (errorMessage()) {
           <div class="error-box">
             <mat-icon>error_outline</mat-icon>
-            <span>{{ errorMessage }}</span>
+            <span>{{ errorMessage() }}</span>
           </div>
         }
 
-        @if (successMessage) {
+        @if (successMessage()) {
           <div class="success-box">
             <mat-icon>check_circle</mat-icon>
-            <span>{{ successMessage }}</span>
+            <span>{{ successMessage() }}</span>
           </div>
         }
 
         <button mat-flat-button color="primary" type="submit" class="full-width submit-btn"
-                [disabled]="form.invalid || submitting">
-          @if (submitting) {
+                [disabled]="form.invalid || submitting()">
+          @if (submitting()) {
             <mat-spinner diameter="20" />
           } @else {
             Créer mon compte
