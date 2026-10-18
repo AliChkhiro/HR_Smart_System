@@ -2,6 +2,7 @@ package com.apprh.backend.users.api;
 
 import com.apprh.backend.users.application.UserService;
 import com.apprh.backend.users.domain.UserRole;
+import com.apprh.backend.users.domain.UserStatus;
 import com.apprh.backend.common.security.UserPrincipal;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +33,23 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'RH')")
     public Page<UserResponse> list(@RequestParam(required = false) String search,
                                    @RequestParam(required = false) UserRole role,
+                                   @RequestParam(required = false) UserStatus status,
                                    @RequestParam(defaultValue = "false") boolean unassigned,
                                    @RequestParam(defaultValue = "0") int page,
                                    @RequestParam(defaultValue = "20") int size) {
-        return userService.list(search, role, unassigned, PageRequest.of(page, Math.min(size, 100)));
+        return userService.list(search, role, unassigned, status, PageRequest.of(page, Math.min(size, 100)));
+    }
+
+    @PostMapping("/{id}/approve")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH')")
+    public UserResponse approve(@PathVariable Long id) {
+        return userService.approve(id);
+    }
+
+    @PostMapping("/{id}/reject")
+    @PreAuthorize("hasAnyRole('ADMIN', 'RH')")
+    public UserResponse reject(@PathVariable Long id) {
+        return userService.reject(id);
     }
 
     @PostMapping

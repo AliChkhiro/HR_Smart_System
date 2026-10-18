@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 import { MainLayout } from './layout/main-layout/main-layout';
 
 export const routes: Routes = [
@@ -19,6 +20,11 @@ export const routes: Routes = [
       { path: 'employees', loadComponent: () => import('./features/employees/employees').then(m => m.Employees) },
       { path: 'departments', loadComponent: () => import('./features/departments/departments').then(m => m.Departments) },
       { path: 'users', loadComponent: () => import('./features/users/users').then(m => m.Users) },
+      {
+        path: 'approvals',
+        canActivate: [roleGuard('ADMIN', 'RH')],
+        loadComponent: () => import('./features/approvals/approvals').then(m => m.Approvals)
+      },
       { path: 'skills', loadComponent: () => import('./features/skills/skills').then(m => m.Skills) },
       { path: 'calendar', loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar) },
       { path: 'notifications', loadComponent: () => import('./features/notifications/notifications').then(m => m.Notifications) },
