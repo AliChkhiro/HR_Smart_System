@@ -41,7 +41,9 @@ app:
     access-token-ttl: ${JWT_ACCESS_TTL:15m}
     refresh-token-ttl: ${JWT_REFRESH_TTL:7d}
   seed:
-    password: ${SEED_PASSWORD:Apprh@2026!}
+    # Comptes de démonstration : désactivés par défaut. Activés uniquement via le profil « dev ».
+    enabled: ${SEED_ENABLED:false}
+    password: ${SEED_PASSWORD:}
   mail:
     enabled: ${MAIL_ENABLED:false}
     from: ${MAIL_FROM:no-reply@apprh.local}

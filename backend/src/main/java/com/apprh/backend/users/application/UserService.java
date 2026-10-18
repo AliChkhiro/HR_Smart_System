@@ -1,6 +1,9 @@
 package com.apprh.backend.users.application;
 
 import com.apprh.backend.common.exception.ApiException;
+import com.apprh.backend.email.application.EmailService;
+import com.apprh.backend.notifications.application.NotificationService;
+import com.apprh.backend.notifications.domain.NotificationType;
 import com.apprh.backend.users.api.UserCreateRequest;
 import com.apprh.backend.users.api.UserResponse;
 import com.apprh.backend.users.api.UserUpdateRequest;
@@ -27,10 +30,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final NotificationService notificationService;
+    private final EmailService emailService;
 
     @Transactional(readOnly = true)
-    public Page<UserResponse> list(String search, UserRole role, boolean unassigned, Pageable pageable) {
-        return userRepository.findAll(UserSpecifications.activeAndFiltered(search, role, unassigned), pageable)
+    public Page<UserResponse> list(String search, UserRole role, boolean unassigned, UserStatus status, Pageable pageable) {
+        return userRepository.findAll(UserSpecifications.activeAndFiltered(search, role, unassigned, status), pageable)
                 .map(userMapper::toResponse);
     }
 
@@ -83,6 +88,46 @@ public class UserService {
         User user = findActive(id);
         user.setDeletedAt(Instant.now());
         userRepository.save(user);
+    }
+
+    /**
+     * Valide une demande d'inscription en attente (PENDING → ACTIVE) et en informe l'intéressé.
+     */
+    @Transactional
+    public UserResponse approve(Long id) {
+        User user = requirePending(id);
+        user.setStatus(UserStatus.ACTIVE);
+        User saved = userRepository.save(user);
+        notifyDecision(saved, NotificationType.USER_APPROVED,
+                "Votre compte a été validé. Vous pouvez maintenant vous connecter à AppRH.");
+        return userMapper.toResponse(saved);
+    }
+
+    /**
+     * Refuse une demande d'inscription en attente (PENDING → DISABLED) et en informe l'intéressé.
+     */
+    @Transactional
+    public UserResponse reject(Long id) {
+        User user = requirePending(id);
+        user.setStatus(UserStatus.DISABLED);
+        User saved = userRepository.save(user);
+        notifyDecision(saved, NotificationType.USER_REJECTED,
+                "Votre demande de création de compte n'a pas été validée. Contactez les ressources humaines.");
+        return userMapper.toResponse(saved);
+    }
+
+    private User requirePending(Long id) {
+        User user = findActive(id);
+        if (user.getStatus() != UserStatus.PENDING) {
+            throw new ApiException(HttpStatus.CONFLICT, "USER_NOT_PENDING",
+                    "Cette demande d'inscription n'est pas en attente de validation");
+        }
+        return user;
+    }
+
+    private void notifyDecision(User user, NotificationType type, String message) {
+        notificationService.create(user.getId(), type, message);
+        emailService.send(user.getEmail(), "AppRH — Votre demande de compte", message);
     }
 
     private User findActive(Long id) {

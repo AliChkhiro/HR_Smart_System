@@ -8,6 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../../core/services/auth.service';
+import { environment } from '../../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -34,6 +35,7 @@ export class Login {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
+  protected readonly demoHint = environment.demoAccountsHint;
   protected submitting = false;
   protected errorMessage: string | null = null;
 
@@ -49,9 +51,16 @@ export class Login {
         this.authService.setSession(res);
         this.router.navigate(['/dashboard']);
       },
-      error: () => {
+      error: (err) => {
         this.submitting = false;
-        this.errorMessage = 'Identifiants invalides. Veuillez réessayer.';
+        const code = err?.error?.code;
+        if (code === 'AUTH_ACCOUNT_PENDING') {
+          this.errorMessage = 'Votre compte est en attente de validation par les ressources humaines.';
+        } else if (code === 'AUTH_ACCOUNT_DISABLED') {
+          this.errorMessage = 'Ce compte est désactivé. Contactez les ressources humaines.';
+        } else {
+          this.errorMessage = 'Identifiants invalides. Veuillez réessayer.';
+        }
       }
     });
   }

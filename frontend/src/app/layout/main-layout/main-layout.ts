@@ -22,6 +22,7 @@ interface NavItem {
   label: string;
   section: string;
   adminOnly?: boolean;
+  roles?: UserRole[];
 }
 
 @Component({
@@ -65,11 +66,18 @@ export class MainLayout {
     { path: '/skills', icon: 'workspace_premium', label: 'Compétences', section: 'RESSOURCES HUMAINES' },
     { path: '/notifications', icon: 'notifications', label: 'Notifications', section: 'RESSOURCES HUMAINES' },
     { path: '/users', icon: 'manage_accounts', label: 'Utilisateurs', section: 'SYSTÈME', adminOnly: true },
+    { path: '/approvals', icon: 'how_to_reg', label: 'Validations', section: 'SYSTÈME', roles: ['ADMIN', 'RH'] },
     { path: '/settings', icon: 'settings', label: 'Paramètres', section: 'SYSTÈME' }
   ];
 
   protected readonly visibleNavItems = signal(
-    this.navItems.filter(item => !item.adminOnly || this.authService.isAdmin())
+    this.navItems.filter(item => {
+      if (item.roles) {
+        const role = this.authService.user()?.role;
+        return !!role && item.roles.includes(role);
+      }
+      return !item.adminOnly || this.authService.isAdmin();
+    })
   );
 
   protected readonly currentPageLabel = signal('');

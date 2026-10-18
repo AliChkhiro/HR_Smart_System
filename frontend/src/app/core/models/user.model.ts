@@ -1,5 +1,5 @@
 export type UserRole = 'ADMIN' | 'RH' | 'CHEF_PROJET' | 'EMPLOYEE';
-export type UserStatus = 'ACTIVE' | 'DISABLED';
+export type UserStatus = 'PENDING' | 'ACTIVE' | 'DISABLED';
 
 export interface UserDto {
   id: number;

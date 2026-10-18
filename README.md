@@ -66,6 +66,18 @@ Copy-Item .env.example .env
 
 Le fichier `.env` est ignoré par git : n'y committez jamais de secret.
 
+### Comptes et inscription
+
+- **Inscription publique** : `POST /auth/register` crée un compte au statut `PENDING`.
+  Le compte ne peut pas se connecter tant qu'un membre **RH** (ou Administrateur) ne l'a pas
+  validé depuis l'écran **Validations** (`/approvals`). La validation passe le compte à
+  `ACTIVE` ; un refus le passe à `DISABLED`. L'intéressé est informé par notification
+  in-app et par email.
+- **Comptes de démonstration** : créés uniquement en développement
+  (`SPRING_PROFILES_ACTIVE=dev`, `SEED_ENABLED=true`). En production, le seeding est
+  désactivé (`app.seed.enabled=false`) : aucun compte de démonstration n'est créé et
+  l'indice de connexion n'est pas affiché sur l'écran de connexion.
+
 ## Assistant RH IA (chatbot)
 
 Un assistant conversationnel 100 % local (Ollama) est intégré sous forme de widget

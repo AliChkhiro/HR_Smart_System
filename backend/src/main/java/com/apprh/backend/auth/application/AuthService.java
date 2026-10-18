@@ -8,6 +8,8 @@ import com.apprh.backend.auth.infrastructure.JwtProperties;
 import com.apprh.backend.auth.infrastructure.JwtService;
 import com.apprh.backend.auth.infrastructure.RefreshTokenRepository;
 import com.apprh.backend.common.exception.ApiException;
+import com.apprh.backend.notifications.application.NotificationService;
+import com.apprh.backend.notifications.domain.NotificationType;
 import com.apprh.backend.users.api.UserResponse;
 import com.apprh.backend.users.domain.User;
 import com.apprh.backend.users.domain.UserRole;
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class AuthService {
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
     private final UserMapper userMapper;
+    private final NotificationService notificationService;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
@@ -40,9 +44,7 @@ public class AuthService {
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
             throw invalidCredentials();
         }
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "AUTH_ACCOUNT_DISABLED", "Ce compte est désactivé");
-        }
+        ensureAccountUsable(user);
         return issueTokens(user);
     }
 
@@ -59,9 +61,11 @@ public class AuthService {
                 .lastName(request.lastName().trim())
                 .passwordHash(passwordEncoder.encode(request.password()))
                 .role(UserRole.EMPLOYEE)
-                .status(UserStatus.ACTIVE)
+                .status(UserStatus.PENDING)
                 .build();
-        return userMapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        notifyRecruiters(saved);
+        return userMapper.toResponse(saved);
     }
 
     @Transactional
@@ -73,9 +77,7 @@ public class AuthService {
         }
         User user = userRepository.findByIdAndDeletedAtIsNull(stored.getUserId())
                 .orElseThrow(() -> new ApiException(HttpStatus.UNAUTHORIZED, "AUTH_INVALID_REFRESH_TOKEN", "Utilisateur introuvable"));
-        if (user.getStatus() != UserStatus.ACTIVE) {
-            throw new ApiException(HttpStatus.FORBIDDEN, "AUTH_ACCOUNT_DISABLED", "Ce compte est désactivé");
-        }
+        ensureAccountUsable(user);
         stored.setRevoked(true);
         refreshTokenRepository.save(stored);
         return issueTokens(user);
@@ -107,6 +109,28 @@ public class AuthService {
                 .build();
         refreshTokenRepository.save(entity);
         return new AuthResponse(accessToken, refreshToken, userMapper.toResponse(user));
+    }
+
+    /**
+     * Empêche l'émission de jetons pour un compte non opérationnel.
+     * Un compte PENDING attend la validation RH ; DISABLED est un compte désactivé.
+     */
+    private void ensureAccountUsable(User user) {
+        if (user.getStatus() == UserStatus.PENDING) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "AUTH_ACCOUNT_PENDING",
+                    "Votre compte est en attente de validation par les ressources humaines");
+        }
+        if (user.getStatus() != UserStatus.ACTIVE) {
+            throw new ApiException(HttpStatus.FORBIDDEN, "AUTH_ACCOUNT_DISABLED", "Ce compte est désactivé");
+        }
+    }
+
+    private void notifyRecruiters(User user) {
+        String message = "%s %s (%s) demande la création d'un compte"
+                .formatted(user.getFirstName(), user.getLastName(), user.getEmail());
+        for (User recruiter : userRepository.findByRoleInAndDeletedAtIsNull(List.of(UserRole.ADMIN, UserRole.RH))) {
+            notificationService.create(recruiter.getId(), NotificationType.USER_REGISTRATION, message);
+        }
     }
 
     private ApiException invalidCredentials() {

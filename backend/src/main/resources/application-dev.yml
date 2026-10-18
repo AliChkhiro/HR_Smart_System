@@ -10,3 +10,7 @@ app:
     # Secret de développement uniquement. En production, JWT_SECRET est obligatoire
     # et ce secret de repli est refusé (voir application-prod.yml et JwtService).
     secret: ${JWT_SECRET:dev-secret-a-changer-avant-production}
+  seed:
+    # Comptes de démonstration activés en développement (mot de passe de démo documenté).
+    enabled: ${SEED_ENABLED:true}
+    password: ${SEED_PASSWORD:Apprh@2026!}

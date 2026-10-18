@@ -11,3 +11,6 @@ app:
   jwt:
     # OBLIGATOIRE : secret fort d'au moins 32 caractères. Échec au démarrage si absent ou vide.
     secret: ${JWT_SECRET}
+  seed:
+    # Aucun compte de démonstration en production.
+    enabled: ${SEED_ENABLED:false}

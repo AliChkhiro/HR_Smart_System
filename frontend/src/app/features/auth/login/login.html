@@ -84,10 +84,12 @@
         </button>
       </form>
 
-      <div class="demo-hint">
-        <mat-icon>info_outline</mat-icon>
-        <span>Comptes de démonstration : <b>admin / rh / chefprojet / employe</b> @@apprh.local — mot de passe <b>Apprh@2026!</b></span>
-      </div>
+      @if (demoHint) {
+        <div class="demo-hint">
+          <mat-icon>info_outline</mat-icon>
+          <span>{{ demoHint }}</span>
+        </div>
+      }
 
       <div class="register-switch">
         Pas encore de compte ? <a routerLink="/register">Créer un compte</a>

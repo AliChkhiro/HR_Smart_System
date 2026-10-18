@@ -19,6 +19,8 @@ import com.apprh.backend.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.env.Environment;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -30,6 +32,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@ConditionalOnProperty(name = "app.seed.enabled", havingValue = "true")
 public class DataSeeder implements CommandLineRunner {
 
     private static final List<SeedAccount> ACCOUNTS = List.of(
@@ -65,6 +68,7 @@ public class DataSeeder implements CommandLineRunner {
     private final EmployeeSkillRepository employeeSkillRepository;
     private final LeaveRequestRepository leaveRequestRepository;
     private final NotificationService notificationService;
+    private final Environment environment;
 
     @Value("${app.seed.password}")
     private String seedPassword;
@@ -72,6 +76,14 @@ public class DataSeeder implements CommandLineRunner {
     @Override
     @Transactional
     public void run(String... args) {
+        // Défense en profondeur : même si le seed est activé par erreur, il ne s'exécute jamais en production.
+        if (environment.matchesProfiles("prod")) {
+            return;
+        }
+        if (seedPassword == null || seedPassword.isBlank()) {
+            throw new IllegalStateException(
+                    "app.seed.enabled=true mais app.seed.password est vide : définissez SEED_PASSWORD.");
+        }
         for (SeedAccount account : ACCOUNTS) {
             if (!userRepository.existsByEmailAndDeletedAtIsNull(account.email())) {
                 userRepository.save(User.builder()

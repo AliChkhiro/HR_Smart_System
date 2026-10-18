@@ -22,7 +22,10 @@ export class Notifications {
   protected readonly typeIcons: Record<NotificationType, string> = {
     LEAVE_REQUEST: 'beach_access',
     LEAVE_REVIEW: 'fact_check',
-    TASK_ASSIGNED: 'assignment_turned_in'
+    TASK_ASSIGNED: 'assignment_turned_in',
+    USER_REGISTRATION: 'person_add',
+    USER_APPROVED: 'how_to_reg',
+    USER_REJECTED: 'person_off'
   };
   protected readonly notifications = signal<NotificationDto[]>([]);
   protected readonly loading = signal(false);

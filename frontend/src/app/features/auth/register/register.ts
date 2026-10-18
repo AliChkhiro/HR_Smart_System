@@ -56,7 +56,8 @@ export class Register {
     }).subscribe({
       next: () => {
         this.submitting = false;
-        this.successMessage = 'Compte créé avec succès. Vous pouvez maintenant vous connecter.';
+        this.successMessage =
+          'Votre demande a été envoyée. Un membre des ressources humaines doit valider votre compte avant la première connexion.';
         this.form.reset();
       },
       error: (err) => {
