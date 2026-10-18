@@ -1,0 +1,12 @@
+# Profil de DÉVELOPPEMENT (actif par défaut via « spring.profiles.default »).
+# Valeurs de repli non sensibles, réservées au poste de développement local.
+# NE JAMAIS utiliser ce profil en production : utilisez SPRING_PROFILES_ACTIVE=prod.
+spring:
+  datasource:
+    password: ${DB_PASSWORD:apprh}
+
+app:
+  jwt:
+    # Secret de développement uniquement. En production, JWT_SECRET est obligatoire
+    # et ce secret de repli est refusé (voir application-prod.yml et JwtService).
+    secret: ${JWT_SECRET:dev-secret-a-changer-avant-production}

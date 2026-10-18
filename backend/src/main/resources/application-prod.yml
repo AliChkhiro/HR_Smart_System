@@ -1,0 +1,13 @@
+# Profil de PRODUCTION (SPRING_PROFILES_ACTIVE=prod).
+# Aucune valeur de repli : le démarrage échoue explicitement si une variable manque.
+# Les secrets doivent être fournis par l'environnement (voir .env.example / docker-compose.yml).
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+app:
+  jwt:
+    # OBLIGATOIRE : secret fort d'au moins 32 caractères. Échec au démarrage si absent ou vide.
+    secret: ${JWT_SECRET}

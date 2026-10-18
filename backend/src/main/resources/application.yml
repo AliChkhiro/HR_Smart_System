@@ -1,10 +1,14 @@
 ﻿spring:
   application:
     name: apprh-backend
+  # Profil de développement par défaut. En production : SPRING_PROFILES_ACTIVE=prod.
+  profiles:
+    default: dev
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/apprh}
     username: ${DB_USERNAME:apprh}
-    password: ${DB_PASSWORD:apprh}
+    # Aucun mot de passe par défaut ici : fourni par le profil (dev) ou l'environnement (prod).
+    password: ${DB_PASSWORD:}
   mail:
     host: ${MAIL_HOST:}
     port: ${MAIL_PORT:587}
@@ -31,7 +35,9 @@ app:
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200}
   jwt:
-    secret: ${JWT_SECRET:dev-secret-a-changer-avant-production}
+    # Aucun secret de repli dans la configuration de base.
+    # Valeur obligatoire (JWT_SECRET) — voir application-dev.yml / application-prod.yml.
+    secret: ${JWT_SECRET:}
     access-token-ttl: ${JWT_ACCESS_TTL:15m}
     refresh-token-ttl: ${JWT_REFRESH_TTL:7d}
   seed:

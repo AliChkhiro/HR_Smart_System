@@ -23,9 +23,19 @@ Projet de stage de fin d'études (3 mois, solo). Stack : Java 21 / Spring Boot 4
 
 ## Démarrage rapide (Docker)
 
+1. Créez le fichier d'environnement et renseignez les secrets obligatoires (`JWT_SECRET`, `DB_PASSWORD`) :
+
+```powershell
+Copy-Item .env.example .env
+```
+
+2. Démarrez la pile :
+
 ```bash
 docker compose up --build
 ```
+
+> Sans `JWT_SECRET` ni `DB_PASSWORD`, `docker compose` s'arrête avec un message explicite.
 
 | Service     | URL                          |
 |-------------|------------------------------|
@@ -46,6 +56,7 @@ Arrêt : `docker compose down` (ajouter `-v` pour supprimer le volume PostgreSQL
 
 Toutes les valeurs sensibles passent par variables d'environnement (voir `application.yml` et `docker-compose.yml`) :
 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `IA_SERVICE_URL`.
+En Docker/production, `JWT_SECRET` et `DB_PASSWORD` sont **obligatoires** (aucun repli).
 
 Pour le déploiement Docker, copiez le modèle puis renseignez vos valeurs :
 

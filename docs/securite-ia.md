@@ -13,7 +13,7 @@ Angular) et ses interactions avec l'authentification/RBAC existants.
 | Limite de débit       | OK  | Fenêtre glissante par utilisateur sur les endpoints LLM |
 | CORS                  | Corrigé | Origines explicites, credentials désactivés |
 | Persistance           | Renforcée | Troncature + écriture non bloquante pour la réponse |
-| Secrets               | Durci | Avertissement au démarrage si secret par défaut |
+| Secrets               | Durci | Échec au démarrage en prod si `JWT_SECRET` absent/vide/trop court ; avertissement en dev |
 | Injection de prompt   | Traité | Prompt système durci + contexte en lecture seule |
 
 ## Constats et correctifs (étape 10a)
@@ -24,7 +24,7 @@ Angular) et ses interactions avec l'authentification/RBAC existants.
 | 2 | Historique persisté sans borne sur le texte assemblé | `DataIntegrityViolation` (VARCHAR(4000)) pouvant transformer une réussite en repli | Troncature à 4000 caractères dans `ChatHistoryService` |
 | 5. Persistance couplée à la réponse | Une erreur d'écriture déclenchait le repli « IA indisponible » | `ChatbotService.persist(...)` isole l'écriture (journalisée, non bloquante) |
 | 5b. Rate-limit sur tout `/chatbot/**` | Les lectures d'historique consommaient le quota | Interceptor limité à `/chatbot/chat` et `/chatbot/chat/stream` |
-| 6. Secret JWT par défaut silencieux | Risque de déploiement avec le secret de dev | Avertissement au démarrage si `JWT_SECRET` absent |
+| 6. Secret JWT par défaut silencieux | Risque de déploiement avec le secret de dev | Validation au démarrage (`JwtService`) : échec si `JWT_SECRET` absent, vide ou < 32 octets, ou s'il s'agit du secret de dev sous le profil `prod` ; avertissement en dev. Aucune valeur de repli dans `application.yml` ni `application-prod.yml`. |
 
 ## Mesures en place (audit)
 
@@ -45,8 +45,9 @@ Angular) et ses interactions avec l'authentification/RBAC existants.
   `allowCredentials=false` (jeton Bearer en en-tête, pas de cookie).
 - **Confidentialité des logs** : jamais le contenu utilisateur ; seuls id, rôle et
   longueur sont journalisés.
-- **Secrets** : `.env` exclu du git, `.env.example` fourni ; avertissement si le
-  secret JWT de développement est utilisé.
+- **Secrets** : `.env` exclu du git, `.env.example` fourni sans secret réel ; `JWT_SECRET`
+  obligatoire (échec au démarrage si absent, vide ou < 32 octets ; secret de dev refusé
+  sous le profil `prod`) et identifiants PostgreSQL externalisés dans `docker-compose.yml`.
 - **Métriques** : exposées via Actuator, accessibles uniquement aux utilisateurs
   authentifiés.
 
@@ -58,4 +59,4 @@ Angular) et ses interactions avec l'authentification/RBAC existants.
 | Jeton JWT en `localStorage` | Accepté (SPA) | Mitigé par l'échappement Markdown + sanitisation Angular ; envisager des cookies `httpOnly` sinon |
 | Actuator `metrics` lisible par tout utilisateur connecté | Accepté | Le limiter au rôle ADMIN si nécessaire |
 | Cold start Ollama (~20 s) | Connu | `OLLAMA_KEEP_ALIVE=24h`, warm-up au démarrage |
-| Secret JWT par défaut | Avertissement | Imposer un secret fort (32+ car.) avant mise en production |
+| Secret JWT par défaut | Atténué | Échec explicite en `prod` (secret absent, vide, < 32 car. ou secret de dev) ; définir `JWT_SECRET` (32+ car.) via `.env`/environnement |
