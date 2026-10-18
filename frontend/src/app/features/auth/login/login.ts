@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -36,15 +36,19 @@ export class Login {
   });
 
   protected readonly demoHint = environment.demoAccountsHint;
-  protected submitting = false;
-  protected errorMessage: string | null = null;
+  // Signaux : l'application tourne sans zone.js (Angular 22), la détection de changements
+  // ne se déclenche donc que sur signal, événement ou markForCheck. Des champs simples
+  // laissés sans déclencheur figeaient le spinner et rendaient le message d'erreur
+  // invisible jusqu'à une interaction de l'utilisateur.
+  protected readonly submitting = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
 
   submit(): void {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
-    this.errorMessage = null;
+    this.submitting.set(true);
+    this.errorMessage.set(null);
     const { email, password } = this.form.getRawValue();
     this.authService.login({ email: email!, password: password! }).subscribe({
       next: (res) => {
@@ -52,14 +56,14 @@ export class Login {
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        this.submitting = false;
+        this.submitting.set(false);
         const code = err?.error?.code;
         if (code === 'AUTH_ACCOUNT_PENDING') {
-          this.errorMessage = 'Votre compte est en attente de validation par les ressources humaines.';
+          this.errorMessage.set('Votre compte est en attente de validation par les ressources humaines.');
         } else if (code === 'AUTH_ACCOUNT_DISABLED') {
-          this.errorMessage = 'Ce compte est désactivé. Contactez les ressources humaines.';
+          this.errorMessage.set('Ce compte est désactivé. Contactez les ressources humaines.');
         } else {
-          this.errorMessage = 'Identifiants invalides. Veuillez réessayer.';
+          this.errorMessage.set('Identifiants invalides. Veuillez réessayer.');
         }
       }
     });

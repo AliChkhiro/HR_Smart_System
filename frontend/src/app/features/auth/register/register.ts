@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -36,17 +36,21 @@ export class Register {
     password: ['', [Validators.required, Validators.minLength(6)]]
   });
 
-  protected submitting = false;
-  protected errorMessage: string | null = null;
-  protected successMessage: string | null = null;
+  // Signaux : l'application tourne sans zone.js (Angular 22), la détection de changements
+  // ne se déclenche donc que sur signal, événement ou markForCheck. Des champs simples
+  // laissés sans déclencheur laissaient le spinner actif et rendaient les messages
+  // d'échec ou de succès invisibles jusqu'à une interaction de l'utilisateur.
+  protected readonly submitting = signal(false);
+  protected readonly errorMessage = signal<string | null>(null);
+  protected readonly successMessage = signal<string | null>(null);
 
   submit(): void {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
-    this.errorMessage = null;
-    this.successMessage = null;
+    this.submitting.set(true);
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
     const { firstName, lastName, email, password } = this.form.getRawValue();
     this.authService.register({
       firstName: firstName!,
@@ -55,17 +59,18 @@ export class Register {
       password: password!
     }).subscribe({
       next: () => {
-        this.submitting = false;
-        this.successMessage =
-          'Votre demande a été envoyée. Un membre des ressources humaines doit valider votre compte avant la première connexion.';
+        this.submitting.set(false);
+        this.successMessage.set(
+          'Votre demande a été envoyée. Un membre des ressources humaines doit valider votre compte avant la première connexion.'
+        );
         this.form.reset();
       },
       error: (err) => {
-        this.submitting = false;
+        this.submitting.set(false);
         if (err?.status === 409) {
-          this.errorMessage = 'Un compte avec cet email existe déjà.';
+          this.errorMessage.set('Un compte avec cet email existe déjà.');
         } else {
-          this.errorMessage = 'Une erreur est survenue lors de la création du compte.';
+          this.errorMessage.set('Une erreur est survenue lors de la création du compte.');
         }
       }
     });

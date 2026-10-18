@@ -67,16 +67,16 @@
           }
         </mat-form-field>
 
-        @if (errorMessage) {
+        @if (errorMessage()) {
           <div class="error-box">
             <mat-icon>error_outline</mat-icon>
-            <span>{{ errorMessage }}</span>
+            <span>{{ errorMessage() }}</span>
           </div>
         }
 
         <button mat-flat-button color="primary" type="submit" class="full-width submit-btn"
-                [disabled]="form.invalid || submitting">
-          @if (submitting) {
+                [disabled]="form.invalid || submitting()">
+          @if (submitting()) {
             <mat-spinner diameter="20" />
           } @else {
             Se connecter
