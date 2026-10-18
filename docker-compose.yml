@@ -3,15 +3,15 @@ services:
     image: postgres:17-alpine
     container_name: apprh-db
     environment:
-      POSTGRES_DB: apprh
-      POSTGRES_USER: apprh
-      POSTGRES_PASSWORD: apprh
+      POSTGRES_DB: ${DB_NAME:-apprh}
+      POSTGRES_USER: ${DB_USERNAME:-apprh}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD est requis - copiez .env.example vers .env et renseignez-le}
     ports:
       - "5433:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U apprh -d apprh"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,20 +20,21 @@ services:
     build: ./backend
     container_name: apprh-backend
     environment:
-      DB_URL: jdbc:postgresql://db:5432/apprh
-      DB_USERNAME: apprh
-      DB_PASSWORD: apprh
-      JWT_SECRET: 
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-dev}
+      DB_URL: "jdbc:postgresql://db:5432/${DB_NAME:-apprh}"
+      DB_USERNAME: ${DB_USERNAME:-apprh}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD est requis - copiez .env.example vers .env et renseignez-le}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET est requis - copiez .env.example vers .env et renseignez-le}
       IA_SERVICE_URL: http://ia-service:8000
       CHATBOT_IA_SERVICE_URL: http://ia-service:8000
-      CHATBOT_OLLAMA_MODEL: llama3.2:3b
-      CHATBOT_TIMEOUT_MS: 90000
-      MAIL_ENABLED: 
-      MAIL_HOST: 
-      MAIL_PORT: 
-      MAIL_USERNAME: 
-      MAIL_PASSWORD: 
-      MAIL_FROM: 
+      CHATBOT_OLLAMA_MODEL: ${CHATBOT_OLLAMA_MODEL:-llama3.2:3b}
+      CHATBOT_TIMEOUT_MS: ${CHATBOT_TIMEOUT_MS:-90000}
+      MAIL_ENABLED: ${MAIL_ENABLED:-false}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
     ports:
       - "8081:8080"
     healthcheck:

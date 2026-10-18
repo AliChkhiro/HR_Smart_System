@@ -3,6 +3,12 @@
 *.env
 .env.local
 
+# Dépendances et artefacts de build
+node_modules/
+dist/
+target/
+.angular/
+
 # IDE
 .idea/
 .vscode/
