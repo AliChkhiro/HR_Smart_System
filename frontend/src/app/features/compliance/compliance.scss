@@ -1,0 +1,28 @@
+.tab-body {
+  padding: 20px 0;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  padding: 32px 0;
+}
+
+.toolbar .filter {
+  min-width: 220px;
+}
+
+.entity-id {
+  color: #8b6f47;
+}
+
+.detail-cell {
+  max-width: 380px;
+  white-space: normal;
+  color: #5f6368;
+}
+
+.decision-date {
+  color: #5f6368;
+  font-size: 13px;
+}

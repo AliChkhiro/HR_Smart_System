@@ -1,0 +1,139 @@
+<div class="page">
+  <div class="page-header">
+    <div class="page-ico"><mat-icon>verified_user</mat-icon></div>
+    <div class="page-titles">
+      <h1 class="page-title">Conformité</h1>
+      <p class="page-subtitle">Journal d'audit et demandes d'effacement RGPD — réservé Administrateur</p>
+    </div>
+    <div class="page-actions">
+      <button mat-stroked-button (click)="loadAudit(pageIndex()); loadErasures()">
+        <mat-icon>refresh</mat-icon>
+        Rafraîchir
+      </button>
+    </div>
+  </div>
+
+  <mat-tab-group>
+    <mat-tab label="Journal d'audit">
+      <div class="tab-body">
+        <mat-card class="content-card">
+          <mat-card-content>
+            @if (auditLoading()) {
+              <div class="spinner"><mat-spinner diameter="40" /></div>
+            } @else {
+              <div class="table-wrap">
+                <table mat-table [dataSource]="audit()">
+                  <ng-container matColumnDef="createdAt">
+                    <th mat-header-cell *matHeaderCellDef>Date</th>
+                    <td mat-cell *matCellDef="let entry">{{ entry.createdAt | date: 'dd/MM/yyyy HH:mm:ss' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="action">
+                    <th mat-header-cell *matHeaderCellDef>Action</th>
+                    <td mat-cell *matCellDef="let entry">
+                      <span class="chip-status" [class]="actionClass(entry.action)">{{ entry.action }}</span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="actor">
+                    <th mat-header-cell *matHeaderCellDef>Auteur</th>
+                    <td mat-cell *matCellDef="let entry">{{ entry.actorEmail ?? 'Système' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="entity">
+                    <th mat-header-cell *matHeaderCellDef>Entité</th>
+                    <td mat-cell *matCellDef="let entry">
+                      {{ entry.entityType }}<span class="entity-id">{{ entry.entityId ? ' #' + entry.entityId : '' }}</span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="detail">
+                    <th mat-header-cell *matHeaderCellDef>Détail</th>
+                    <td mat-cell *matCellDef="let entry" class="detail-cell">{{ entry.detail ?? '—' }}</td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="auditColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: auditColumns"></tr>
+                </table>
+              </div>
+              @if (audit().length === 0) {
+                <p class="empty">Aucune entrée dans le journal d'audit.</p>
+              }
+              <mat-paginator
+                [length]="auditTotal()"
+                [pageSize]="pageSize()"
+                [pageIndex]="pageIndex()"
+                [pageSizeOptions]="[25, 50, 100]"
+                (page)="onAuditPage($event)" />
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Demandes d'effacement">
+      <div class="tab-body">
+        <mat-card class="content-card">
+          <mat-card-content>
+            <div class="toolbar">
+              <mat-form-field appearance="outline" class="filter">
+                <mat-label>Statut</mat-label>
+                <mat-select [value]="erasureFilter()" (selectionChange)="erasureFilter.set($event.value); loadErasures()">
+                  <mat-option value="PENDING">En attente</mat-option>
+                  <mat-option value="APPROVED">Validées</mat-option>
+                  <mat-option value="REJECTED">Refusées</mat-option>
+                  <mat-option value="">Toutes</mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            @if (erasuresLoading()) {
+              <div class="spinner"><mat-spinner diameter="40" /></div>
+            } @else if (erasures().length === 0) {
+              <p class="empty">Aucune demande d'effacement pour ce filtre.</p>
+            } @else {
+              <div class="table-wrap">
+                <table mat-table [dataSource]="erasures()">
+                  <ng-container matColumnDef="requestedAt">
+                    <th mat-header-cell *matHeaderCellDef>Demandée le</th>
+                    <td mat-cell *matCellDef="let request">{{ request.requestedAt | date: 'dd/MM/yyyy HH:mm' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="user">
+                    <th mat-header-cell *matHeaderCellDef>Utilisateur</th>
+                    <td mat-cell *matCellDef="let request">{{ request.userEmail ?? request.userId }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="reason">
+                    <th mat-header-cell *matHeaderCellDef>Motif</th>
+                    <td mat-cell *matCellDef="let request" class="detail-cell">{{ request.reason ?? '—' }}</td>
+                  </ng-container>
+                  <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Statut</th>
+                    <td mat-cell *matCellDef="let request">
+                      <span class="chip-status" [class]="erasureStatusClass(request.status)">
+                        {{ erasureStatusLabels[request.status] }}
+                      </span>
+                    </td>
+                  </ng-container>
+                  <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef>Actions</th>
+                    <td mat-cell *matCellDef="let request">
+                      @if (request.status === 'PENDING') {
+                        <button mat-icon-button color="primary" matTooltip="Valider l'effacement"
+                                [disabled]="decisionInFlight() === request.id" (click)="approve(request)">
+                          <mat-icon>check_circle</mat-icon>
+                        </button>
+                        <button mat-icon-button color="warn" matTooltip="Refuser la demande"
+                                [disabled]="decisionInFlight() === request.id" (click)="reject(request)">
+                          <mat-icon>cancel</mat-icon>
+                        </button>
+                      } @else {
+                        <span class="decision-date">{{ request.decidedAt | date: 'dd/MM/yyyy' }}</span>
+                      }
+                    </td>
+                  </ng-container>
+                  <tr mat-header-row *matHeaderRowDef="erasureColumns"></tr>
+                  <tr mat-row *matRowDef="let row; columns: erasureColumns"></tr>
+                </table>
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>

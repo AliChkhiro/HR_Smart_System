@@ -4,7 +4,9 @@ export type NotificationType =
   | 'TASK_ASSIGNED'
   | 'USER_REGISTRATION'
   | 'USER_APPROVED'
-  | 'USER_REJECTED';
+  | 'USER_REJECTED'
+  | 'ERASURE_REQUESTED'
+  | 'ERASURE_DECIDED';
 
 export interface NotificationDto {
   id: number;

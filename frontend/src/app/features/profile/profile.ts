@@ -13,14 +13,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatListModule } from '@angular/material/list';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { EmployeesService } from '../../core/services/employees.service';
 import { LeavesService } from '../../core/services/leaves.service';
 import { NotificationsService } from '../../core/services/notifications.service';
+import { RgpdService } from '../../core/services/rgpd.service';
 import { UsersService } from '../../core/services/users.service';
 import { EmployeeDto } from '../../core/models/employee.model';
 import { LeaveDto } from '../../core/models/leave.model';
 import { NotificationDto } from '../../core/models/notification.model';
+import { ErasureRequestDto, ErasureStatus } from '../../core/models/rgpd.model';
 import { UserRole } from '../../core/models/user.model';
 
 @Component({
@@ -47,6 +50,7 @@ export class Profile {
   private readonly employeesService = inject(EmployeesService);
   private readonly leavesService = inject(LeavesService);
   private readonly notificationsService = inject(NotificationsService);
+  private readonly rgpdService = inject(RgpdService);
   private readonly usersService = inject(UsersService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
@@ -61,6 +65,11 @@ export class Profile {
   protected readonly saving = signal(false);
   protected readonly selectedTab = signal(0);
   protected readonly editing = signal(false);
+  protected readonly exporting = signal(false);
+  protected readonly erasureSubmitting = signal(false);
+  protected readonly erasureRequest = signal<ErasureRequestDto | null>(null);
+  protected readonly erasureReason = signal('');
+  protected readonly showErasureForm = signal(false);
 
   protected readonly form = this.fb.group({
     firstName: ['', Validators.required],
@@ -247,6 +256,82 @@ export class Profile {
     this.router.navigate(['/leaves']);
   }
 
+  protected exportData(): void {
+    if (this.exporting()) {
+      return;
+    }
+    this.exporting.set(true);
+    this.rgpdService.exportPersonalData().subscribe({
+      next: data => {
+        this.exporting.set(false);
+        this.downloadJson(data);
+        this.snackBar.open('Export de vos données personnelles généré', 'Fermer', { duration: 3500 });
+      },
+      error: () => {
+        this.exporting.set(false);
+        this.snackBar.open("Impossible de générer l'export de vos données", 'Fermer', { duration: 4000 });
+      }
+    });
+  }
+
+  protected submitErasureRequest(): void {
+    if (this.erasureSubmitting()) {
+      return;
+    }
+    this.erasureSubmitting.set(true);
+    this.rgpdService.requestErasure(this.erasureReason()).subscribe({
+      next: request => {
+        this.erasureSubmitting.set(false);
+        this.erasureRequest.set(request);
+        this.erasureReason.set('');
+        this.showErasureForm.set(false);
+        this.snackBar.open('Demande de suppression transmise à un administrateur', 'Fermer', { duration: 4000 });
+      },
+      error: (error: HttpErrorResponse) => {
+        this.erasureSubmitting.set(false);
+        const message = (error.error as { message?: string } | null)?.message ?? 'Impossible de transmettre la demande';
+        this.snackBar.open(message, 'Fermer', { duration: 4500 });
+      }
+    });
+  }
+
+  protected erasureStatusLabel(status: ErasureStatus): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'Validée';
+      case 'REJECTED':
+        return 'Refusée';
+      default:
+        return 'En attente de validation';
+    }
+  }
+
+  protected canRequestErasure(): boolean {
+    const request = this.erasureRequest();
+    return !request || request.status !== 'PENDING';
+  }
+
+  protected erasureStatusClass(status: ErasureStatus): string {
+    switch (status) {
+      case 'APPROVED':
+        return 'chip-green';
+      case 'REJECTED':
+        return 'chip-red';
+      default:
+        return 'chip-amber';
+    }
+  }
+
+  private downloadJson(data: unknown): void {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `mes-donnees-personnelles-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
+
   protected retry(): void {
     this.load();
   }
@@ -273,6 +358,13 @@ export class Profile {
 
     this.notificationsService.list(0, 8).subscribe({
       next: page => this.recentActivities.set(page.content)
+    });
+
+    this.rgpdService.myErasureRequests().subscribe({
+      next: requests => {
+        const pending = requests.find(request => request.status === 'PENDING');
+        this.erasureRequest.set(pending ?? requests[0] ?? null);
+      }
     });
   }
 

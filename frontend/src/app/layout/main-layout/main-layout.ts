@@ -67,6 +67,7 @@ export class MainLayout {
     { path: '/notifications', icon: 'notifications', label: 'Notifications', section: 'RESSOURCES HUMAINES' },
     { path: '/users', icon: 'manage_accounts', label: 'Utilisateurs', section: 'SYSTÈME', adminOnly: true },
     { path: '/approvals', icon: 'how_to_reg', label: 'Validations', section: 'SYSTÈME', roles: ['ADMIN', 'RH'] },
+    { path: '/compliance', icon: 'verified_user', label: 'Conformité', section: 'SYSTÈME', adminOnly: true },
     { path: '/settings', icon: 'settings', label: 'Paramètres', section: 'SYSTÈME', adminOnly: true }
   ];
 

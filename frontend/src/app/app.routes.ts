@@ -36,6 +36,11 @@ export const routes: Routes = [
         path: 'settings',
         canActivate: [roleGuard('ADMIN')],
         loadComponent: () => import('./features/settings/settings').then(m => m.Settings)
+      },
+      {
+        path: 'compliance',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./features/compliance/compliance').then(m => m.Compliance)
       }
     ]
   },
