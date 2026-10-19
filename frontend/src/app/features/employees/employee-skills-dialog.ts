@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -46,7 +46,7 @@ export class EmployeeSkillsDialogComponent {
   protected readonly skills = signal<SkillDto[]>([]);
   protected readonly currentSkills = signal<EmployeeDto['skills']>(this.data.employee.skills);
   protected readonly availableSkills = signal<SkillDto[]>([]);
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     skillId: [null as number | null, [Validators.required]],
@@ -67,17 +67,17 @@ export class EmployeeSkillsDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { skillId, level } = this.form.getRawValue();
     this.employeesService.addSkill(this.employee.id, { skillId: skillId!, level: level! }).subscribe({
       next: employee => {
         this.currentSkills.set(employee.skills);
         this.form.reset({ skillId: null, level: 3 });
         this.refreshAvailable();
-        this.submitting = false;
+        this.submitting.set(false);
       },
       error: err => {
-        this.submitting = false;
+        this.submitting.set(false);
         this.handleError(err);
       }
     });

@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -52,7 +52,7 @@ export class ProjectMembersDialogComponent {
   protected readonly members = signal<ProjectMemberDto[]>([]);
   protected readonly employees = signal<EmployeeDto[]>([]);
   protected readonly availableEmployees = signal<EmployeeDto[]>([]);
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     employeeId: [null as number | null, [Validators.required]],
@@ -74,7 +74,7 @@ export class ProjectMembersDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { employeeId, role } = this.form.getRawValue();
     this.projectsService.addMember(this.project.id, { employeeId: employeeId!, role: role as ProjectMemberRole })
       .subscribe({
@@ -82,10 +82,10 @@ export class ProjectMembersDialogComponent {
           this.members.set(detail.members);
           this.form.reset({ employeeId: null, role: 'MEMBER' });
           this.refreshAvailable();
-          this.submitting = false;
+          this.submitting.set(false);
         },
         error: err => {
-          this.submitting = false;
+          this.submitting.set(false);
           this.handleError(err);
         }
       });

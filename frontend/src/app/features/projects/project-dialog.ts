@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -38,7 +38,7 @@ export class ProjectDialogComponent {
   protected readonly isEdit = this.data.project !== null;
   protected readonly statuses: ProjectStatus[] = ['PLANNED', 'IN_PROGRESS', 'ON_HOLD', 'COMPLETED', 'CANCELLED'];
   protected readonly priorities: ProjectPriority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT'];
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     name: [this.data.project?.name ?? '', [Validators.required]],
@@ -53,7 +53,7 @@ export class ProjectDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { name, description, startDate, endDate, status, priority } = this.form.getRawValue();
     if (this.isEdit && this.data.project) {
       this.projectsService.update(this.data.project.id, {
@@ -89,7 +89,7 @@ export class ProjectDialogComponent {
   }
 
   private handleError(err: unknown): void {
-    this.submitting = false;
+    this.submitting.set(false);
     const message =
       (err as { error?: { message?: string } })?.error?.message ??
       'Une erreur est survenue. Vérifiez vos informations.';

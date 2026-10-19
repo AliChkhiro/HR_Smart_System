@@ -41,7 +41,7 @@
           }
         </mat-select>
       </mat-form-field>
-      <button mat-flat-button color="primary" (click)="addSkill()" [disabled]="form.invalid || submitting">
+      <button mat-flat-button color="primary" (click)="addSkill()" [disabled]="form.invalid || submitting()">
         <mat-icon>add</mat-icon>
         Associer
       </button>

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -53,7 +53,7 @@ export class LeaveDialogComponent {
     UNPAID: 'Sans solde',
     OTHER: 'Autre'
   };
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     type: ['ANNUAL', [Validators.required]],
@@ -66,7 +66,7 @@ export class LeaveDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { type, startDate, endDate, reason } = this.form.getRawValue();
     this.leavesService.create({
       type: type as LeaveType,
@@ -83,7 +83,7 @@ export class LeaveDialogComponent {
   }
 
   private handleError(err: unknown): void {
-    this.submitting = false;
+    this.submitting.set(false);
     const message =
       (err as { error?: { message?: string } })?.error?.message ??
       'Une erreur est survenue. Vérifiez vos informations.';

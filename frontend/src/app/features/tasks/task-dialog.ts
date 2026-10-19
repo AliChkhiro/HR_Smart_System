@@ -1,4 +1,4 @@
-import { Component, Inject, inject, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -57,7 +57,7 @@ export class TaskDialogComponent {
   protected readonly skills = signal<SkillDto[]>([]);
   protected readonly recommendations = signal<RecommendationDto[]>([]);
   protected readonly recommending = signal(false);
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     name: [this.data.task?.name ?? '', [Validators.required]],
@@ -123,7 +123,7 @@ export class TaskDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { name, description, projectId, assigneeId, skillIds, status, priority, estimatedHours, startDate, dueDate } =
       this.form.getRawValue();
     if (this.isEdit && this.data.task) {
@@ -168,7 +168,7 @@ export class TaskDialogComponent {
   }
 
   private handleError(err: unknown): void {
-    this.submitting = false;
+    this.submitting.set(false);
     const message =
       (err as { error?: { message?: string } })?.error?.message ??
       'Une erreur est survenue. Vérifiez vos informations.';

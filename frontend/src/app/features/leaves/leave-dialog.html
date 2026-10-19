@@ -31,8 +31,8 @@
 </mat-dialog-content>
 <mat-dialog-actions align="end">
   <button mat-button mat-dialog-close>Annuler</button>
-  <button mat-flat-button color="primary" [disabled]="form.invalid || submitting" (click)="submit()">
-    @if (submitting) {
+  <button mat-flat-button color="primary" [disabled]="form.invalid || submitting()" (click)="submit()">
+    @if (submitting()) {
       <mat-spinner diameter="18"></mat-spinner>
     } @else {
       <span>Envoyer la demande</span>
