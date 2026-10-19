@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -37,7 +37,7 @@ export class SkillDialogComponent {
 
   protected readonly isEdit = this.data.skill !== null;
   protected readonly categories = ['DEVELOPPEMENT', 'BASE_DE_DONNEES', 'DEVOPS', 'GESTION', 'RH', 'COMMERCIAL', 'GENERAL'];
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     name: [this.data.skill?.name ?? '', [Validators.required]],
@@ -48,7 +48,7 @@ export class SkillDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { name, category } = this.form.getRawValue();
     const request = { name: name!, category: category! };
     const action = this.isEdit && this.data.skill
@@ -64,7 +64,7 @@ export class SkillDialogComponent {
   }
 
   private handleError(err: unknown): void {
-    this.submitting = false;
+    this.submitting.set(false);
     const message =
       (err as { error?: { message?: string } })?.error?.message ??
       'Une erreur est survenue. Vérifiez vos informations.';

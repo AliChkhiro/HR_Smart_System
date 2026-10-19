@@ -52,9 +52,9 @@
   </form>
 </mat-dialog-content>
 <mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close [disabled]="submitting">Annuler</button>
-  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid || submitting">
-    @if (submitting) {
+  <button mat-button mat-dialog-close [disabled]="submitting()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="submit()" [disabled]="form.invalid || submitting()">
+    @if (submitting()) {
       <mat-spinner diameter="18" />
     } @else {
       Enregistrer

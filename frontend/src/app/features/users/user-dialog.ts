@@ -1,4 +1,4 @@
-import { Component, Inject, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -43,7 +43,7 @@ export class UserDialogComponent {
     EMPLOYEE: 'Employé'
   };
   protected readonly isEdit = this.data.user !== null;
-  protected submitting = false;
+  protected readonly submitting = signal(false);
 
   protected readonly form = this.fb.group({
     email: [this.data.user?.email ?? '', [Validators.required, Validators.email]],
@@ -57,7 +57,7 @@ export class UserDialogComponent {
     if (this.form.invalid) {
       return;
     }
-    this.submitting = true;
+    this.submitting.set(true);
     const { email, firstName, lastName, password, role } = this.form.getRawValue();
     if (this.isEdit && this.data.user) {
       this.usersService.update(this.data.user.id, {
@@ -83,7 +83,7 @@ export class UserDialogComponent {
   }
 
   private handleError(err: unknown): void {
-    this.submitting = false;
+    this.submitting.set(false);
     const message =
       (err as { error?: { message?: string } })?.error?.message ??
       'Une erreur est survenue. Vérifiez vos informations.';
