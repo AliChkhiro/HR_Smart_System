@@ -19,7 +19,11 @@ export const routes: Routes = [
       { path: 'leaves', loadComponent: () => import('./features/leaves/leaves').then(m => m.Leaves) },
       { path: 'employees', loadComponent: () => import('./features/employees/employees').then(m => m.Employees) },
       { path: 'departments', loadComponent: () => import('./features/departments/departments').then(m => m.Departments) },
-      { path: 'users', loadComponent: () => import('./features/users/users').then(m => m.Users) },
+      {
+        path: 'users',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./features/users/users').then(m => m.Users)
+      },
       {
         path: 'approvals',
         canActivate: [roleGuard('ADMIN', 'RH')],
@@ -28,7 +32,11 @@ export const routes: Routes = [
       { path: 'skills', loadComponent: () => import('./features/skills/skills').then(m => m.Skills) },
       { path: 'calendar', loadComponent: () => import('./features/calendar/calendar').then(m => m.Calendar) },
       { path: 'notifications', loadComponent: () => import('./features/notifications/notifications').then(m => m.Notifications) },
-      { path: 'settings', loadComponent: () => import('./features/settings/settings').then(m => m.Settings) }
+      {
+        path: 'settings',
+        canActivate: [roleGuard('ADMIN')],
+        loadComponent: () => import('./features/settings/settings').then(m => m.Settings)
+      }
     ]
   },
   { path: '**', redirectTo: 'dashboard' }
