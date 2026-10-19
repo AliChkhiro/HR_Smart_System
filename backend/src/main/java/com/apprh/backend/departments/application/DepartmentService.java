@@ -1,5 +1,7 @@
 package com.apprh.backend.departments.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.departments.api.DepartmentRequest;
 import com.apprh.backend.departments.api.DepartmentResponse;
@@ -30,6 +32,7 @@ public class DepartmentService {
     private final DepartmentMapper departmentMapper;
     private final EmployeeRepository employeeRepository;
     private final UserRepository userRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<DepartmentResponse> list(String search, Pageable pageable) {
@@ -51,7 +54,9 @@ public class DepartmentService {
                 .description(trimToNull(request.description()))
                 .manager(findManager(request.managerId()))
                 .build();
-        return withEmployeeCount(departmentMapper.toResponse(departmentRepository.save(department)));
+        Department saved = departmentRepository.save(department);
+        auditService.record(AuditAction.ENTITY_CREATED, "DEPARTMENT", saved.getId(), "Création du département " + saved.getName());
+        return withEmployeeCount(departmentMapper.toResponse(saved));
     }
 
     @Transactional
@@ -65,7 +70,9 @@ public class DepartmentService {
             department.setDescription(trimToNull(request.description()));
         }
         department.setManager(findManager(request.managerId()));
-        return withEmployeeCount(departmentMapper.toResponse(departmentRepository.save(department)));
+        Department saved = departmentRepository.save(department);
+        auditService.record(AuditAction.ENTITY_UPDATED, "DEPARTMENT", saved.getId(), "Modification du département " + saved.getName());
+        return withEmployeeCount(departmentMapper.toResponse(saved));
     }
 
     @Transactional
@@ -78,6 +85,7 @@ public class DepartmentService {
         }
         department.setDeletedAt(Instant.now());
         departmentRepository.save(department);
+        auditService.record(AuditAction.ENTITY_DELETED, "DEPARTMENT", id, "Suppression douce du département " + department.getName());
     }
 
     private Department findActive(Long id) {

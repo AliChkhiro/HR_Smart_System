@@ -1,5 +1,7 @@
 package com.apprh.backend.auth.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.auth.api.AuthResponse;
 import com.apprh.backend.auth.api.LoginRequest;
 import com.apprh.backend.auth.api.RegisterRequest;
@@ -36,16 +38,32 @@ public class AuthService {
     private final JwtProperties jwtProperties;
     private final UserMapper userMapper;
     private final NotificationService notificationService;
+    private final AuditService auditService;
 
     @Transactional
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().trim().toLowerCase())
-                .orElseThrow(() -> invalidCredentials());
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
-            throw invalidCredentials();
+        try {
+            User user = userRepository.findByEmailAndDeletedAtIsNull(request.email().trim().toLowerCase())
+                    .orElseThrow(() -> invalidCredentials());
+            if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+                throw invalidCredentials();
+            }
+            ensureAccountUsable(user);
+            auditService.record(user.getId(), user.getEmail(), AuditAction.LOGIN_SUCCESS, "USER", user.getId(), "Connexion réussie");
+            return issueTokens(user);
+        } catch (ApiException ex) {
+            if ("AUTH_INVALID_CREDENTIALS".equals(ex.getCode())) {
+                auditLoginFailure(request);
+            }
+            throw ex;
         }
-        ensureAccountUsable(user);
-        return issueTokens(user);
+    }
+
+    private void auditLoginFailure(LoginRequest request) {
+        String email = request.email() == null ? null : request.email().trim().toLowerCase();
+        Long userId = email == null ? null
+                : userRepository.findByEmailAndDeletedAtIsNull(email).map(User::getId).orElse(null);
+        auditService.record(userId, email, AuditAction.LOGIN_FAILURE, "USER", userId, "Échec de connexion");
     }
 
     @Transactional

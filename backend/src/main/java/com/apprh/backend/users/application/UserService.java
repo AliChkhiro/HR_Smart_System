@@ -1,5 +1,7 @@
 package com.apprh.backend.users.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.notifications.application.NotificationService;
@@ -32,6 +34,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<UserResponse> list(String search, UserRole role, boolean unassigned, UserStatus status, Pageable pageable) {
@@ -53,7 +56,10 @@ public class UserService {
                 .role(request.role())
                 .status(UserStatus.ACTIVE)
                 .build();
-        return userMapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditService.record(saved.getId(), saved.getEmail(), AuditAction.ENTITY_CREATED, "USER", saved.getId(),
+                "Création de compte (rôle " + saved.getRole() + ")");
+        return userMapper.toResponse(saved);
     }
 
     @Transactional
@@ -77,7 +83,10 @@ public class UserService {
         if (request.lastName() != null) {
             user.setLastName(request.lastName().trim());
         }
-        return userMapper.toResponse(userRepository.save(user));
+        User saved = userRepository.save(user);
+        auditService.record(saved.getId(), saved.getEmail(), AuditAction.ENTITY_UPDATED, "USER", saved.getId(),
+                "Modification de compte");
+        return userMapper.toResponse(saved);
     }
 
     @Transactional
@@ -88,6 +97,7 @@ public class UserService {
         User user = findActive(id);
         user.setDeletedAt(Instant.now());
         userRepository.save(user);
+        auditService.record(AuditAction.ENTITY_DELETED, "USER", id, "Suppression douce d'un compte");
     }
 
     /**
@@ -98,6 +108,8 @@ public class UserService {
         User user = requirePending(id);
         user.setStatus(UserStatus.ACTIVE);
         User saved = userRepository.save(user);
+        auditService.record(saved.getId(), saved.getEmail(), AuditAction.USER_APPROVED, "USER", saved.getId(),
+                "Approbation du compte");
         notifyDecision(saved, NotificationType.USER_APPROVED,
                 "Votre compte a été validé. Vous pouvez maintenant vous connecter à AppRH.");
         return userMapper.toResponse(saved);
@@ -111,6 +123,8 @@ public class UserService {
         User user = requirePending(id);
         user.setStatus(UserStatus.DISABLED);
         User saved = userRepository.save(user);
+        auditService.record(saved.getId(), saved.getEmail(), AuditAction.USER_REJECTED, "USER", saved.getId(),
+                "Rejet du compte");
         notifyDecision(saved, NotificationType.USER_REJECTED,
                 "Votre demande de création de compte n'a pas été validée. Contactez les ressources humaines.");
         return userMapper.toResponse(saved);

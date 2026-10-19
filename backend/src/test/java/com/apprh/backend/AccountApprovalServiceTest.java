@@ -1,5 +1,6 @@
 package com.apprh.backend;
 
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.notifications.application.NotificationService;
@@ -45,6 +46,9 @@ class AccountApprovalServiceTest {
 
     @Mock
     private EmailService emailService;
+
+    @Mock
+    private AuditService auditService;
 
     @InjectMocks
     private UserService userService;

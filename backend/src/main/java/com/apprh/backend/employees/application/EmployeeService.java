@@ -1,5 +1,7 @@
 package com.apprh.backend.employees.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.departments.domain.Department;
 import com.apprh.backend.departments.infrastructure.DepartmentRepository;
@@ -42,6 +44,7 @@ public class EmployeeService {
     private final DepartmentRepository departmentRepository;
     private final SkillRepository skillRepository;
     private final EmployeeSkillRepository employeeSkillRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<EmployeeResponse> list(String search, Long departmentId, EmployeeStatus status, Pageable pageable) {
@@ -83,6 +86,7 @@ public class EmployeeService {
                 .status(EmployeeStatus.ACTIVE)
                 .build();
         Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditAction.ENTITY_CREATED, "EMPLOYEE", saved.getId(), "Création de la fiche employé");
         return toResponseWithSkills(saved, List.of());
     }
 
@@ -102,6 +106,7 @@ public class EmployeeService {
             employee.setStatus(request.status());
         }
         Employee saved = employeeRepository.save(employee);
+        auditService.record(AuditAction.ENTITY_UPDATED, "EMPLOYEE", saved.getId(), "Modification de la fiche employé");
         return toResponseWithSkills(saved, employeeSkillRepository.findAllByEmployeeId(id));
     }
 
@@ -111,6 +116,7 @@ public class EmployeeService {
         employeeSkillRepository.deleteAllByEmployeeId(id);
         employee.setDeletedAt(Instant.now());
         employeeRepository.save(employee);
+        auditService.record(AuditAction.ENTITY_DELETED, "EMPLOYEE", id, "Suppression douce de la fiche employé");
     }
 
     @Transactional

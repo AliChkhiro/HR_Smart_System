@@ -1,5 +1,7 @@
 package com.apprh.backend.skills.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.skills.api.SkillRequest;
 import com.apprh.backend.skills.api.SkillResponse;
@@ -28,6 +30,7 @@ public class SkillService {
     private final SkillRepository skillRepository;
     private final SkillMapper skillMapper;
     private final EmployeeSkillRepository employeeSkillRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<SkillResponse> list(String search, String category, Pageable pageable) {
@@ -43,7 +46,9 @@ public class SkillService {
                 .name(name)
                 .category(request.category().trim().toUpperCase(Locale.ROOT))
                 .build();
-        return withEmployeeCount(skillRepository.save(skill));
+        Skill saved = skillRepository.save(skill);
+        auditService.record(AuditAction.ENTITY_CREATED, "SKILL", saved.getId(), "Création de la compétence " + saved.getName());
+        return withEmployeeCount(saved);
     }
 
     @Transactional
@@ -56,7 +61,9 @@ public class SkillService {
         if (request.category() != null && !request.category().isBlank()) {
             skill.setCategory(request.category().trim().toUpperCase(Locale.ROOT));
         }
-        return withEmployeeCount(skillRepository.save(skill));
+        Skill saved = skillRepository.save(skill);
+        auditService.record(AuditAction.ENTITY_UPDATED, "SKILL", saved.getId(), "Modification de la compétence " + saved.getName());
+        return withEmployeeCount(saved);
     }
 
     @Transactional
@@ -69,6 +76,7 @@ public class SkillService {
         }
         skill.setDeletedAt(Instant.now());
         skillRepository.save(skill);
+        auditService.record(AuditAction.ENTITY_DELETED, "SKILL", id, "Suppression douce de la compétence " + skill.getName());
     }
 
     private Skill findActive(Long id) {
