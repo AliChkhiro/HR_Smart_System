@@ -1,7 +1,7 @@
 import { Service, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { HolidayDto, HolidayType } from '../models/holiday.model';
+import { HolidayDto } from '../models/holiday.model';
 
 @Service()
 export class HolidaysService {
