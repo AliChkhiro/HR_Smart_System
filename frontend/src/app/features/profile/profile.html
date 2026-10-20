@@ -530,6 +530,90 @@
           </div>
         </mat-tab>
 
+        <mat-tab label="Données personnelles">
+          <div class="tab-body">
+            <mat-card class="content-card">
+              <mat-card-header>
+                <mat-card-title>Mes données personnelles</mat-card-title>
+                <mat-card-subtitle>Conformité RGPD : droit d'accès et droit à l'effacement</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="rgpd-block">
+                  <mat-icon class="rgpd-ico">download</mat-icon>
+                  <div class="rgpd-body">
+                    <b>Droit d'accès</b>
+                    <p>
+                      Téléchargez l'ensemble des données personnelles liées à votre compte
+                      (profil, fiche employé, congés, compétences, historique du chatbot).
+                    </p>
+                  </div>
+                  <button mat-flat-button color="primary" (click)="exportData()" [disabled]="exporting()">
+                    @if (exporting()) {
+                      <mat-spinner diameter="18" />
+                    } @else {
+                      <mat-icon>download</mat-icon>
+                    }
+                    Exporter mes données
+                  </button>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="rgpd-block">
+                  <mat-icon class="rgpd-ico">delete_forever</mat-icon>
+                  <div class="rgpd-body">
+                    <b>Droit à l'effacement</b>
+                    @if (erasureRequest(); as request) {
+                      <p>
+                        Demande du {{ request.requestedAt | date: 'dd/MM/yyyy' }} —
+                        <span class="chip-status" [class]="erasureStatusClass(request.status)">
+                          {{ erasureStatusLabel(request.status) }}
+                        </span>
+                      </p>
+                      @if (request.status === 'PENDING') {
+                        <p class="rgpd-hint">Un administrateur doit valider votre demande avant tout effacement.</p>
+                      }
+                    } @else {
+                      <p>
+                        Vous pouvez demander la suppression de votre compte. La demande est examinée
+                        par un administrateur avant toute suppression : elle n'est jamais automatique.
+                      </p>
+                    }
+                  </div>
+                  @if (canRequestErasure()) {
+                    <button mat-stroked-button color="warn" (click)="showErasureForm.set(!showErasureForm())">
+                      <mat-icon>delete_forever</mat-icon>
+                      Demander la suppression
+                    </button>
+                  }
+                </div>
+
+                @if (showErasureForm() && canRequestErasure()) {
+                  <div class="rgpd-erasure-form">
+                    <mat-form-field appearance="outline" class="rgpd-reason">
+                      <mat-label>Motif (facultatif)</mat-label>
+                      <textarea matInput rows="3" maxlength="500" #reasonInput
+                                (input)="erasureReason.set(reasonInput.value)"
+                                placeholder="Expliquez brièvement votre demande"></textarea>
+                    </mat-form-field>
+                    <div class="rgpd-form-actions">
+                      <button mat-stroked-button type="button" (click)="showErasureForm.set(false)">Annuler</button>
+                      <button mat-flat-button color="warn" (click)="submitErasureRequest()" [disabled]="erasureSubmitting()">
+                        @if (erasureSubmitting()) {
+                          <mat-spinner diameter="18" />
+                        } @else {
+                          <mat-icon>send</mat-icon>
+                        }
+                        Confirmer la demande
+                      </button>
+                    </div>
+                  </div>
+                }
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-tab>
+
         <mat-tab label="Préférences">
           <div class="tab-body">
             <mat-card class="content-card">

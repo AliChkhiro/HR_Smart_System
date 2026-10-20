@@ -25,7 +25,9 @@ export class Notifications {
     TASK_ASSIGNED: 'assignment_turned_in',
     USER_REGISTRATION: 'person_add',
     USER_APPROVED: 'how_to_reg',
-    USER_REJECTED: 'person_off'
+    USER_REJECTED: 'person_off',
+    ERASURE_REQUESTED: 'privacy_tip',
+    ERASURE_DECIDED: 'verified_user'
   };
   protected readonly notifications = signal<NotificationDto[]>([]);
   protected readonly loading = signal(false);

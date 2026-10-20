@@ -1,5 +1,7 @@
 package com.apprh.backend.tasks.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.employees.domain.Employee;
@@ -44,6 +46,7 @@ public class TaskService {
     private final SkillRepository skillRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<TaskResponse> list(String search, Long projectId, Long assigneeId, TaskStatus status,
@@ -69,6 +72,7 @@ public class TaskService {
                 .build();
         validateDates(task.getStartDate(), task.getDueDate());
         Task saved = taskRepository.save(task);
+        auditService.record(AuditAction.ENTITY_CREATED, "TASK", saved.getId(), "Création de la tâche " + saved.getName());
         notifyAssignee(saved, "Nouvelle tâche assignée : %s".formatted(saved.getName()));
         return taskMapper.toResponse(saved);
     }
@@ -108,6 +112,7 @@ public class TaskService {
         }
         validateDates(task.getStartDate(), task.getDueDate());
         Task saved = taskRepository.save(task);
+        auditService.record(AuditAction.ENTITY_UPDATED, "TASK", saved.getId(), "Modification de la tâche " + saved.getName());
         notifyAssignee(saved, "Tâche modifiée : %s".formatted(saved.getName()));
         return taskMapper.toResponse(saved);
     }
@@ -133,6 +138,7 @@ public class TaskService {
         Task task = findActive(id);
         task.setDeletedAt(Instant.now());
         taskRepository.save(task);
+        auditService.record(AuditAction.ENTITY_DELETED, "TASK", id, "Suppression douce de la tâche " + task.getName());
     }
 
     private Task findActive(Long id) {

@@ -1,5 +1,7 @@
 package com.apprh.backend.leaves.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.email.application.EmailService;
 import com.apprh.backend.employees.domain.Employee;
@@ -43,6 +45,7 @@ public class LeaveService {
     private final UserRepository userRepository;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<LeaveResponse> list(Long currentUserId, boolean manager, Long employeeId, LeaveStatus status,
@@ -81,6 +84,7 @@ public class LeaveService {
                 .reason(trimToNull(request.reason()))
                 .build();
         LeaveRequest saved = leaveRequestRepository.save(leave);
+        auditService.record(AuditAction.ENTITY_CREATED, "LEAVE_REQUEST", saved.getId(), "Création d'une demande de congés");
         String requestMessage = "%s %s a demandé des congés (%s) du %s au %s".formatted(
                 employee.getUser().getFirstName(), employee.getUser().getLastName(),
                 request.type(), request.startDate().format(DATE_FORMAT), request.endDate().format(DATE_FORMAT));
@@ -110,6 +114,9 @@ public class LeaveService {
         leave.setReviewComment(trimToNull(request.comment()));
         LeaveRequest saved = leaveRequestRepository.save(leave);
         boolean approved = request.status() == LeaveStatus.APPROVED;
+        auditService.record(approved ? AuditAction.LEAVE_APPROVED : AuditAction.LEAVE_REJECTED,
+                "LEAVE_REQUEST", saved.getId(),
+                approved ? "Demande de congés approuvée" : "Demande de congés rejetée");
         String decision = approved ? "approuvée" : "rejetée";
         String period = "du %s au %s".formatted(
                 leave.getStartDate().format(DATE_FORMAT), leave.getEndDate().format(DATE_FORMAT));
@@ -146,6 +153,7 @@ public class LeaveService {
         }
         leave.setDeletedAt(Instant.now());
         leaveRequestRepository.save(leave);
+        auditService.record(AuditAction.LEAVE_CANCELLED, "LEAVE_REQUEST", id, "Annulation d'une demande de congés");
     }
 
     private LeaveRequest findActive(Long id) {

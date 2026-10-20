@@ -1,5 +1,7 @@
 package com.apprh.backend.projects.application;
 
+import com.apprh.backend.audit.application.AuditAction;
+import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
 import com.apprh.backend.employees.domain.Employee;
 import com.apprh.backend.employees.infrastructure.EmployeeRepository;
@@ -38,6 +40,7 @@ public class ProjectService {
     private final ProjectMapper projectMapper;
     private final ProjectMemberRepository projectMemberRepository;
     private final EmployeeRepository employeeRepository;
+    private final AuditService auditService;
 
     @Transactional(readOnly = true)
     public Page<ProjectResponse> list(String search, ProjectStatus status, ProjectPriority priority, Pageable pageable) {
@@ -80,6 +83,7 @@ public class ProjectService {
                 .priority(request.priority() != null ? request.priority() : ProjectPriority.MEDIUM)
                 .build();
         Project saved = projectRepository.save(project);
+        auditService.record(AuditAction.ENTITY_CREATED, "PROJECT", saved.getId(), "Création du projet " + saved.getName());
         ProjectResponse response = projectMapper.toResponse(saved);
         return new ProjectResponse(response.id(), response.name(), response.description(), response.startDate(),
                 response.endDate(), response.status(), response.priority(), 0L, response.createdAt());
@@ -113,6 +117,7 @@ public class ProjectService {
             project.setPriority(request.priority());
         }
         Project saved = projectRepository.save(project);
+        auditService.record(AuditAction.ENTITY_UPDATED, "PROJECT", saved.getId(), "Modification du projet " + saved.getName());
         return toResponseWithCount(saved, projectMemberRepository.countByProjectId(saved.getId()));
     }
 
@@ -122,6 +127,7 @@ public class ProjectService {
         projectMemberRepository.deleteAllByProjectId(id);
         project.setDeletedAt(Instant.now());
         projectRepository.save(project);
+        auditService.record(AuditAction.ENTITY_DELETED, "PROJECT", id, "Suppression douce du projet " + project.getName());
     }
 
     @Transactional
