@@ -59,6 +59,19 @@ public class UserController {
         return userService.create(request);
     }
 
+    @PatchMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public UserResponse updateMe(@Valid @RequestBody UserUpdateRequest request, Authentication authentication) {
+        Long userId = currentUserId(authentication);
+        // Libre-service strict : seul le prénom et le nom sont autorisés
+        UserUpdateRequest sanitized = new UserUpdateRequest(
+                request.firstName(),
+                request.lastName(),
+                null,
+                null);
+        return userService.update(userId, sanitized, userId);
+    }
+
     @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse update(@PathVariable Long id, @Valid @RequestBody UserUpdateRequest request, Authentication authentication) {
