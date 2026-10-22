@@ -32,6 +32,10 @@ export class UsersService {
     return this.http.patch<UserDto>(`${environment.apiUrl}/users/${id}`, request);
   }
 
+  updateMe(request: UserUpdateRequest) {
+    return this.http.patch<UserDto>(`${environment.apiUrl}/users/me`, request);
+  }
+
   approve(id: number) {
     return this.http.post<UserDto>(`${environment.apiUrl}/users/${id}/approve`, {});
   }

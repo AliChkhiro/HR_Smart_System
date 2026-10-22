@@ -225,7 +225,7 @@ export class Profile {
       return;
     }
     this.saving.set(true);
-    this.usersService.update(current.id, {
+    this.usersService.updateMe({
       firstName: this.form.value.firstName ?? undefined,
       lastName: this.form.value.lastName ?? undefined
     }).subscribe({
@@ -240,9 +240,10 @@ export class Profile {
         this.editing.set(false);
         this.snackBar.open('Profil mis à jour avec succès', 'Fermer', { duration: 3500 });
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.saving.set(false);
-        this.snackBar.open('Impossible de mettre à jour le profil', 'Fermer', { duration: 4000 });
+        const message = (error.error as { message?: string } | null)?.message ?? 'Impossible de mettre à jour le profil';
+        this.snackBar.open(message, 'Fermer', { duration: 4000 });
       }
     });
   }
