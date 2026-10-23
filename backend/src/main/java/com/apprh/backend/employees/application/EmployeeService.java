@@ -3,6 +3,7 @@ package com.apprh.backend.employees.application;
 import com.apprh.backend.audit.application.AuditAction;
 import com.apprh.backend.audit.application.AuditService;
 import com.apprh.backend.common.exception.ApiException;
+import com.apprh.backend.common.security.UserPrincipal;
 import com.apprh.backend.departments.domain.Department;
 import com.apprh.backend.departments.infrastructure.DepartmentRepository;
 import com.apprh.backend.employees.api.EmployeeCreateRequest;
@@ -20,11 +21,15 @@ import com.apprh.backend.skills.domain.Skill;
 import com.apprh.backend.skills.infrastructure.EmployeeSkillRepository;
 import com.apprh.backend.skills.infrastructure.SkillRepository;
 import com.apprh.backend.users.domain.User;
+import com.apprh.backend.users.domain.UserRole;
 import com.apprh.backend.users.infrastructure.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +77,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse create(EmployeeCreateRequest request) {
+        assertCanManageEmployees();
         if (employeeRepository.existsByUserIdAndDeletedAtIsNull(request.userId())) {
             throw new ApiException(HttpStatus.CONFLICT, "EMPLOYEE_USER_EXISTS",
                     "Ce compte utilisateur est déjà rattaché à un employé");
@@ -92,6 +98,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse update(Long id, EmployeeUpdateRequest request) {
+        assertCanManageEmployees();
         Employee employee = findActive(id);
         if (request.departmentId() != null) {
             employee.setDepartment(findDepartment(request.departmentId()));
@@ -112,6 +119,7 @@ public class EmployeeService {
 
     @Transactional
     public void delete(Long id) {
+        assertCanManageEmployees();
         Employee employee = findActive(id);
         employeeSkillRepository.deleteAllByEmployeeId(id);
         employee.setDeletedAt(Instant.now());
@@ -121,6 +129,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse addSkill(Long employeeId, EmployeeSkillRequest request) {
+        assertCanManageEmployees();
         Employee employee = findActive(employeeId);
         Skill skill = skillRepository.findByIdAndDeletedAtIsNull(request.skillId())
                 .orElseThrow(() -> new ApiException(HttpStatus.BAD_REQUEST, "SKILL_NOT_FOUND", "Compétence introuvable"));
@@ -139,6 +148,7 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse updateSkillLevel(Long employeeId, Long skillId, int level) {
+        assertCanManageEmployees();
         Employee employee = findActive(employeeId);
         EmployeeSkill link = employeeSkillRepository.findByEmployeeIdAndSkillId(employeeId, skillId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "EMPLOYEE_SKILL_NOT_FOUND",
@@ -150,12 +160,34 @@ public class EmployeeService {
 
     @Transactional
     public EmployeeResponse removeSkill(Long employeeId, Long skillId) {
+        assertCanManageEmployees();
         Employee employee = findActive(employeeId);
         EmployeeSkill link = employeeSkillRepository.findByEmployeeIdAndSkillId(employeeId, skillId)
                 .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, "EMPLOYEE_SKILL_NOT_FOUND",
                         "Cette compétence n'est pas associée à l'employé"));
         employeeSkillRepository.delete(link);
         return toResponseWithSkills(employee, employeeSkillRepository.findAllByEmployeeId(employeeId));
+    }
+
+    /**
+     * Controle defensif au niveau service : seules les operations de gestion des
+     * fiches employe sont reservees aux roles ADMIN et RH.
+     *
+     * <p>Les controleurs appliquent deja cette regle via {@code @PreAuthorize}.
+     * Ce garde-fou empeche un contournement par un appel direct au service et
+     * s'appuie uniquement sur l'identite issue du contexte de securite (jamais
+     * sur un identifiant fourni par le client).</p>
+     *
+     * <p>La consultation reste accessible a tout utilisateur authentifie.</p>
+     */
+    private void assertCanManageEmployees() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null
+                && authentication.getPrincipal() instanceof UserPrincipal principal
+                && (principal.role() == UserRole.ADMIN || principal.role() == UserRole.RH)) {
+            return;
+        }
+        throw new AccessDeniedException("Gestion des fiches employé réservée aux rôles ADMIN et RH");
     }
 
     private Employee findActive(Long id) {
